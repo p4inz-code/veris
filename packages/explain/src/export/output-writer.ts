@@ -86,7 +86,17 @@ export class OutputWriter {
       });
 
       // Atomic rename (atomic on same filesystem)
-      fs.renameSync(tmpPath, resolvedPath);
+      try {
+        fs.renameSync(tmpPath, resolvedPath);
+      } catch (renameError) {
+        // Best-effort cleanup: remove the temp file if rename fails
+        try {
+          fs.unlinkSync(tmpPath);
+        } catch {
+          // Ignore cleanup errors — temp files are harmless leftovers
+        }
+        throw renameError;
+      }
 
       return {
         success: true,

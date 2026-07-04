@@ -163,7 +163,7 @@ export class RetryManager {
    * Check if we can retry (retry budget remaining).
    */
   canRetry(): boolean {
-    return this.retryCount <= this.config.maxRetries;
+    return this.retryCount < this.config.maxRetries;
   }
 
   /**
