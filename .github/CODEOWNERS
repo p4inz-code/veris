@@ -1,0 +1,16 @@
+# Default owners for the entire repository
+* @veris/maintainers
+
+# Architecture specifications
+/docs/architecture/ @veris/maintainers
+
+# Core data model
+/packages/core/ @veris/maintainers
+
+# CLI and API
+/packages/cli/ @veris/maintainers
+/packages/api/ @veris/maintainers
+
+# CI/CD and tooling
+/.github/ @veris/maintainers
+/tools/ @veris/maintainers

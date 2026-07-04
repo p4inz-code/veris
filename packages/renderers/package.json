@@ -1,0 +1,67 @@
+{
+  "name": "@veris/renderers",
+  "version": "0.1.0",
+  "description": "VERIS visual rendering of reports — TUI, HTML, Markdown",
+  "license": "MIT",
+  "author": "VERIS Contributors",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "build:watch": "tsup --watch",
+    "clean": "node -e \"fs.rmSync('dist',{recursive:true,force:true})\"",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@veris/core": "workspace:*",
+    "@veris/report": "workspace:*"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  },
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/veris/veris.git"
+  },
+  "homepage": "https://github.com/veris/veris",
+  "bugs": {
+    "url": "https://github.com/veris/veris/issues"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/veris/veris/funding"
+  },
+  "keywords": [
+    "security",
+    "malware",
+    "forensics",
+    "analysis",
+    "deterministic",
+    "scanner",
+    "typescript",
+    "renderer",
+    "tui",
+    "html",
+    "visualization"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

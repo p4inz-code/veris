@@ -1,0 +1,74 @@
+{
+  "name": "veris-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "description": "VERIS — Deterministic Static Security Analysis Platform",
+  "license": "MIT",
+  "author": "VERIS Contributors",
+  "homepage": "https://github.com/veris/veris",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/veris/veris.git"
+  },
+  "bugs": {
+    "url": "https://github.com/veris/veris/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@11.9.0",
+  "scripts": {
+    "build": "pnpm build:core && pnpm build:layers",
+    "build:core": "pnpm --filter=@veris/core --filter=@veris/shared build",
+    "build:layers": "pnpm --filter=!@veris/core --filter=!@veris/shared build",
+    "build:all": "pnpm -r build",
+    "build:watch": "pnpm -r --parallel build:watch",
+    "clean": "pnpm -r clean",
+    "clean:all": "pnpm -r clean && rm -rf node_modules",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "eslint . --max-warnings 250",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --check \"**/*.{ts,tsx,js,json,yaml,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,json,yaml,md}\"",
+    "format:fix": "prettier --write \"**/*.{ts,tsx,js,json,yaml,md}\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:unit": "vitest run --project unit",
+    "test:component": "vitest run --project component",
+    "test:integration": "vitest run --project integration",
+    "test:e2e": "vitest run --project e2e",
+    "changeset": "changeset",
+    "changeset:version": "changeset version",
+    "changeset:publish": "changeset publish",
+    "prepare": "husky",
+    "ci:all": "pnpm build && pnpm typecheck && pnpm lint && pnpm test",
+    "circular": "npx madge --circular --ext ts packages/*/src/index.ts"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.27.0",
+    "@types/node": "^22.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.0",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.2.0",
+    "madge": "^7.0.0",
+    "prettier": "^3.2.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{json,yaml,md}": [
+      "prettier --write"
+    ]
+  }
+}

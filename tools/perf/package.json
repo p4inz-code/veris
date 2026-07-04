@@ -1,0 +1,20 @@
+{
+  "name": "@veris/perf",
+  "version": "0.1.0",
+  "private": true,
+  "description": "VERIS performance benchmarking suite",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "bench": "vitest run --bench",
+    "bench:watch": "vitest --bench"
+  },
+  "dependencies": {
+    "@veris/core": "workspace:*",
+    "@veris/analyzer": "workspace:*"
+  },
+  "devDependencies": {
+    "vitest": "^2.0.0",
+    "typescript": "^5.5.0"
+  }
+}

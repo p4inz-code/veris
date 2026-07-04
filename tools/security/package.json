@@ -1,0 +1,19 @@
+{
+  "name": "@veris/security-suite",
+  "version": "0.1.0",
+  "private": true,
+  "description": "VERIS security testing suite — fuzzing, boundary, adversarial",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "fuzz": "vitest run",
+    "adversarial": "vitest run --reporter=verbose"
+  },
+  "dependencies": {
+    "@veris/core": "workspace:*"
+  },
+  "devDependencies": {
+    "vitest": "^2.0.0",
+    "typescript": "^5.5.0"
+  }
+}

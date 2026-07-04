@@ -1,0 +1,80 @@
+{
+  "name": "@veris/explain",
+  "version": "0.1.0",
+  "description": "VERIS AI explanation layer — explains deterministic analysis results via LLM providers",
+  "license": "MIT",
+  "author": "VERIS Contributors",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./internal": {
+      "types": "./dist/internal.d.ts",
+      "import": "./dist/internal.js",
+      "require": "./dist/internal.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "build:watch": "tsup --watch",
+    "clean": "node -e \"fs.rmSync('dist',{recursive:true,force:true})\"",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:types": "tsc --noEmit --project tsconfig.json"
+  },
+  "dependencies": {
+    "@veris/ai": "workspace:*",
+    "@veris/config": "workspace:*",
+    "@veris/core": "workspace:*",
+    "@veris/logger": "workspace:*",
+    "@veris/shared": "workspace:*",
+    "handlebars": "^4.7.9"
+  },
+  "optionalDependencies": {
+    "better-sqlite3": "^11.0.0"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  },
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/veris/veris.git"
+  },
+  "homepage": "https://github.com/veris/veris",
+  "bugs": {
+    "url": "https://github.com/veris/veris/issues"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/veris/veris/funding"
+  },
+  "keywords": [
+    "security",
+    "malware",
+    "forensics",
+    "analysis",
+    "deterministic",
+    "scanner",
+    "typescript",
+    "explanation",
+    "llm",
+    "ai",
+    "reasoning"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

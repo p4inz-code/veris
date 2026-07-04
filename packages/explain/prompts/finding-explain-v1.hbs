@@ -1,0 +1,56 @@
+---
+id: finding-explain-v1
+version: 1.0.0
+type: context
+description: Context template for a single finding explanation
+changed: 2026-07-02
+---
+
+## Finding
+- ID: {{finding.id}}
+- Title: {{finding.title}}
+- Severity: {{severity-label finding.severity.level}} ({{format-score finding.severity.score}}/10)
+- Confidence: {{format-confidence finding.confidence}}
+- Rule: {{finding.ruleId}}
+- Description: {{finding.description}}
+
+{{#if finding.taxonomyIds}}
+- Taxonomy: {{finding.taxonomyIds}}
+{{/if}}
+
+## Evidence ({{pluralize evidence.length "match"}})
+{{#each evidence}}
+### Match {{@index}}{{#if this.id}} ({{this.id}}){{/if}}
+- Location: {{this.sourceLocation.path}}:{{this.sourceLocation.startLine}}
+- Match type: {{this.matchDetail.kind}}
+- Confidence: {{format-confidence this.confidence}}
+{{#if this.sourceLocation.snippet}}
+- Snippet: `{{this.sourceLocation.snippet}}`
+{{/if}}
+{{/each}}
+
+{{#if rule}}
+## Rule
+- ID: {{rule.id}}
+- Name: {{rule.name}}
+- Description: {{rule.description}}
+- Severity: {{severity-label rule.severity.level}} ({{format-score rule.severity.score}}/10)
+{{#if rule.packId}}- Pack: {{rule.packId}}{{/if}}
+{{#if rule.cweIds}}- CWE: {{rule.cweIds}}{{/if}}
+{{#if rule.remediation}}- Remediation: {{rule.remediation}}{{/if}}
+{{/if}}
+
+{{#if artifact}}
+## Artifact
+- Path: {{artifact.path}}
+- Type: {{artifact.type}}{{#if artifact.subType}}/{{artifact.subType}}{{/if}}
+{{/if}}
+
+{{#if risk}}
+## Risk Context
+- Risk level: {{risk.overallLevel}}
+- Overall risk score: {{format-score risk.overallScore}}/10
+{{#if risk.dimensions}}
+- Dimensions: {{risk.dimensions.length}}
+{{/if}}
+{{/if}}

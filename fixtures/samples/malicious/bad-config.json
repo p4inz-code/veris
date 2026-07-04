@@ -1,0 +1,9 @@
+{
+  "name": "malicious-project",
+  "config": {
+    "password": "super_secret_123",
+    "api_key": "sk-live-abc123def456",
+    "debug": true,
+    "allow_origin": "*"
+  }
+}

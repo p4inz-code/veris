@@ -1,0 +1,11 @@
+{
+  "name": "@veris/scripts",
+  "version": "0.1.0",
+  "private": true,
+  "description": "VERIS build and release helper scripts",
+  "license": "MIT",
+  "type": "module",
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}
