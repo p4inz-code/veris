@@ -33,8 +33,8 @@ information.
 
 ### How do I install VERIS?
 
-Run `npx veris` to use it immediately, or install globally with
-`npm install -g veris`. See [INSTALL](INSTALL.md) for details.
+Run `npx veris-cli` to use it immediately, or install globally with
+`npm install -g veris-cli`. See [INSTALL](INSTALL.md) for details.
 
 ### What are the requirements?
 
@@ -42,7 +42,7 @@ Node.js 18 or later. VERIS works on Windows, macOS, and Linux.
 
 ### veris: command not found
 
-Your npm global bin directory may not be in your PATH. Try `npx veris` instead,
+Your npm global bin directory may not be in your PATH. Try `npx veris-cli` instead,
 which requires no installation.
 
 ## Usage

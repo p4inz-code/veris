@@ -12,10 +12,10 @@ cloud dependency.
 
 ```bash
 # Run without installing (recommended)
-npx veris
+npx veris-cli
 
 # Install permanently
-npm install -g veris
+npm install -g veris-cli
 ```
 
 Requirements: Node.js 18 or later. Works on Windows, macOS, and Linux.

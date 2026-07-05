@@ -3,7 +3,7 @@
 ## Step 1: Install
 
 ```
-npx veris
+npx veris-cli
 ```
 
 This downloads and runs VERIS. If you see the help text, it worked.
@@ -11,7 +11,7 @@ This downloads and runs VERIS. If you see the help text, it worked.
 To install permanently:
 
 ```
-npm install -g veris
+npm install -g veris-cli
 ```
 
 Then use `veris` without `npx`.

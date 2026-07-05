@@ -15,8 +15,8 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- Package published as `veris` on npm
-- Run via `npx veris` with no installation required
+- Package published as `veris-cli` on npm
+- Run via `npx veris-cli` with no installation required
 - Shell completions for Bash, Zsh, and Fish
 - AI explanation layer (OpenAI, Anthropic, Ollama)
 - Report summarization via AI

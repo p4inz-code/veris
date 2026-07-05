@@ -2,8 +2,8 @@
 
 ## Changes
 
-- Package renamed to `veris` for npm install (`npm install -g veris`)
-- Run via `npx veris` with no installation required
+- Published as `veris-cli` on npm (`npm install -g veris-cli`)
+- Run via `npx veris-cli` with no installation required
 - Shell completions for Bash, Zsh, and Fish
 - AI explanation layer supports OpenAI, Anthropic, and Ollama
 - Report summarization via AI
@@ -34,13 +34,13 @@ Requires Node.js 18 or later.
 ## Install
 
 ```
-npx veris
+npx veris-cli
 ```
 
 Or install permanently:
 
 ```
-npm install -g veris
+npm install -g veris-cli
 ```
 
 ## Verify
@@ -54,5 +54,5 @@ Output: `veris 0.1.3`
 ## Links
 
 - GitHub: https://github.com/veris/veris
-- npm: https://www.npmjs.com/package/veris
+- npm: https://www.npmjs.com/package/veris-cli
 - Issues: https://github.com/veris/veris/issues

@@ -18,16 +18,16 @@ node --version
 Run VERIS without installing:
 
 ```
-npx veris
+npx veris-cli
 ```
 
 Each invocation checks for the latest version automatically. Use it like any
 installed command:
 
 ```
-npx veris scan
-npx veris scan ./project
-npx veris init
+npx veris-cli scan
+npx veris-cli scan ./project
+npx veris-cli init
 ```
 
 ### npm global install
@@ -35,7 +35,7 @@ npx veris init
 Install permanently:
 
 ```
-npm install -g veris
+npm install -g veris-cli
 ```
 
 After installation, use `veris` directly:
@@ -47,7 +47,7 @@ veris scan
 ### pnpm global install
 
 ```
-pnpm add -g veris
+pnpm add -g veris-cli
 ```
 
 Then use `veris` directly:
@@ -73,7 +73,7 @@ veris 0.1.3
 ### Command not found
 
 If `veris` is not found after global install, your npm global bin directory may
-not be in your PATH. Try `npx veris` instead.
+not be in your PATH. Try `npx veris-cli` instead.
 
 ### Permission errors (macOS / Linux)
 
