@@ -1,42 +1,21 @@
-# Contributor Covenant Code of Conduct
+# Code of Conduct
 
 ## Our Pledge
 
-We as members, contributors, and leaders pledge to make participation in our
-community a harassment-free experience for everyone.
+VERIS is committed to providing a professional, harassment-free experience for
+everyone involved with the project, including contributors, evaluators, and
+support channels.
 
-## Our Standards
+## Standards
 
-Examples of behavior that contributes to a positive environment:
+Examples of expected behavior:
 
-- Using welcoming and inclusive language
+- Using welcoming and professional language
 - Being respectful of differing viewpoints and experiences
-- Gracefully accepting constructive criticism
-- Focusing on what is best for the community
-- Showing empathy towards other community members
+- Gracefully accepting constructive feedback
+- Focusing on what is best for the project and its users
 
 ## Enforcement
 
-Violations can be reported to the project maintainers at **veris-conduct@googlegroups.com**.
-All complaints will be reviewed and investigated promptly and fairly.
-
-Project maintainers are obligated to maintain confidentiality with regard to
-the reporter of an incident.
-
-## Enforcement Guidelines
-
-Community leaders will follow these Community Impact Guidelines in determining
-the consequences for any action they deem in violation:
-
-1. **Correction**: Private warning with clarification of why the behavior was inappropriate
-2. **Warning**: Warning with consequences for continued behavior
-3. **Temporary Ban**: Temporary ban from community interaction
-4. **Permanent Ban**: Permanent ban from community interaction
-
-## Attribution
-
-This Code of Conduct is adapted from the [Contributor Covenant](https://www.contributor-covenant.org),
-version 2.1, available at https://www.contributor-covenant.org/version/2/1/code_of_conduct.html.
-
-Community Impact Guidelines were inspired by [Mozilla's code of conduct
-enforcement ladder](https://github.com/mozilla/diversity).
+Violations can be reported to **veris-conduct@googlegroups.com**. All complaints
+will be reviewed and investigated promptly and confidentially.

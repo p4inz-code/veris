@@ -1,12 +1,15 @@
 # Contributing
 
+VERIS accepts contributions from authorized contributors. This guide documents
+the development workflow for internal team members and approved external
+contributors.
+
 ## Getting started
 
-1. Fork the repository
-2. Clone your fork: `git clone https://github.com/veris/veris.git`
-3. Install dependencies: `pnpm install`
-4. Build all packages: `pnpm build`
-5. Run tests: `pnpm test`
+1. Clone the repository: `git clone https://github.com/veris/veris.git`
+2. Install dependencies: `pnpm install`
+3. Build all packages: `pnpm build`
+4. Run tests: `pnpm test`
 
 ## Development
 

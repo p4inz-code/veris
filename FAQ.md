@@ -26,7 +26,8 @@ summarizes reports — it never participates in detection or scoring.
 
 ### Is VERIS free?
 
-Yes. VERIS is open source under the MIT license.
+Contact VERIS sales at [veris.com](https://veris.com) for pricing and licensing
+information.
 
 ## Installation
 

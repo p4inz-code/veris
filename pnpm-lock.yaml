@@ -195,7 +195,7 @@ importers:
         version: 2.1.9(@types/node@22.20.0)
 
   packages/cli:
-    dependencies:
+    devDependencies:
       '@veris/ai':
         specifier: workspace:*
         version: link:../ai
@@ -262,7 +262,6 @@ importers:
       '@veris/telemetry':
         specifier: workspace:*
         version: link:../telemetry
-    devDependencies:
       tsup:
         specifier: ^8.0.0
         version: 8.5.1(postcss@8.5.16)(tsx@4.22.4)(typescript@5.9.3)(yaml@2.9.0)

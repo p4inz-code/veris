@@ -117,4 +117,4 @@
 - CI integration runner
 - Web dashboard
 - Additional rule packs
-- Community marketplace
+- Extension marketplace

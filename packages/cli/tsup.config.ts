@@ -11,5 +11,6 @@ export default defineConfig({
   clean: true,
   minify: false,
   splitting: false,
+  noExternal: ['@veris/*', 'handlebars'],
   outDir: 'dist',
 });

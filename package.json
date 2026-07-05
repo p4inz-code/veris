@@ -3,8 +3,8 @@
   "private": true,
   "version": "0.1.0",
   "description": "VERIS — Deterministic Static Security Analysis Platform",
-  "license": "MIT",
-  "author": "VERIS Contributors",
+  "license": "UNLICENSED",
+  "author": "VERIS",
   "homepage": "https://github.com/veris/veris",
   "repository": {
     "type": "git",

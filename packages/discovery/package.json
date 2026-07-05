@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "description": "VERIS deterministic streaming filesystem discovery engine and artifact graph",
-  "license": "MIT",
-  "author": "VERIS Contributors",
+  "license": "UNLICENSED",
+  "author": "VERIS",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -48,10 +48,6 @@
   "homepage": "https://github.com/veris/veris",
   "bugs": {
     "url": "https://github.com/veris/veris/issues"
-  },
-  "funding": {
-    "type": "github",
-    "url": "https://github.com/veris/veris/funding"
   },
   "keywords": [
     "security",
