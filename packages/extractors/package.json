@@ -1,6 +1,7 @@
 {
   "name": "@veris/extractors",
   "version": "0.1.0",
+  "private": true,
   "description": "VERIS artifact extraction framework — extractors, registry, and built-in extractors",
   "license": "MIT",
   "author": "VERIS Contributors",
@@ -65,8 +66,5 @@
     "parser",
     "binary",
     "archive"
-  ],
-  "publishConfig": {
-    "access": "public"
-  }
+  ]
 }

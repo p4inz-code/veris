@@ -1,6 +1,7 @@
 {
   "name": "@veris/rules",
   "version": "0.1.0",
+  "private": true,
   "description": "VERIS rule engine — deterministic, immutable rule evaluation on Evidence, Features, and Capabilities",
   "license": "MIT",
   "author": "VERIS Contributors",
@@ -62,8 +63,5 @@
     "rules",
     "conditions",
     "evaluation"
-  ],
-  "publishConfig": {
-    "access": "public"
-  }
+  ]
 }

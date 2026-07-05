@@ -1,50 +1,36 @@
 ---
-name: Bug Report
-about: Report a bug to help us improve VERIS
-title: '[BUG] '
+name: Bug report
+about: Report a bug to help improve VERIS
+title: ''
 labels: bug
 assignees: ''
 ---
 
-## Bug Description
+## Description
 
 A clear and concise description of the bug.
 
-## To Reproduce
+## Reproduction
 
-Steps to reproduce the behavior:
+Steps to reproduce:
 
-1. Run command: `veris ...`
-2. With input file: ...
-3. See error: ...
-
-## Expected Behavior
-
-A clear and concise description of what you expected to happen.
+1. Run: `veris ...`
+2. Expected behavior
+3. Actual behavior
 
 ## Environment
 
-- OS: [e.g., Ubuntu 22.04, macOS 14, Windows 11]
-- Node.js version: [e.g., 18.0.0, 20.0.0, 22.0.0]
-- VERIS version: [e.g., 0.1.0]
-- Installation method: [e.g., npm, pnpm, from source]
+- OS: [e.g. Ubuntu 22.04, macOS 14, Windows 11]
+- Node.js version: [e.g. 18, 20, 22]
+- VERIS version: [e.g. 0.1.3]
+- Installation method: [npx, npm global, from source]
 
 ## Logs
 
 ```
-Paste any relevant logs, error messages, or stack traces here.
+Paste error messages or stack traces here.
 ```
 
-## Additional Context
+## Additional context
 
-Add any other context about the problem here, such as:
-
-- Sample input files (sanitized)
-- Configuration files
-- Related issues
-
-## Checklist
-
-- [ ] I have checked that this bug is not already reported
-- [ ] I have included all relevant information
-- [ ] I have removed any sensitive data from the report
+Any other information that may help diagnose the issue.

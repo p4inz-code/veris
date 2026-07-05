@@ -1,6 +1,7 @@
 {
   "name": "@veris/pipeline",
   "version": "0.1.0",
+  "private": true,
   "description": "VERIS pipeline orchestration — wires Analysis → Rules → Correlation → RiskEvaluator → DecisionEngine into a single deterministic pipeline.",
   "license": "MIT",
   "author": "VERIS Contributors",
@@ -68,8 +69,5 @@
     "pipeline",
     "orchestrator",
     "workflow"
-  ],
-  "publishConfig": {
-    "access": "public"
-  }
+  ]
 }

@@ -4,9 +4,8 @@
 
 All VERIS packages use independent versioning managed by [Changesets](https://github.com/changesets/changesets).
 
-- `@veris/core` — Stable (1.x), changes rarely
-- `@veris/shared` — Stable (1.x)
-- All other packages — Pre-v1 (0.x) until stabilized
+- Foundation components — Stable, changes rarely
+- All other components — Pre-v1 (0.x) until stabilized
 
 ## Release Process
 

@@ -19,7 +19,7 @@ Increment the patch version when:
 - Documentation updates
 - Performance optimizations without behavior change
 
-**Example:** `0.1.1` → `0.1.2`
+**Example:** `0.1.2` → `0.1.3`
 
 ### Minor Releases (0.x.0)
 
@@ -52,17 +52,11 @@ While VERIS is in the 0.x phase:
 - **Patch releases** never include breaking changes
 - The goal is to reach **1.0.0** with a stable, documented, fully backward-compatible API
 
-## Independent Package Versioning
-
-VERIS is a monorepo with **independently versioned** packages. Each `@veris/*` package has its own version number.
-
-- `@veris/core` and `@veris/shared` are Foundation packages — they change rarely and follow strict semver
-- All other packages may version independently as they evolve toward 1.0.0
-- The `@veris/cli` package is the primary user-facing package and drives the release cadence
-
 ## Version Management
 
-Versioning is managed by [Changesets](https://github.com/changesets/changesets).
+Versioning is managed by [Changesets](https://github.com/changesets/changesets). Different
+components of the system may version independently as they evolve toward 1.0.0.
+The CLI package is the primary user-facing component and drives the release cadence.
 
 ### Workflow
 

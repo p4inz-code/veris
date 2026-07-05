@@ -1,6 +1,7 @@
 {
   "name": "@veris/knowledge",
   "version": "0.1.0",
+  "private": true,
   "description": "VERIS taxonomy, CWE/OWASP mappings, and enrichment data",
   "license": "MIT",
   "author": "VERIS Contributors",
@@ -63,8 +64,5 @@
     "cwe",
     "owasp",
     "enrichment"
-  ],
-  "publishConfig": {
-    "access": "public"
-  }
+  ]
 }

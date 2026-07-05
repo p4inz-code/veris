@@ -1,6 +1,7 @@
 {
   "name": "@veris/config",
   "version": "0.1.0",
+  "private": true,
   "description": "VERIS multi-source configuration loading, merging, and validation",
   "license": "MIT",
   "author": "VERIS Contributors",
@@ -61,8 +62,5 @@
     "typescript",
     "configuration",
     "settings"
-  ],
-  "publishConfig": {
-    "access": "public"
-  }
+  ]
 }

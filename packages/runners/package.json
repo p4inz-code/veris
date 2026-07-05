@@ -1,6 +1,7 @@
 {
   "name": "@veris/runners",
   "version": "0.1.0",
+  "private": true,
   "description": "VERIS execution environment adapters — local, CI, daemon",
   "license": "MIT",
   "author": "VERIS Contributors",
@@ -69,8 +70,5 @@
     "execution",
     "ci",
     "daemon"
-  ],
-  "publishConfig": {
-    "access": "public"
-  }
+  ]
 }

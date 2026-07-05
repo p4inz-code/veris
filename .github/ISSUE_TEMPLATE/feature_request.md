@@ -1,46 +1,30 @@
 ---
-name: Feature Request
+name: Feature request
 about: Suggest an idea for VERIS
-title: '[FEATURE] '
+title: ''
 labels: enhancement
 assignees: ''
 ---
 
-## Problem Statement
+## Problem
 
-A clear and concise description of what problem this feature would solve.
-Example: "I'm always frustrated when ..."
+A clear description of what problem this feature would solve.
 
-## Proposed Solution
+## Solution
 
-A clear and concise description of what you want to happen.
+A clear description of what you want to happen.
 
-## Alternative Solutions
+## Alternatives
 
-A clear and concise description of any alternative solutions or features you've considered.
-
-## Use Case
-
-Describe the specific use case this feature would address. Include:
-
-- Who would benefit
-- What workflow it improves
-- Any relevant context
+Any alternative solutions you have considered.
 
 ## Impact
 
-- [ ] This would be a breaking change
-- [ ] This affects the CLI
-- [ ] This affects the API
-- [ ] This affects the analysis pipeline
-- [ ] This affects documentation only
+- [ ] Breaking change
+- [ ] Affects the CLI
+- [ ] Affects the analysis pipeline
+- [ ] Documentation only
 
-## Additional Context
+## Additional context
 
-Add any other context, screenshots, or examples about the feature request here.
-
-## Checklist
-
-- [ ] I have checked that this feature has not been requested already
-- [ ] I have described the problem and proposed solution clearly
-- [ ] I understand this is an open-source project and timelines depend on contributors
+Any other context, examples, or references.

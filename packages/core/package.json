@@ -1,6 +1,7 @@
 {
   "name": "@veris/core",
   "version": "0.1.0",
+  "private": true,
   "description": "VERIS canonical domain types, error hierarchy, and constants",
   "license": "MIT",
   "author": "VERIS Contributors",
@@ -64,8 +65,5 @@
     "domain",
     "constants",
     "errors"
-  ],
-  "publishConfig": {
-    "access": "public"
-  }
+  ]
 }

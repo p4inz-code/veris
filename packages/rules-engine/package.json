@@ -1,6 +1,7 @@
 {
   "name": "@veris/rules-engine",
   "version": "0.1.0",
+  "private": true,
   "description": "VERIS rule matching, evaluation, scheduling, and sandboxed expression evaluation",
   "license": "MIT",
   "author": "VERIS Contributors",
@@ -64,8 +65,5 @@
     "rules-engine",
     "matching",
     "scheduling"
-  ],
-  "publishConfig": {
-    "access": "public"
-  }
+  ]
 }

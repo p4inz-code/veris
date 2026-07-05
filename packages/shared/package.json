@@ -1,6 +1,7 @@
 {
   "name": "@veris/shared",
   "version": "0.1.0",
+  "private": true,
   "description": "VERIS general-purpose utilities — collections, hashing, serialization, FS, net, path, platform, Result monad, semver",
   "license": "MIT",
   "author": "VERIS Contributors",
@@ -67,8 +68,5 @@
     "collections",
     "result",
     "monad"
-  ],
-  "publishConfig": {
-    "access": "public"
-  }
+  ]
 }

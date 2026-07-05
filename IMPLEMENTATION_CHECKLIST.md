@@ -15,42 +15,42 @@
 
 ### Layer 0 — Foundation
 
-- [x] @veris/core — Types, errors, constants
-- [x] @veris/shared — Collections, hashing, serialization, FS, net, path, platform, Result monad, semver
+- [x] Core types, errors, constants
+- [x] Collections, hashing, serialization, FS, net, path, platform, Result monad, semver
 
 ### Layer 1 — Framework
 
-- [x] @veris/logger — Structured logging
-- [x] @veris/config — Configuration loading
-- [x] @veris/telemetry — Metrics and tracing
-- [x] @veris/ai — AI provider adapters
+- [x] Structured logging
+- [x] Configuration loading
+- [x] Metrics and tracing
+- [x] AI provider adapters
 
 ### Layer 2 — Domain
 
-- [x] @veris/extractors — Extraction framework
-- [x] @veris/rules-engine — Rule matching and evaluation
-- [x] @veris/rules — Shipped rule packs
-- [x] @veris/knowledge — Taxonomy and mappings
+- [x] Extraction framework
+- [x] Rule matching and evaluation
+- [x] Shipped rule packs
+- [x] Taxonomy and mappings
 
 ### Layer 3 — Analysis
 
-- [x] @veris/analyzer — Pipeline orchestrator
+- [x] Pipeline orchestrator
 
 ### Layer 4 — Report & Output
 
-- [x] @veris/report — Report construction
-- [x] @veris/exporters — Output formats
+- [x] Report construction
+- [x] Output formats
 
 ### Layer 5 — Application
 
-- [x] @veris/cli — CLI commands
-- [x] @veris/api — Programmatic API
+- [x] CLI commands
+- [x] Programmatic API
 
 ### Layer 6+ — Extensions
 
-- [x] @veris/runners — Execution runners
-- [ ] @veris/plugins — Plugin system (V2+)
-- [ ] @veris/renderers — Report rendering (in progress)
+- [x] Execution runners
+- [ ] Plugin system (V2+)
+- [ ] Report rendering (in progress)
 
 ## Milestones
 

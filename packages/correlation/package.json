@@ -1,6 +1,7 @@
 {
   "name": "@veris/correlation",
   "version": "0.1.0",
+  "private": true,
   "description": "VERIS correlation engine — correlates related evidence into deterministic behavioral chains. Sits between Rules and Risk in the pipeline.",
   "license": "MIT",
   "author": "VERIS Contributors",
@@ -63,8 +64,5 @@
     "correlation",
     "behavior",
     "chain"
-  ],
-  "publishConfig": {
-    "access": "public"
-  }
+  ]
 }

@@ -1,6 +1,7 @@
 {
   "name": "@veris/exporters",
   "version": "0.1.0",
+  "private": true,
   "description": "VERIS report serialization to JSON, SARIF, HTML, Markdown, CSV, JUnit",
   "license": "MIT",
   "author": "VERIS Contributors",
@@ -65,8 +66,5 @@
     "html",
     "json",
     "markdown"
-  ],
-  "publishConfig": {
-    "access": "public"
-  }
+  ]
 }

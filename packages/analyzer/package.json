@@ -1,6 +1,7 @@
 {
   "name": "@veris/analyzer",
   "version": "0.1.0",
+  "private": true,
   "description": "VERIS analysis pipeline orchestrator",
   "license": "MIT",
   "author": "VERIS Contributors",
@@ -67,8 +68,5 @@
     "typescript",
     "orchestrator",
     "pipeline"
-  ],
-  "publishConfig": {
-    "access": "public"
-  }
+  ]
 }

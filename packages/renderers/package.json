@@ -1,6 +1,7 @@
 {
   "name": "@veris/renderers",
   "version": "0.1.0",
+  "private": true,
   "description": "VERIS visual rendering of reports — TUI, HTML, Markdown",
   "license": "MIT",
   "author": "VERIS Contributors",
@@ -63,8 +64,5 @@
     "tui",
     "html",
     "visualization"
-  ],
-  "publishConfig": {
-    "access": "public"
-  }
+  ]
 }

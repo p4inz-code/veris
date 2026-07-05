@@ -1,6 +1,7 @@
 {
   "name": "@veris/logger",
   "version": "0.1.0",
+  "private": true,
   "description": "VERIS structured logging with pluggable transports and formatters",
   "license": "MIT",
   "author": "VERIS Contributors",
@@ -61,8 +62,5 @@
     "typescript",
     "logging",
     "structured-logging"
-  ],
-  "publishConfig": {
-    "access": "public"
-  }
+  ]
 }

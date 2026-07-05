@@ -1,6 +1,7 @@
 {
   "name": "@veris/discovery",
   "version": "0.1.0",
+  "private": true,
   "description": "VERIS deterministic streaming filesystem discovery engine and artifact graph",
   "license": "MIT",
   "author": "VERIS Contributors",
@@ -63,8 +64,5 @@
     "filesystem",
     "traversal",
     "artifact"
-  ],
-  "publishConfig": {
-    "access": "public"
-  }
+  ]
 }

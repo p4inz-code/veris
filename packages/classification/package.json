@@ -1,6 +1,7 @@
 {
   "name": "@veris/classification",
   "version": "0.1.0",
+  "private": true,
   "description": "VERIS deterministic multi-signal artifact classification engine",
   "license": "MIT",
   "author": "VERIS Contributors",
@@ -63,8 +64,5 @@
     "file-type",
     "magic-bytes",
     "heuristic"
-  ],
-  "publishConfig": {
-    "access": "public"
-  }
+  ]
 }

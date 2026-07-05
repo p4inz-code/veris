@@ -1,6 +1,7 @@
 {
   "name": "@veris/explain",
   "version": "0.1.0",
+  "private": true,
   "description": "VERIS AI explanation layer — explains deterministic analysis results via LLM providers",
   "license": "MIT",
   "author": "VERIS Contributors",
@@ -76,8 +77,5 @@
     "llm",
     "ai",
     "reasoning"
-  ],
-  "publishConfig": {
-    "access": "public"
-  }
+  ]
 }

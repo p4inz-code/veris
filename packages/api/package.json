@@ -1,6 +1,7 @@
 {
   "name": "@veris/api",
   "version": "0.1.0",
+  "private": true,
   "description": "VERIS programmatic API — primary client for integrating VERIS into applications",
   "license": "MIT",
   "author": "VERIS Contributors",
@@ -69,8 +70,5 @@
     "typescript",
     "sdk",
     "integration"
-  ],
-  "publishConfig": {
-    "access": "public"
-  }
+  ]
 }

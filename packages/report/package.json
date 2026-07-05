@@ -1,6 +1,7 @@
 {
   "name": "@veris/report",
   "version": "0.1.0",
+  "private": true,
   "description": "VERIS canonical report construction, diffing, and aggregation",
   "license": "MIT",
   "author": "VERIS Contributors",
@@ -65,8 +66,5 @@
     "report",
     "diff",
     "aggregation"
-  ],
-  "publishConfig": {
-    "access": "public"
-  }
+  ]
 }

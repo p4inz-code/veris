@@ -1,6 +1,7 @@
 {
   "name": "@veris/telemetry",
   "version": "0.1.0",
+  "private": true,
   "description": "VERIS metrics, tracing, and OpenTelemetry integration",
   "license": "MIT",
   "author": "VERIS Contributors",
@@ -61,8 +62,5 @@
     "metrics",
     "tracing",
     "opentelemetry"
-  ],
-  "publishConfig": {
-    "access": "public"
-  }
+  ]
 }

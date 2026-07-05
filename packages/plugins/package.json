@@ -1,6 +1,7 @@
 {
   "name": "@veris/plugins",
   "version": "0.1.0",
+  "private": true,
   "description": "VERIS plugin host, SDK, and manifest system",
   "license": "MIT",
   "author": "VERIS Contributors",
@@ -64,8 +65,5 @@
     "plugin",
     "extension",
     "sdk"
-  ],
-  "publishConfig": {
-    "access": "public"
-  }
+  ]
 }
