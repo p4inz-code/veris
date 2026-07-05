@@ -20,6 +20,9 @@
       "require": "./dist/internal.cjs"
     }
   },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "files": [
     "dist"
   ],

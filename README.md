@@ -225,18 +225,23 @@ pnpm --filter=@veris/cli veris explain fin_abc123
 ## Installation
 
 ```bash
-# Clone the repository
+# Global install (npm published package)
+npm install -g @veris/cli
+
+# Verify installation
+veris --help
+```
+
+### From source
+
+```bash
 git clone https://github.com/veris/veris.git
 cd veris
-
-# Install all dependencies
 pnpm install
-
-# Build all packages
 pnpm build
 ```
 
-> **Note:** VERIS is currently in **beta** (v0.1.0). npm packages are not yet published. All development is done from source.
+> **Note:** VERIS is currently in **beta** (v0.1.2). npm packages are available on the public registry. See [Installation](#installation) for global install instructions.
 
 <br />
 
@@ -605,7 +610,7 @@ chore:    Maintenance
 
 ## Roadmap
 
-### Current: Beta (v0.1.0)
+### Current: Beta (v0.1.2)
 
 - ✅ All 26 packages scaffolded and building
 - ✅ 2,795+ tests across all packages
@@ -614,6 +619,7 @@ chore:    Maintenance
 - ✅ Security audit complete
 - ✅ Performance audit complete
 - ✅ Architecture specifications frozen (SPEC-001–012)
+- ✅ npm publishing ready
 
 ### V1.0
 
@@ -644,7 +650,7 @@ chore:    Maintenance
 
 ### Is VERIS production-ready?
 
-VERIS is in **beta** (v0.1.0). All core analysis packages are functional with extensive test coverage. The full pipeline from discovery through export is implemented. V1.0 is being prepared for release.
+VERIS is in **beta** (v0.1.2). All core analysis packages are functional with extensive test coverage. The full pipeline from discovery through export is implemented. V1.0 is being prepared for release.
 
 ### Does VERIS require an internet connection?
 

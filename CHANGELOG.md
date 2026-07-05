@@ -5,6 +5,42 @@ All notable changes to VERIS will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] — 2026-07-05
+
+### Release Engineering
+
+- Added `engines` field to CLI package.json (node >= 18.0.0)
+- Added `engines` field to all @veris/* sub-packages (node >= 18.0.0)
+- Updated README version references from v0.1.0 to v0.1.2
+- Updated README installation section with npm global install instructions
+- Updated README npm publishing status
+- Added CHANGELOG v0.1.2 entry
+- Created VERSIONING.md documenting semver policy
+- Created RELEASE.md documenting the release checklist
+- Updated IMPLEMENTATION_CHECKLIST.md to reflect current state
+
+### CLI
+
+- Bumped @veris/cli version to 0.1.2
+- Updated CLI_VERSION constant in wirer.ts to 0.1.2
+- Disabled tsup code splitting for reliable CLI binary output
+
+### Packaging
+
+- All 25 publishable @veris/* packages now have explicit `engines` field
+- All packages verified with `npm pack` — clean tarballs
+
+### Build
+
+- tsup `splitting: false` for deterministic bundle output
+
+### Documentation
+
+- README now reflects npm-published status
+- VERSIONING.md created with semver policy
+- RELEASE.md created with official release checklist
+- CHANGELOG.md updated through v0.1.2
+
 ## [0.1.0] — 2026-07-04
 
 ### Added
@@ -38,4 +74,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Immutable outputs — all objects are frozen at construction
 - No circular dependencies across packages
 
+[0.1.2]: https://github.com/veris/veris/releases/tag/v0.1.2
 [0.1.0]: https://github.com/veris/veris/releases/tag/v0.1.0

@@ -38,7 +38,7 @@ import { createLogger, type Logger } from '@veris/logger';
 // ── Constants ──
 
 /** CLI tool version (matches package.json). */
-export const CLI_VERSION = '0.1.0';
+export const CLI_VERSION = '0.1.2';
 
 /** Default report file paths to search (in order). */
 const DEFAULT_REPORT_PATHS = [

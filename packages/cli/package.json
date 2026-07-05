@@ -1,6 +1,6 @@
 {
   "name": "@veris/cli",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "VERIS CLI — scan, report, init, validate, version, completions",
   "license": "MIT",
   "author": "VERIS Contributors",
@@ -17,6 +17,9 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     }
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "files": [
     "dist"

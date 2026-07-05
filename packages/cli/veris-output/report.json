@@ -1,0 +1,593 @@
+{
+  "id": "rep_f87c9afe2f22219207c6d45d8fd0a9332b429abf439181e661e3b8c3ade36ae3",
+  "session": {
+    "id": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+    "schemaVersion": "1.0.0",
+    "engineVersion": "0.1.0",
+    "startedAt": "2026-07-05T07:17:40.106Z",
+    "completedAt": "2026-07-05T07:17:40.106Z",
+    "durationMs": 0,
+    "config": {
+      "target": "."
+    },
+    "environment": {
+      "os": "win32",
+      "arch": "x64",
+      "runtimeVersion": "v24.14.0",
+      "engineVersion": "0.1.0"
+    },
+    "artifactCount": 33,
+    "findingCount": 0,
+    "status": "completed"
+  },
+  "artifacts": [
+    {
+      "id": "dart_3b2e9fef9c08fed66062fb8ffb770c04cf9aab5f75d34578283116108e8190da",
+      "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+      "parentId": null,
+      "type": "configuration",
+      "originalPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\tsconfig.json",
+      "normalizedPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\tsconfig.json",
+      "size": 222,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "5799cf92f53f6ae686239c1b46dbebf90b71c41d9f5c1867271d6985ddbc0ff8"
+      },
+      "mimeType": "application/json",
+      "extractedAt": "2026-07-05T07:17:40.106Z",
+      "extractorId": "cli-scan"
+    },
+    {
+      "id": "dart_4ba3b756e051a6a19ed8e4f4632d53a553a5f67d5cdc7eef8712e08661613eb5",
+      "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+      "parentId": null,
+      "type": "document",
+      "originalPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\README.md",
+      "normalizedPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\README.md",
+      "size": 3563,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "a49f6c10590a5a9dec8092570a945456617cfe8a23a8e31817aed94e1d1feaca"
+      },
+      "mimeType": "text/markdown",
+      "extractedAt": "2026-07-05T07:17:40.106Z",
+      "extractorId": "cli-scan"
+    },
+    {
+      "id": "dart_4d965810244cdb899b4eff2fe7061952c0c5ec8319697dc0e361cc69ba5ea30e",
+      "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+      "parentId": null,
+      "type": "configuration",
+      "originalPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\package.json",
+      "normalizedPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\package.json",
+      "size": 2254,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "64909fbcce4ce6c383dbc12bbd75d597cdd45cdbe9ff8c68c989562e0e977bc8"
+      },
+      "mimeType": "application/json",
+      "extractedAt": "2026-07-05T07:17:40.106Z",
+      "extractorId": "cli-scan"
+    },
+    {
+      "id": "dart_003716dfecc4be6e6ae751012a311d52f57452d242979d6d300960d2c641d9b6",
+      "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+      "parentId": null,
+      "type": "script",
+      "originalPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\src\\commands\\validate.ts",
+      "normalizedPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\src\\commands\\validate.ts",
+      "size": 3993,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "916e0ef515eee2479a1fdf9089da0c3bafe8249a4d44f792234bc9059e3dc9f9"
+      },
+      "mimeType": "text/typescript",
+      "extractedAt": "2026-07-05T07:17:40.106Z",
+      "extractorId": "cli-scan"
+    },
+    {
+      "id": "dart_0e71e530500d4bac3f9ad680bf9abf492369cd0bb82ec51ea6846096f5b9ba0e",
+      "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+      "parentId": null,
+      "type": "script",
+      "originalPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\src\\commands\\init.ts",
+      "normalizedPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\src\\commands\\init.ts",
+      "size": 4282,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "7d224365691e7bb570decec077abc3f691aa33c5f0268550ad40ab78c8a20b26"
+      },
+      "mimeType": "text/typescript",
+      "extractedAt": "2026-07-05T07:17:40.106Z",
+      "extractorId": "cli-scan"
+    },
+    {
+      "id": "dart_8705096cdf8ebd03babd3b3cfd6391abe22bdc85cb69bb8b7ecff92b794296bb",
+      "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+      "parentId": null,
+      "type": "script",
+      "originalPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\src\\commands\\completion.ts",
+      "normalizedPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\src\\commands\\completion.ts",
+      "size": 9312,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "ac36b1e81b04b7615ab9b286fe351504e43c958d6bc97bb27a97d488e757e3cd"
+      },
+      "mimeType": "text/typescript",
+      "extractedAt": "2026-07-05T07:17:40.106Z",
+      "extractorId": "cli-scan"
+    },
+    {
+      "id": "dart_95b4c7f856ab0f67d3e4b8d20709ce71509d8b28f3dc2a4f04588d37db343e63",
+      "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+      "parentId": null,
+      "type": "script",
+      "originalPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\src\\commands\\report.ts",
+      "normalizedPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\src\\commands\\report.ts",
+      "size": 6357,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "3862e2c359a5a85979769c3c9a3a82b7b440bdc88d96a95be5452ba8e66cfbca"
+      },
+      "mimeType": "text/typescript",
+      "extractedAt": "2026-07-05T07:17:40.106Z",
+      "extractorId": "cli-scan"
+    },
+    {
+      "id": "dart_a070e2f6deaf56f69a0b44759982188ed95cc8b306a5a3039703657bc7a509a3",
+      "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+      "parentId": null,
+      "type": "script",
+      "originalPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\src\\commands\\scan.ts",
+      "normalizedPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\src\\commands\\scan.ts",
+      "size": 17937,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "02218c76e2724b45667de055017df1022d45860d95772185b4da36224865d036"
+      },
+      "mimeType": "text/typescript",
+      "extractedAt": "2026-07-05T07:17:40.106Z",
+      "extractorId": "cli-scan"
+    },
+    {
+      "id": "dart_c0c71eb57668f736f1f389e1a8b80407d68646100b914a3cc5a3e916303decb4",
+      "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+      "parentId": null,
+      "type": "script",
+      "originalPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\src\\commands\\index.ts",
+      "normalizedPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\src\\commands\\index.ts",
+      "size": 1612,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "abd37a8c16f5f888f451bb97009b91d2ee9f7ca13de60d24061926fe21e68773"
+      },
+      "mimeType": "text/typescript",
+      "extractedAt": "2026-07-05T07:17:40.106Z",
+      "extractorId": "cli-scan"
+    },
+    {
+      "id": "dart_d32eca7a571c90bdd60a539151d9c10422a3ecd4b0d67038073e10a6c656f48a",
+      "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+      "parentId": null,
+      "type": "script",
+      "originalPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\src\\commands\\explain.ts",
+      "normalizedPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\src\\commands\\explain.ts",
+      "size": 10164,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "7fe7503b2ecdd53e174b1c6975403dd9e7ae200feaf2683f10f29f674176aab2"
+      },
+      "mimeType": "text/typescript",
+      "extractedAt": "2026-07-05T07:17:40.106Z",
+      "extractorId": "cli-scan"
+    },
+    {
+      "id": "dart_d6530e7b0e60ecb7975d162c61c71a1ea5c70362f88d89ab94ce98cfde0b1f9b",
+      "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+      "parentId": null,
+      "type": "script",
+      "originalPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\src\\commands\\summarize.ts",
+      "normalizedPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\src\\commands\\summarize.ts",
+      "size": 8372,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "63340608055417a2af8040d155a7cbde3785180e6c5bc472698656f6d18059b3"
+      },
+      "mimeType": "text/typescript",
+      "extractedAt": "2026-07-05T07:17:40.106Z",
+      "extractorId": "cli-scan"
+    },
+    {
+      "id": "dart_7bacb388d5f9c35a420b40f0dcb256c410f0d6c133f44eecfc8d59d564806fa3",
+      "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+      "parentId": null,
+      "type": "script",
+      "originalPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\src\\index.ts",
+      "normalizedPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\src\\index.ts",
+      "size": 2242,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "4714d8b6193eb135400c4572827d778287c54434b6ad96f56cec72aa05c479a0"
+      },
+      "mimeType": "text/typescript",
+      "extractedAt": "2026-07-05T07:17:40.106Z",
+      "extractorId": "cli-scan"
+    },
+    {
+      "id": "dart_98694a5acfa5f020b849e3a6ff421d173bda1a0cfda90661df0230918d62c7bb",
+      "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+      "parentId": null,
+      "type": "script",
+      "originalPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\src\\wirer.ts",
+      "normalizedPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\src\\wirer.ts",
+      "size": 12931,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "8c7b96c09011989914d6261318cd1b667b7b3c6fc1c2fc9c521aaa8be672c3c0"
+      },
+      "mimeType": "text/typescript",
+      "extractedAt": "2026-07-05T07:17:40.106Z",
+      "extractorId": "cli-scan"
+    },
+    {
+      "id": "dart_c750a583e23c7a3333ad26894a28be3c0c02bd05a6c561f8ead39ee68550866c",
+      "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+      "parentId": null,
+      "type": "script",
+      "subType": "Shebang",
+      "originalPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\src\\cli.ts",
+      "normalizedPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\src\\cli.ts",
+      "size": 9404,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "ddf631de7547c2635a6253e19292394f00cc8ce93473eea86dc27df75d5e15b3"
+      },
+      "mimeType": "text/plain",
+      "extractedAt": "2026-07-05T07:17:40.106Z",
+      "extractorId": "cli-scan"
+    },
+    {
+      "id": "dart_52cc9dbfafc0e624b8220d02d50fda794d87b00697de0547c81f2187925c7a51",
+      "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+      "parentId": null,
+      "type": "archive",
+      "subType": "GZIP",
+      "originalPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\veris-cli-0.1.1.tgz",
+      "normalizedPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\veris-cli-0.1.1.tgz",
+      "size": 162863,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "5136dd3084e3d9fbb7d8465b66ef969d1fbe99d23230f9f528fbdfb2dfc4ae92"
+      },
+      "mimeType": "application/gzip",
+      "extractedAt": "2026-07-05T07:17:40.106Z",
+      "extractorId": "cli-scan"
+    },
+    {
+      "id": "dart_1cf95ee454ae8cc362d3192f9cb7943a4931cdd8162e79e95abd27ea25682167",
+      "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+      "parentId": null,
+      "type": "document",
+      "originalPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\veris-output\\report.md",
+      "normalizedPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\veris-output\\report.md",
+      "size": 616,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "82d3771f13c0a509ab7426fb450217b08a8039bc0c54177bba01a2cb74ee2b1a"
+      },
+      "mimeType": "text/markdown",
+      "extractedAt": "2026-07-05T07:17:40.106Z",
+      "extractorId": "cli-scan"
+    },
+    {
+      "id": "dart_afa926dc3a203a81df2ca7a7003a46d0067b1b917e4158e9ed3df0fd4723b024",
+      "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+      "parentId": null,
+      "type": "configuration",
+      "originalPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\veris-output\\report.json",
+      "normalizedPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\veris-output\\report.json",
+      "size": 26298,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "86250276a1a9a76f202360a2b56a68c0d6207f8739eafc1c6d8435e1b3fcbf57"
+      },
+      "mimeType": "application/json",
+      "extractedAt": "2026-07-05T07:17:40.106Z",
+      "extractorId": "cli-scan"
+    },
+    {
+      "id": "dart_40e2c453ef5ed86f96e6a69247511b666b836d5702b8ef4ddb8a009e67b94911",
+      "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+      "parentId": null,
+      "type": "script",
+      "originalPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\__tests__\\commands\\summarize.test.ts",
+      "normalizedPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\__tests__\\commands\\summarize.test.ts",
+      "size": 8334,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "76cc8d3a848fa7c59ac3b95fb579831f5190d5295ca49b52f6b6819b38c97460"
+      },
+      "mimeType": "text/typescript",
+      "extractedAt": "2026-07-05T07:17:40.106Z",
+      "extractorId": "cli-scan"
+    },
+    {
+      "id": "dart_fc2a0c6ede28fd7ba3cbe55d33994c361be0dd718c894e3b0e6cf9a57ff09cd7",
+      "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+      "parentId": null,
+      "type": "script",
+      "originalPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\__tests__\\commands\\explain.test.ts",
+      "normalizedPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\__tests__\\commands\\explain.test.ts",
+      "size": 11217,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "1e8825eff8b16de05f1d8e1b4a845e4e0233d548e08f0ed8e576e83f552e3343"
+      },
+      "mimeType": "text/typescript",
+      "extractedAt": "2026-07-05T07:17:40.106Z",
+      "extractorId": "cli-scan"
+    },
+    {
+      "id": "dart_f65f06796b28c3c332827535bffca21695a02d526309a6007f5b645f7f49159c",
+      "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+      "parentId": null,
+      "type": "script",
+      "originalPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\__tests__\\cli.test.ts",
+      "normalizedPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\__tests__\\cli.test.ts",
+      "size": 4357,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "c8d80651eb3247c7653fe9ab08dd1d5ef6909fd384f3c46bec5b76d41ba4b627"
+      },
+      "mimeType": "text/typescript",
+      "extractedAt": "2026-07-05T07:17:40.106Z",
+      "extractorId": "cli-scan"
+    },
+    {
+      "id": "dart_f9596c7e3ec982783c8f2758137b728b189ca1fbfb8042bd1f10431f9c712ecc",
+      "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+      "parentId": null,
+      "type": "script",
+      "originalPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\tsup.config.ts",
+      "normalizedPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\tsup.config.ts",
+      "size": 266,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "f9c3ce13fc2d204910cb3d1e7b925e40de1871bcbb21ff3b324b070e785ca33a"
+      },
+      "mimeType": "text/typescript",
+      "extractedAt": "2026-07-05T07:17:40.106Z",
+      "extractorId": "cli-scan"
+    },
+    {
+      "id": "dart_225d8b596864cee295ed88efef8fb656542b3817d8ec856f5ae556d8be8149dc",
+      "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+      "parentId": null,
+      "type": "file",
+      "originalPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\dist\\cli.js.map",
+      "normalizedPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\dist\\cli.js.map",
+      "size": 122113,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "8032d413d33aaed19efdb3afaab9fb73901821d2441c2a1ee46f58d7fa94c53c"
+      },
+      "mimeType": "application/octet-stream",
+      "extractedAt": "2026-07-05T07:17:40.106Z",
+      "extractorId": "cli-scan"
+    },
+    {
+      "id": "dart_4b3123e5c546fed63f8235f040e474a2c5d64fc445b4c8c41d55ab1efbcfda65",
+      "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+      "parentId": null,
+      "type": "script",
+      "subType": "Shebang",
+      "originalPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\dist\\cli.d.cts",
+      "normalizedPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\dist\\cli.d.cts",
+      "size": 1028,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "f194be1f6312cd1898e2afe2fe7ac9a1fdbf00785aae39e228077ae255ab9564"
+      },
+      "mimeType": "text/plain",
+      "extractedAt": "2026-07-05T07:17:40.106Z",
+      "extractorId": "cli-scan"
+    },
+    {
+      "id": "dart_61960593103d285c4000bdf41b1188b76f1353e99846f75e950595beffde8190",
+      "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+      "parentId": null,
+      "type": "script",
+      "originalPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\dist\\index.cjs",
+      "normalizedPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\dist\\index.cjs",
+      "size": 66473,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "8c5b7421f9e1ab072d6bf357194aff707891a19ddf75eb579922359dc8277466"
+      },
+      "mimeType": "text/javascript",
+      "extractedAt": "2026-07-05T07:17:40.106Z",
+      "extractorId": "cli-scan"
+    },
+    {
+      "id": "dart_6f88ca6f216d33d3ff521f07c6c51dd809b72e89d4eaa064805b3b5bc98a4a29",
+      "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+      "parentId": null,
+      "type": "script",
+      "subType": "Shebang",
+      "originalPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\dist\\cli.d.ts",
+      "normalizedPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\dist\\cli.d.ts",
+      "size": 1028,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "f194be1f6312cd1898e2afe2fe7ac9a1fdbf00785aae39e228077ae255ab9564"
+      },
+      "mimeType": "text/plain",
+      "extractedAt": "2026-07-05T07:17:40.106Z",
+      "extractorId": "cli-scan"
+    },
+    {
+      "id": "dart_925310b80f5be0df1d580cb8503041686db12434d9c2635289c7d885400255e0",
+      "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+      "parentId": null,
+      "type": "script",
+      "subType": "Shebang",
+      "originalPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\dist\\cli.js",
+      "normalizedPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\dist\\cli.js",
+      "size": 62961,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "a98a742e449f17f55d8da8c9842c26a0345eb93dd2ec08fa59c97552698ae036"
+      },
+      "mimeType": "text/plain",
+      "extractedAt": "2026-07-05T07:17:40.106Z",
+      "extractorId": "cli-scan"
+    },
+    {
+      "id": "dart_943fe09dd14261f31a427e3bdb60b618e761d44eb98322763679f3530a2f62aa",
+      "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+      "parentId": null,
+      "type": "file",
+      "originalPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\dist\\index.js.map",
+      "normalizedPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\dist\\index.js.map",
+      "size": 122172,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "0fa6d709cbc0f2b5de9247899da7f3d13f428c7ad8e93953fc4743f5b7540b01"
+      },
+      "mimeType": "application/octet-stream",
+      "extractedAt": "2026-07-05T07:17:40.106Z",
+      "extractorId": "cli-scan"
+    },
+    {
+      "id": "dart_99bba14bda17dc109dd7b3e899b21f5f9bec3435cc09f4b6d5bca64dbe30f201",
+      "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+      "parentId": null,
+      "type": "file",
+      "originalPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\dist\\index.cjs.map",
+      "normalizedPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\dist\\index.cjs.map",
+      "size": 124268,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "45295e7de062067ec1cd6d9ea23cbd811e5ca43c04a346f751a303b92ae89baf"
+      },
+      "mimeType": "application/octet-stream",
+      "extractedAt": "2026-07-05T07:17:40.106Z",
+      "extractorId": "cli-scan"
+    },
+    {
+      "id": "dart_9f5a7533f6bcc41618ff3c137d28bcd9122d5c37fbe3f60c140d75a508b6093c",
+      "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+      "parentId": null,
+      "type": "file",
+      "originalPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\dist\\cli.cjs.map",
+      "normalizedPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\dist\\cli.cjs.map",
+      "size": 121730,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "461aefb32679824fbcc789e92637a6564c9b53c8f025dda0955a1d6eea3d10db"
+      },
+      "mimeType": "application/octet-stream",
+      "extractedAt": "2026-07-05T07:17:40.106Z",
+      "extractorId": "cli-scan"
+    },
+    {
+      "id": "dart_ce56f2786a4b45a4b8c16cbc58c56355505bb082932379813a75474bec3991b0",
+      "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+      "parentId": null,
+      "type": "script",
+      "originalPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\dist\\index.d.ts",
+      "normalizedPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\dist\\index.d.ts",
+      "size": 20261,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "c84dfe99365c5a6960a7d10126e1815a2afe2b62a489adf456c3dd0570d9d32e"
+      },
+      "mimeType": "text/typescript",
+      "extractedAt": "2026-07-05T07:17:40.106Z",
+      "extractorId": "cli-scan"
+    },
+    {
+      "id": "dart_d1652ddf45f30d89abf0afe5eee9be2cecb103fdc43973b0f7f3e6d3aa587291",
+      "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+      "parentId": null,
+      "type": "script",
+      "subType": "Shebang",
+      "originalPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\dist\\cli.cjs",
+      "normalizedPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\dist\\cli.cjs",
+      "size": 64836,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "6c89bdb8fc29c1f43ac86c3cee62da3ef39feaa4f12880d2ee22cd35983e583a"
+      },
+      "mimeType": "text/plain",
+      "extractedAt": "2026-07-05T07:17:40.106Z",
+      "extractorId": "cli-scan"
+    },
+    {
+      "id": "dart_e07a530cde8a0f240a5d7c1240156d4095cf884c3ab808b526897e83549f1684",
+      "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+      "parentId": null,
+      "type": "file",
+      "originalPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\dist\\index.d.cts",
+      "normalizedPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\dist\\index.d.cts",
+      "size": 20262,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "18d6783226957a91acf7b16b9f389096ad9eeccca543b45d8f5e4d4d28a9fc1a"
+      },
+      "mimeType": "application/octet-stream",
+      "extractedAt": "2026-07-05T07:17:40.106Z",
+      "extractorId": "cli-scan"
+    },
+    {
+      "id": "dart_f6889db5fb59bbddc39ebdcffe3ff40bff53cf60d3c5c163ec29234b12ebf4c4",
+      "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+      "parentId": null,
+      "type": "script",
+      "originalPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\dist\\index.js",
+      "normalizedPath": "C:\\Users\\Admin\\Desktop\\Veris\\packages\\cli\\dist\\index.js",
+      "size": 63503,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "66076e0c839d70d1c44e14379a371d7640a0ee2af52e76c19e9a034ea9547399"
+      },
+      "mimeType": "text/javascript",
+      "extractedAt": "2026-07-05T07:17:40.106Z",
+      "extractorId": "cli-scan"
+    }
+  ],
+  "findings": [],
+  "trustProfile": {
+    "id": "tp_f87c9afe2f22219207c6d45d8fd0a9332b429abf439181e661e3b8c3ade36ae3",
+    "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+    "artifactId": "dart_3b2e9fef9c08fed66062fb8ffb770c04cf9aab5f75d34578283116108e8190da",
+    "trustScore": 1,
+    "findingDensity": 0,
+    "severityBreakdown": {},
+    "computedAt": "2026-07-05T07:17:40.106Z"
+  },
+  "riskProfile": {
+    "id": "rp_f87c9afe2f22219207c6d45d8fd0a9332b429abf439181e661e3b8c3ade36ae3",
+    "sessionId": "scan_f25f72facb0b896413fab9ba3a73d1ede999003b32b5e7beaf3fa1b535f1070e",
+    "trustProfileId": "tp_f87c9afe2f22219207c6d45d8fd0a9332b429abf439181e661e3b8c3ade36ae3",
+    "riskScore": 0,
+    "riskLevel": "negligible",
+    "maxSeverity": {
+      "level": "info",
+      "score": 0
+    },
+    "computedAt": "2026-07-05T07:17:40.106Z"
+  },
+  "summary": {
+    "totalArtifacts": 33,
+    "totalFindings": 0,
+    "findingsBySeverity": {},
+    "findingsByCategory": {},
+    "riskScore": 0,
+    "trustScore": 1,
+    "scanDurationMs": 0,
+    "rulesApplied": 0,
+    "behaviorsDetected": 0
+  },
+  "generatedAt": "2026-07-05T07:17:40.106Z"
+}
