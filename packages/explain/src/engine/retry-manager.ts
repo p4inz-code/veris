@@ -163,7 +163,11 @@ export class RetryManager {
    * Check if we can retry (retry budget remaining).
    */
   canRetry(): boolean {
-    return this.retryCount < this.config.maxRetries;
+    // retryCount is incremented by recordFailure() on EVERY failure,
+    // including the initial attempt. Using <= ensures that with
+    // maxRetries=2 we get: initial + 1st retry + 2nd retry = 3 total
+    // calls before giving up. With < it would only give 1 retry (2 calls).
+    return this.retryCount <= this.config.maxRetries;
   }
 
   /**

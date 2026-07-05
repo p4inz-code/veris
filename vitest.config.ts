@@ -4,7 +4,14 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    pool: 'threads',
+    pool: 'forks',
+    poolOptions: {
+      forks: {
+        singleFork: true, // Windows workaround: prevents IPC corruption in Tinypool
+        // that causes "Worker exited unexpectedly" and hash mismatches
+        // when multiple fork workers run concurrently.
+      },
+    },
     include: ['packages/*/__tests__/**/*.test.ts'],
     exclude: [
       'node_modules',
