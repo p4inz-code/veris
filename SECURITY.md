@@ -9,7 +9,7 @@
 
 ## Reporting a vulnerability
 
-Report security vulnerabilities by email to **veris-security@googlegroups.com**.
+Report security vulnerabilities by email to **atharva.patil.cg@gmail.com**.
 
 Do not open public GitHub issues for security vulnerabilities.
 
