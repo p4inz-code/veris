@@ -1,3 +1,8 @@
+
+<p align="center">
+  <img src="https://github.com/p4inz-code/veris/blob/main/assets/banner.png?raw=true" alt="VERIS Banner" width="100%">
+</p>
+
 # VERIS
 
 Vulnerability Enumeration & Risk Intelligence System.
