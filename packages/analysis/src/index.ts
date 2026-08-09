@@ -81,8 +81,36 @@ export type {
   BatchAnalysisResult,
 } from './analysis-engine.js';
 
-// Built-in analyzers
+// PE Analysis Engine
 export { PEAnalyzer } from './analyzers/pe-analyzer.js';
+export { analyzePE } from './pe/engine.js';
+export type { PEEvidence, PEResult } from './pe/engine.js';
+export { parsePE, computeEntropy, rvaToOffset } from './pe/parser.js';
+export type {
+  PEParsed,
+  PESection,
+  PEImport,
+  PEExport,
+  PEOverlay,
+  PECertificate,
+  PEResource,
+  TLSInfo,
+  CompilerInfo,
+  PackerResult,
+} from './pe/types.js';
+export {
+  analyzeSections,
+  analyzeImports,
+  detectPacker,
+  analyzeOverlay,
+  identifyCompiler,
+  analyzeTLS,
+  analyzeResources,
+  analyzeSignature,
+  analyzeTimestamp,
+  analyzeEntryPoint,
+} from './pe/analyzers/index.js';
+export { SUSPICIOUS_APIS, KNOWN_PACKER_SECTIONS, STANDARD_SECTION_NAMES } from './pe/constants.js';
 export { ELFAnalyzer } from './analyzers/elf-analyzer.js';
 export { MachOAnalyzer } from './analyzers/macho-analyzer.js';
 export { CertificateAnalyzer } from './analyzers/certificate-analyzer.js';

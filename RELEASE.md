@@ -7,6 +7,8 @@
 - Shell completions for Bash, Zsh, and Fish
 - AI explanation layer supports OpenAI, Anthropic, and Ollama
 - Report summarization via AI
+- Knowledge pack system with built-in packs
+- PE deep analysis engine (headers, sections, imports, packers, signatures)
 - 6 export formats: JSON, Markdown, HTML, SARIF 2.1.0, CSV, JUnit
 - Deterministic analysis — identical inputs produce identical outputs
 - Offline-first — analysis pipeline requires no network access
@@ -20,6 +22,8 @@ This is the first production-ready CLI release. Core features are stable:
 - 20+ built-in security rules
 - 35 behavioral correlation patterns
 - Deterministic risk scoring with contribution analysis
+- PE/ELF/Mach-O binary analysis engine
+- Knowledge pack enrichment
 
 ## Compatibility
 

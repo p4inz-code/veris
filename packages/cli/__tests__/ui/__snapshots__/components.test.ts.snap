@@ -1,0 +1,30 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Badge > renders badges matching snapshot 1`] = `" [CRIT] CRITICAL [0m"`;
+
+exports[`Badge > renders badges matching snapshot 2`] = `" [OK]   SUCCESS [0m"`;
+
+exports[`MiniChart > renders severity distribution matching snapshot 1`] = `
+"Findings by Severity[0m
+
+ Critical             ##------------------[0m   12%
+ High                 ######--------------[0m   32%
+ Medium               ##########----------[0m   48%
+ Low                  ##------------------[0m    8%
+ Info                 --------------------[0m    0%"
+`;
+
+exports[`ProgressBar > renders progress bar matching snapshot 1`] = `
+"[##########----------] 50%
+  50 / 100
+  Elapsed: 1s  |  ETA: 1s"
+`;
+
+exports[`Table > renders table matching snapshot 1`] = `
+"+======+==============================+==========+
+| ID   | Name                         |    Score |
+|======+==============================+==========|
+| 1    | Alice                        |       95 |
+| 2    | Bob                          |       87 |
++======+==============================+==========+"
+`;

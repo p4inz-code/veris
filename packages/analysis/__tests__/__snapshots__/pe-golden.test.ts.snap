@@ -1,0 +1,332 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`PE Golden Tests — Compiler Identifier > identifies GCC for GCC-built PE > gcc-compiler 1`] = `
+{
+  "compiler": "GCC",
+  "confidence": 0.7,
+  "linkTimeStamp": 2020-01-01T00:00:00.000Z,
+  "majorLinkerVersion": 0,
+  "majorOSVersion": 6,
+  "minorLinkerVersion": 0,
+  "minorOSVersion": 0,
+}
+`;
+
+exports[`PE Golden Tests — Compiler Identifier > identifies Go for Go-built PE > go-compiler 1`] = `
+{
+  "compiler": "Go",
+  "confidence": 0.85,
+  "linkTimeStamp": 2020-01-01T00:00:00.000Z,
+  "majorLinkerVersion": 0,
+  "majorOSVersion": 6,
+  "minorLinkerVersion": 0,
+  "minorOSVersion": 0,
+}
+`;
+
+exports[`PE Golden Tests — Compiler Identifier > identifies MSVC for MSVC-built PE > msvc-compiler 1`] = `
+{
+  "compiler": "MSVC",
+  "confidence": 0.85,
+  "linkTimeStamp": 2020-01-01T00:00:00.000Z,
+  "majorLinkerVersion": 14,
+  "majorOSVersion": 6,
+  "minorLinkerVersion": 0,
+  "minorOSVersion": 0,
+}
+`;
+
+exports[`PE Golden Tests — Compiler Identifier > identifies Rust for Rust-built PE > rust-compiler 1`] = `
+{
+  "compiler": "Rust",
+  "confidence": 0.85,
+  "linkTimeStamp": 2020-01-01T00:00:00.000Z,
+  "majorLinkerVersion": 14,
+  "majorOSVersion": 6,
+  "minorLinkerVersion": 2,
+  "minorOSVersion": 0,
+}
+`;
+
+exports[`PE Golden Tests — Entry Point Analyzer > reports entry point in packer section > packed-entrypoint 1`] = `
+{
+  "confidence": 0.95,
+  "explanation": "Entry point (0x200) is outside all defined sections — highly unusual and indicates deliberate manipulation",
+  "metadata": {
+    "entryPoint": 512,
+  },
+  "severity": "high",
+  "type": "pe-entry-point-outside-sections",
+}
+`;
+
+exports[`PE Golden Tests — Entry Point Analyzer > reports info entry point for invalid PE > broken-entrypoint 1`] = `
+{
+  "confidence": 0,
+  "explanation": "Cannot analyze entry point on invalid PE",
+  "metadata": {
+    "entryPoint": 0,
+  },
+  "severity": "info",
+  "type": "pe-entry-point",
+}
+`;
+
+exports[`PE Golden Tests — Entry Point Analyzer > reports normal or near-section-start entry point > normal-entrypoint 1`] = `
+{
+  "confidence": 0.5,
+  "explanation": "Entry point is very close to the start of section ".text" (offset 0 bytes) — typical for packed executables where the entry is a small unpacking stub",
+  "metadata": {
+    "distance": 0,
+    "entryPoint": 4096,
+    "section": ".text",
+    "sectionSize": 4096,
+  },
+  "severity": "low",
+  "type": "pe-entry-point-near-section-start",
+}
+`;
+
+exports[`PE Golden Tests — Full Engine > produces deterministic output for clean PE > full-engine-evidence-types 1`] = `
+[
+  {
+    "category": "executable",
+    "confidence": 1,
+    "type": "pe-format",
+  },
+  {
+    "category": "obfuscation",
+    "confidence": 0.25,
+    "type": "pe-packer",
+  },
+  {
+    "category": "certificate",
+    "confidence": 1,
+    "type": "pe-no-signature",
+  },
+  {
+    "category": "metadata",
+    "confidence": 1,
+    "type": "pe-timestamp-epoch",
+  },
+  {
+    "category": "executable",
+    "confidence": 0.5,
+    "type": "pe-entry-point-near-section-start",
+  },
+]
+`;
+
+exports[`PE Golden Tests — Import Analyzer > produces deterministic output for clean PE > clean-imports 1`] = `[]`;
+
+exports[`PE Golden Tests — Import Analyzer > produces deterministic output for malicious imports > malicious-imports-summary 1`] = `
+[
+  {
+    "severity": "high",
+    "type": "pe-suspicious-process-injection",
+  },
+  {
+    "severity": "high",
+    "type": "pe-suspicious-credential-dumping",
+  },
+  {
+    "severity": "medium",
+    "type": "pe-suspicious-anti-debugging",
+  },
+  {
+    "severity": "high",
+    "type": "pe-suspicious-url-download",
+  },
+  {
+    "severity": "high",
+    "type": "pe-suspicious-privilege-escalation",
+  },
+]
+`;
+
+exports[`PE Golden Tests — Overlay Analyzer > detects overlay when present > overlay-detection 1`] = `
+{
+  "confidence": 0.85,
+  "explanation": "Overlay with high entropy (7.30) detected: 20.0 KB at offset 0x1400. High entropy overlay data is characteristic of appended encrypted/compressed payloads",
+  "metadata": {
+    "entropy": 7.3,
+    "offset": 5120,
+    "percentage": 45,
+    "size": 20480,
+  },
+  "severity": "high",
+  "type": "pe-high-entropy-overlay",
+}
+`;
+
+exports[`PE Golden Tests — Packer Detector > detects UPX for UPX-packed PE > upx-packer 1`] = `
+{
+  "confidence": 0.9,
+  "packer": "UPX",
+  "packerType": "packer",
+  "signals": [
+    "Known section name: "UPX0"",
+    "Known section name: "UPX1"",
+  ],
+}
+`;
+
+exports[`PE Golden Tests — Packer Detector > returns no packer or low-confidence packer for clean PE > clean-packer 1`] = `
+{
+  "confidence": 0.2,
+  "packer": "Generic",
+  "packerType": "packer",
+  "signals": [
+    "Minimal imports: 3",
+  ],
+}
+`;
+
+exports[`PE Golden Tests — Resources Analyzer > detects resources when present > resource-heavy 1`] = `
+[
+  {
+    "confidence": 1,
+    "explanation": "Version information present: binary data",
+    "metadata": {
+      "count": 1,
+      "sizes": [
+        500,
+      ],
+      "versionText": "",
+    },
+    "severity": "info",
+    "type": "pe-version-info",
+  },
+  {
+    "confidence": 1,
+    "explanation": "Executable requests administrator privileges (requireAdministrator in manifest)",
+    "metadata": {
+      "manifestText": "<assembly><assemblyIdentity version="1.0.0" /><requestedExecutionLevel level="requireAdministrator" /></assembly>",
+    },
+    "severity": "medium",
+    "type": "pe-requires-admin",
+  },
+  {
+    "confidence": 1,
+    "explanation": "1 manifest resource(s) present",
+    "metadata": {
+      "count": 1,
+    },
+    "severity": "info",
+    "type": "pe-manifest-present",
+  },
+  {
+    "confidence": 1,
+    "explanation": "1 icon resource(s) present",
+    "metadata": {
+      "count": 1,
+    },
+    "severity": "info",
+    "type": "pe-icons-present",
+  },
+]
+`;
+
+exports[`PE Golden Tests — Section Analyzer > produces deterministic output for RWX PE > rwx-sections-summary 1`] = `
+[
+  {
+    "section": ".text",
+    "severity": "high",
+    "type": "pe-rwx-section",
+  },
+]
+`;
+
+exports[`PE Golden Tests — Section Analyzer > produces deterministic output for clean PE > clean-sections 1`] = `[]`;
+
+exports[`PE Golden Tests — Signature Analyzer > reports no signature for unsigned PE > unsigned-signature 1`] = `
+[
+  {
+    "confidence": 1,
+    "explanation": "No digital signature found — executable is unsigned; common for most software but notable for system-level binaries",
+    "metadata": {
+      "certificateCount": 0,
+    },
+    "severity": "low",
+    "type": "pe-no-signature",
+  },
+]
+`;
+
+exports[`PE Golden Tests — Signature Analyzer > reports signature present for signed PE > signed-signature 1`] = `
+[
+  {
+    "confidence": 1,
+    "explanation": "Digital signature present: PKCS#7 SignedData (1.0 KB)",
+    "metadata": {
+      "certificateType": "PKCS7_SIGNED_DATA",
+      "revision": 512,
+      "size": 1024,
+    },
+    "severity": "info",
+    "type": "pe-signature-present",
+  },
+]
+`;
+
+exports[`PE Golden Tests — TLS Analyzer > detects TLS callbacks when present > tls-callback-detection 1`] = `
+{
+  "confidence": 0.9,
+  "explanation": "2 TLS callbacks found (addresses: 0x10001000, 0x10002000). Multiple TLS callbacks are extremely rare in legitimate software and strongly indicate malware — each callback executes before the entry point, enabling stealthy initialization",
+  "metadata": {
+    "callbackCount": 2,
+    "callbacks": [
+      {
+        "address": "0x10001000",
+      },
+      {
+        "address": "0x10002000",
+      },
+    ],
+    "rawDataSize": 256,
+  },
+  "severity": "high",
+  "type": "pe-multiple-tls-callbacks",
+}
+`;
+
+exports[`PE Golden Tests — Timestamp Analyzer > reports epoch timestamp > epoch-timestamp 1`] = `
+{
+  "confidence": 1,
+  "explanation": "Timestamp is zero/epoch (Jan 1 1970) (0x0) — indicates the timestamp was not set or was intentionally zeroed, common in packed or manually crafted executables",
+  "metadata": {
+    "epochName": "zero/epoch (Jan 1 1970)",
+    "rawValue": 0,
+  },
+  "severity": "low",
+  "type": "pe-timestamp-epoch",
+}
+`;
+
+exports[`PE Golden Tests — Timestamp Analyzer > reports future timestamp > future-timestamp 1`] = `
+{
+  "confidence": 1,
+  "explanation": "Compilation timestamp is in the future: 2099-01-01 (26648 days in the future). This is impossible for legitimate software and indicates timestamp manipulation",
+  "metadata": {
+    "daysFromNow": 26648,
+    "parsedDate": "2099-01-01T00:00:00.000Z",
+    "rawValue": 4070908800,
+  },
+  "severity": "high",
+  "type": "pe-timestamp-future",
+}
+`;
+
+exports[`PE Golden Tests — Timestamp Analyzer > reports normal timestamp > normal-timestamp 1`] = `
+{
+  "confidence": 1,
+  "explanation": "Compilation timestamp: 2020-01-01 (-2207 days ago)",
+  "metadata": {
+    "daysAgo": -2207,
+    "parsedDate": "2020-01-01T00:00:00.000Z",
+    "rawValue": 1577836800,
+  },
+  "severity": "info",
+  "type": "pe-timestamp-normal",
+}
+`;

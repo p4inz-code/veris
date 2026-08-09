@@ -24,12 +24,25 @@ veris scan --format json                Output as JSON
 veris scan --format html                Output as HTML
 veris scan --format json,html           Multiple formats
 veris scan --output ./results           Custom output directory
-veris scan --silent                     Suppress progress output
+veris scan --progress json              Machine-readable progress output
+veris scan --progress silent            Suppress progress output
 veris scan --verbose                    Show debug output
 veris scan --max-findings 500           Limit findings
 ```
 
 Output formats: `json`, `markdown`, `html`, `sarif`, `csv`, `junit`
+
+### pack
+
+Manage knowledge packs.
+
+```
+veris pack list                         List all loaded packs
+veris pack info <pack>                  Show detailed pack information
+veris pack validate [path]              Validate pack file(s)
+veris pack verify [path]                Verify pack integrity
+veris pack doctor                       Diagnose pack configuration issues
+```
 
 ### report
 

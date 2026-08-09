@@ -1,0 +1,492 @@
+/**
+ * Live Progress Dashboard — stable, minimal scan dashboard.
+ *
+ * Renders four compact sections using only information already available
+ * from the pipeline session:
+ *
+ *   CURRENT       what is happening now (stage + current file)
+ *   PIPELINE      what has completed / what remains (phase visualization)
+ *   STATISTICS    how much work has been processed (existing counters)
+ *   PERFORMANCE   elapsed time and existing throughput metrics
+ *
+ * Design rules:
+ * - Minimal, calm, developer-tool aesthetic (Cargo/Git/Bun/pnpm direction).
+ * - Stable row positions — no jumping layouts, no flicker.
+ * - Repaints only when the rendered content actually changes.
+ * - Non-TTY: prints one deterministic line per phase completion, then the
+ *   final summary — no dashboard, no animation, no per-file spam.
+ * - All colors from the theme system; all symbols from the symbol system;
+ *   adapts to Unicode/ASCII, color/no-color, and narrow/wide terminals.
+ *
+ * @module @veris/cli/scan/progress
+ */
+
+import { getSymbolSet } from '../../ui/renderer/index.js';
+import { type TerminalCapabilities, detectTerminal } from '../../ui/terminal/index.js';
+import { getResolvedTheme } from '../../ui/theme/index.js';
+import { truncateStart } from '../../ui/utilities/index.js';
+import { CLI_VERSION } from '../../wirer.js';
+import type { ProfilerSnapshot } from '../profiler.js';
+import type {
+  ScanSession,
+  CurrentFile,
+  HealthIssue,
+  ScanSummary,
+  StageStatus,
+} from '../scan-session.js';
+
+import { formatError } from './error-presentation.js';
+import { renderFinalSummary } from './final-summary.js';
+import { PIPELINE_PHASES, phaseStatus, renderPipelineVisualization } from './pipeline-viz.js';
+import {
+  type ProgressRenderer,
+  type ProgressUpdate,
+  type ErrorInfo,
+  type StageUpdate,
+  type StartContext,
+} from './renderer.js';
+import { renderStartupScreen } from './startup-screen.js';
+
+// ── Dashboard Refresh ──
+
+const DASHBOARD_INTERVAL_MS = 200;
+
+/** Cap the dashboard width to keep wide terminals readable. */
+const MAX_WIDTH = 100;
+
+/** Below this width, secondary details are dropped (never truncated silently). */
+const NARROW_WIDTH = 56;
+
+/** Label for a raw pipeline stage id, mapped to its display phase. */
+const PHASE_LABEL_BY_STAGE: Readonly<Record<string, string>> = Object.freeze(
+  Object.fromEntries(
+    PIPELINE_PHASES.flatMap((phase) => phase.stages.map((stage) => [stage, phase.label])),
+  ) as Record<string, string>,
+);
+
+// ── Dashboard Renderer ──
+
+/**
+ * Live updating TTY dashboard for scan progress.
+ *
+ * In TTY mode the dashboard is redrawn in place (stable rows, no flicker)
+ * and only when its content actually changes. In non-TTY mode it prints a
+ * single deterministic line per phase completion.
+ */
+export class DashboardRenderer implements ProgressRenderer {
+  readonly supportsAnimation = true;
+
+  private caps: TerminalCapabilities;
+  private readonly injectedCaps: TerminalCapabilities | null;
+  private currentSession: ScanSession | null = null;
+  private timer: ReturnType<typeof setInterval> | null = null;
+  private lastRenderedLineCount: number = 0;
+  private lastRenderedContent: string = '';
+  private finalSummaryText: string = '';
+  private finalSummaryShown: boolean = false;
+  private needsRedraw: boolean = false;
+  private knowledgePackCount: number | undefined = undefined;
+  private readonly printedPhases: Set<string> = new Set();
+
+  constructor(caps?: TerminalCapabilities) {
+    this.injectedCaps = caps ?? null;
+    this.caps = caps ?? detectTerminal();
+  }
+
+  onStart(session: ScanSession, context?: StartContext): void {
+    this.currentSession = session;
+    if (!this.injectedCaps) {
+      this.caps = detectTerminal();
+    }
+    this.knowledgePackCount = context?.knowledgePackCount;
+    this.printedPhases.clear();
+
+    // Render startup screen (shared component)
+    const startupLines = renderStartupScreen(session.config, {
+      version: CLI_VERSION,
+      knowledgePackCount: this.knowledgePackCount,
+    });
+
+    // Write startup screen
+    for (const line of startupLines) {
+      process.stdout.write(line + '\n');
+    }
+    this.lastRenderedLineCount = startupLines.length;
+    this.lastRenderedContent = '';
+
+    // Start animation loop for interactive TTY
+    if (this.caps.isTty && !this.caps.prefersReducedMotion) {
+      this.startAnimation();
+    }
+  }
+
+  onProgress(update: ProgressUpdate): void {
+    if (!this.currentSession) return;
+
+    // Apply update to current session immediately
+    this.currentSession = {
+      ...this.currentSession,
+      ...(update.currentFile !== undefined ? { currentFile: update.currentFile } : {}),
+      ...(update.filesProcessed !== undefined ? { filesProcessed: update.filesProcessed } : {}),
+      ...(update.totalFiles !== undefined ? { totalFiles: update.totalFiles } : {}),
+      ...(update.queueSize !== undefined ? { queueSize: update.queueSize } : {}),
+      ...(update.workerUtilization !== undefined
+        ? { workerUtilization: update.workerUtilization }
+        : {}),
+      currentStage: update.stage,
+    };
+
+    this.needsRedraw = true;
+
+    // Non-TTY: never render the full dashboard (progress events are too noisy).
+    if (!this.caps.isTty) return;
+
+    // Reduced-motion TTY: render immediately, no animation loop.
+    if (this.caps.prefersReducedMotion) {
+      this.renderDashboard();
+    }
+  }
+
+  onStageChange(stage: string, status: StageStatus, timing?: StageUpdate): void {
+    if (!this.currentSession) return;
+
+    // Keep the session's stage state in sync so the visualization is accurate.
+    const stages = { ...this.currentSession.stages };
+    const existing = stages[stage];
+    const now = Date.now();
+    stages[stage] = Object.freeze({
+      id: stage,
+      status,
+      startedAt: existing?.startedAt ?? (status === 'running' ? now : null),
+      completedAt: status === 'completed' || status === 'failed' ? now : null,
+      durationMs: timing?.durationMs ?? existing?.durationMs ?? 0,
+      itemsProcessed: timing?.itemsProcessed ?? existing?.itemsProcessed ?? 0,
+      itemsFailed: timing?.itemsFailed ?? existing?.itemsFailed ?? 0,
+    });
+    this.currentSession = { ...this.currentSession, stages };
+
+    // Non-TTY: print one deterministic line per phase completion.
+    if (!this.caps.isTty) {
+      this.printPhaseTransitions();
+      return;
+    }
+
+    this.needsRedraw = true;
+  }
+
+  onFileStart(file: CurrentFile): void {
+    if (!this.currentSession) return;
+    this.currentSession = { ...this.currentSession, currentFile: file };
+    this.needsRedraw = true;
+  }
+
+  onFileComplete(_file: CurrentFile, _durationMs: number, _success: boolean): void {
+    this.needsRedraw = true;
+  }
+
+  onHealthIssue(_issue: HealthIssue): void {
+    this.needsRedraw = true;
+  }
+
+  onError(error: ErrorInfo): void {
+    if (!this.currentSession) return;
+
+    // Show error immediately below dashboard
+    if (this.caps.isTty) {
+      this.clearDashboard();
+      process.stdout.write(formatError(error) + '\n');
+      // The dashboard was cleared; force the next render to repaint even if
+      // the session content is unchanged (otherwise the dashboard could stay
+      // hidden behind the error message).
+      this.lastRenderedContent = '';
+    }
+  }
+
+  onComplete(session: ScanSession, summary: ScanSummary): void {
+    this.stopAnimation();
+    this.currentSession = session;
+
+    // Clear the dashboard
+    this.clearDashboard();
+
+    // Render final summary
+    const summaryLines = renderFinalSummary(session, summary, {
+      outputFiles: summary.outputFiles,
+    });
+    for (const line of summaryLines) {
+      process.stdout.write(line + '\n');
+    }
+    this.finalSummaryText = summaryLines.join('\n');
+    this.finalSummaryShown = true;
+    this.lastRenderedContent = '';
+  }
+
+  onCancel(session: ScanSession): void {
+    this.stopAnimation();
+    this.currentSession = session;
+
+    // Clear the dashboard
+    this.clearDashboard();
+
+    // Show cancellation info
+    const theme = getResolvedTheme();
+    const symbols = getSymbolSet();
+    const lines: string[] = [
+      '',
+      ` ${theme.status.warning}${symbols.warning}\x1b[0m ${theme.ui.text}Scan Cancelled\x1b[0m`,
+      `   ${theme.ui.textDim}Files processed: ${session.filesProcessed}\x1b[0m`,
+      `   ${theme.ui.textDim}Elapsed: ${formatDuration(session.elapsedMs)}\x1b[0m`,
+      `   ${theme.ui.textDim}Progress: ${(session.progress * 100).toFixed(1)}%\x1b[0m`,
+      '',
+    ];
+    for (const line of lines) {
+      process.stdout.write(line + '\n');
+    }
+    this.finalSummaryText = lines.join('\n');
+    this.finalSummaryShown = true;
+    this.lastRenderedContent = '';
+  }
+
+  onProfilerSnapshot(_snapshot: ProfilerSnapshot): void {
+    // Profiler data is included in the session
+  }
+
+  getFinalSummary(): string {
+    return this.finalSummaryText;
+  }
+
+  dispose(): void {
+    this.stopAnimation();
+  }
+
+  // ── Animation ──
+
+  private startAnimation(): void {
+    if (this.timer !== null) return;
+    this.timer = setInterval(() => {
+      if (this.needsRedraw) {
+        this.renderDashboard();
+        this.needsRedraw = false;
+      }
+    }, DASHBOARD_INTERVAL_MS);
+  }
+
+  private stopAnimation(): void {
+    if (this.timer !== null) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
+  }
+
+  // ── Rendering ──
+
+  private clearDashboard(): void {
+    if (this.lastRenderedLineCount > 0 && this.caps.isTty) {
+      // Move cursor up and clear lines
+      process.stdout.write(`\x1b[${this.lastRenderedLineCount}A`);
+      for (let i = 0; i < this.lastRenderedLineCount; i++) {
+        process.stdout.write('\x1b[2K');
+        if (i < this.lastRenderedLineCount - 1) {
+          process.stdout.write('\x1b[1B');
+        }
+      }
+      // Move cursor back to top
+      process.stdout.write(`\x1b[${this.lastRenderedLineCount}A`);
+      this.lastRenderedLineCount = 0;
+    }
+  }
+
+  private renderDashboard(): void {
+    if (!this.currentSession) return;
+    const session = this.currentSession;
+    const caps = this.caps;
+    const width = Math.min(caps.width, MAX_WIDTH);
+    const narrow = width < NARROW_WIDTH;
+
+    const dashboardLines = this.buildDashboardLines(session, width, narrow);
+
+    // Only repaint when the content actually changed (stability).
+    const content = dashboardLines.join('\n');
+    if (content === this.lastRenderedContent) {
+      return;
+    }
+
+    this.clearDashboard();
+    for (const line of dashboardLines) {
+      process.stdout.write(line + '\n');
+    }
+    this.lastRenderedLineCount = dashboardLines.length;
+    this.lastRenderedContent = content;
+  }
+
+  private buildDashboardLines(session: ScanSession, width: number, narrow: boolean): string[] {
+    const theme = getResolvedTheme();
+    const symbols = getSymbolSet();
+    const lines: string[] = [];
+
+    // ── CURRENT ──
+    lines.push(` ${theme.ui.accent}CURRENT\x1b[0m`);
+    lines.push(this.renderCurrentLine(session, width, narrow));
+
+    // ── Progress (how much work processed) ──
+    if (session.totalFiles > 0) {
+      lines.push(this.renderProgressLine(session, width, narrow, theme, symbols));
+    }
+
+    // ── PIPELINE ──
+    lines.push(` ${theme.ui.accent}PIPELINE\x1b[0m`);
+    lines.push(...renderPipelineVisualization(session.stages, { width }));
+
+    // ── STATISTICS ──
+    lines.push(` ${theme.ui.accent}STATISTICS\x1b[0m`);
+    lines.push(...this.renderStatisticsLines(session, theme));
+
+    // ── PERFORMANCE ──
+    lines.push(` ${theme.ui.accent}PERFORMANCE\x1b[0m`);
+    lines.push(...this.renderPerformanceLines(session, theme));
+
+    return lines;
+  }
+
+  /** CURRENT — current phase + file being processed. */
+  private renderCurrentLine(session: ScanSession, width: number, narrow: boolean): string {
+    const theme = getResolvedTheme();
+    const symbols = getSymbolSet();
+    const phaseLabel = PHASE_LABEL_BY_STAGE[session.currentStage] ?? session.currentStage;
+
+    if (!session.currentFile) {
+      return `    ${theme.ui.text}${phaseLabel}\x1b[0m  ${theme.ui.textDim}-\x1b[0m`;
+    }
+
+    const file = session.currentFile;
+    const sizeSuffix = narrow ? '' : `  (${formatSize(file.size)})`;
+    const maxFileWidth = Math.max(10, width - 6 - phaseLabel.length - sizeSuffix.length);
+    const filename = truncateStart(file.filename, maxFileWidth, symbols.ellipsis);
+
+    return `    ${theme.ui.text}${phaseLabel}\x1b[0m  ${theme.ui.text}${filename}\x1b[0m${theme.ui.textDim}${sizeSuffix}\x1b[0m`;
+  }
+
+  /** Single-line compact progress bar with count and percentage. */
+  private renderProgressLine(
+    session: ScanSession,
+    width: number,
+    narrow: boolean,
+    theme: ReturnType<typeof getResolvedTheme>,
+    symbols: ReturnType<typeof getSymbolSet>,
+  ): string {
+    const pct = Math.min(session.filesProcessed / session.totalFiles, 1);
+    const count = `${session.filesProcessed} / ${session.totalFiles}`;
+    const percent = `${(pct * 100).toFixed(0)}%`;
+
+    // Extremely narrow terminals: keep the count, drop the bar.
+    if (width < 24) {
+      return `    ${theme.ui.text}${count}\x1b[0m`;
+    }
+
+    const barWidth = Math.max(6, Math.min(28, width - (narrow ? 14 : 26)));
+    const filled = Math.round(pct * barWidth);
+    const bar = `${symbols.progressStart}${symbols.progressFull.repeat(filled)}${symbols.progressEmpty.repeat(barWidth - filled)}${symbols.progressEnd}`;
+
+    const text = narrow
+      ? `    ${bar}  ${count}`
+      : `    ${bar}  ${count}  ${theme.ui.textDim}${percent}\x1b[0m`;
+    return ` ${theme.ui.text}${text}\x1b[0m`;
+  }
+
+  /** STATISTICS — existing pipeline counters only. */
+  private renderStatisticsLines(
+    session: ScanSession,
+    theme: ReturnType<typeof getResolvedTheme>,
+  ): string[] {
+    const stats = session.statistics;
+    const rows: Array<{ label: string; value: number; color?: string }> = [
+      { label: 'discovered', value: session.totalFiles },
+      { label: 'processed', value: session.filesProcessed },
+      { label: 'findings', value: stats.findings, color: findingsColor(stats.findings, theme) },
+      { label: 'evidence', value: stats.evidenceCollected },
+    ];
+    if (stats.warnings > 0)
+      rows.push({ label: 'warnings', value: stats.warnings, color: theme.status.warning });
+    if (stats.errors > 0)
+      rows.push({ label: 'errors', value: stats.errors, color: theme.status.error });
+    if (stats.skippedFiles > 0)
+      rows.push({ label: 'skipped', value: stats.skippedFiles, color: theme.ui.textDim });
+
+    const labelWidth = Math.max(...rows.map((r) => r.label.length));
+    return rows.map((row) => {
+      const color = row.color ?? theme.ui.text;
+      return `    ${theme.ui.textDim}${row.label.padEnd(labelWidth)}\x1b[0m  ${color}${formatNumber(row.value)}\x1b[0m`;
+    });
+  }
+
+  /** PERFORMANCE — elapsed time and existing throughput metrics only. */
+  private renderPerformanceLines(
+    session: ScanSession,
+    theme: ReturnType<typeof getResolvedTheme>,
+  ): string[] {
+    const rows: Array<{ label: string; value: string }> = [
+      { label: 'elapsed', value: formatDuration(session.elapsedMs) },
+    ];
+    if (session.throughput > 0) {
+      rows.push({ label: 'throughput', value: `${session.throughput.toFixed(1)} files/s` });
+    }
+
+    const labelWidth = Math.max(...rows.map((r) => r.label.length));
+    return rows.map(
+      (row) =>
+        `    ${theme.ui.textDim}${row.label.padEnd(labelWidth)}\x1b[0m  ${theme.ui.text}${row.value}\x1b[0m`,
+    );
+  }
+
+  /** Non-TTY: print one line per phase as it completes. */
+  private printPhaseTransitions(): void {
+    if (!this.currentSession) return;
+
+    for (const phase of PIPELINE_PHASES) {
+      if (this.printedPhases.has(phase.id)) continue;
+      const status = phaseStatus(this.currentSession.stages, phase);
+      if (status === 'completed' || status === 'failed') {
+        const lines = renderPipelineVisualization(this.currentSession.stages, {
+          width: this.caps.width,
+        });
+        const row = lines.find((line) => line.includes(phase.label));
+        if (row !== undefined) {
+          process.stdout.write(row + '\n');
+        }
+        this.printedPhases.add(phase.id);
+      }
+    }
+  }
+}
+
+/** Color for the findings counter based on count (existing behavior). */
+function findingsColor(count: number, theme: ReturnType<typeof getResolvedTheme>): string {
+  if (count > 50) return theme.severity.critical;
+  if (count > 20) return theme.severity.high;
+  if (count > 5) return theme.severity.medium;
+  return theme.ui.text;
+}
+
+/** Format file size in human-readable form. */
+function formatSize(bytes: number): string {
+  if (bytes === 0) return '0 B';
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  const size = bytes / Math.pow(1024, i);
+  return `${size.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
+}
+
+/** Deterministic thousands separator (locale-independent). */
+function formatNumber(n: number): string {
+  return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+function formatDuration(ms: number): string {
+  const totalSeconds = Math.floor(ms / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  if (hours > 0) return `${hours}h ${minutes}m ${seconds}s`;
+  if (minutes > 0) return `${minutes}m ${seconds}s`;
+  return `${seconds}s`;
+}

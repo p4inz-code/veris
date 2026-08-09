@@ -10,6 +10,8 @@
 
 import * as fs from 'node:fs';
 
+import { getSymbolSet } from '../ui/renderer/index.js';
+import { getResolvedTheme } from '../ui/theme/index.js';
 import { ExitCode, CliError } from '../wirer.js';
 
 // ── Validate Command Options ──
@@ -78,10 +80,18 @@ async function validateConfig(configPath?: string): Promise<{ exitCode: number }
           JSON.parse(content); // validate JSON
         }
 
-        process.stdout.write(`✅ Config is valid: ${p}\n`);
+        const theme = getResolvedTheme();
+        const symbols = getSymbolSet();
+        process.stdout.write(
+          ` ${theme.status.success}${symbols.success}\x1b[0m Config is valid: ${p}\n`,
+        );
         return { exitCode: ExitCode.SUCCESS };
       } catch (error) {
-        process.stderr.write(`❌ Invalid config: ${p}\n`);
+        const theme = getResolvedTheme();
+        const symbols = getSymbolSet();
+        process.stderr.write(
+          ` ${theme.status.error}${symbols.error}\x1b[0m Invalid config: ${p}\n`,
+        );
         process.stderr.write(`   ${error instanceof Error ? error.message : String(error)}\n`);
         return { exitCode: ExitCode.ERROR };
       }
@@ -108,10 +118,18 @@ async function validateRules(rulesPath?: string): Promise<{ exitCode: number }> 
         const files = fs
           .readdirSync(p)
           .filter((f) => f.endsWith('.json') || f.endsWith('.yaml') || f.endsWith('.yml'));
-        process.stdout.write(`✅ Rules directory found: ${p} (${files.length} rule files)\n`);
+        const theme = getResolvedTheme();
+        const symbols = getSymbolSet();
+        process.stdout.write(
+          ` ${theme.status.success}${symbols.success}\x1b[0m Rules directory found: ${p} (${files.length} rule files)\n`,
+        );
         return { exitCode: ExitCode.SUCCESS };
       } else {
-        process.stdout.write(`✅ Rules file found: ${p}\n`);
+        const theme = getResolvedTheme();
+        const symbols = getSymbolSet();
+        process.stdout.write(
+          ` ${theme.status.success}${symbols.success}\x1b[0m Rules file found: ${p}\n`,
+        );
         return { exitCode: ExitCode.SUCCESS };
       }
     }

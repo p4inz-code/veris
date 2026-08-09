@@ -102,6 +102,74 @@ class MarkdownExporterImpl implements Exporter {
       lines.push('');
     }
 
+    // PE Analysis section — extracted from PE-related findings
+    // NOTE: PE evidence types (e.g. 'pe-format', 'pe-packer') are produced by the PE analyzer
+    // but findings come from the rule engine with rule IDs like 'RULE-001'. This section will
+    // populate fully once findings have deterministically detectable PE rule IDs or title prefixes.
+    const peFindings = report.findings.filter(
+      (f) => f.ruleId?.startsWith('pe-') || f.title?.startsWith('PE '),
+    );
+    if (peFindings.length > 0) {
+      lines.push('## Executable Analysis (PE)');
+      lines.push('');
+      lines.push('| Property | Value |');
+      lines.push('|----------|-------|');
+
+      // Extract PE format info from findings
+      const formatFinding = peFindings.find((f) => f.title?.includes('format'));
+      const compilerFinding = peFindings.find((f) => f.ruleId === 'pe-compiler');
+      const packerFinding = peFindings.find((f) => f.ruleId === 'pe-packer');
+      const sigFindings = peFindings.filter(
+        (f) =>
+          f.ruleId?.startsWith('pe-signature') ||
+          f.ruleId === 'pe-no-signature' ||
+          f.ruleId === 'pe-signature-present',
+      );
+      const rwxFindings = peFindings.filter((f) => f.ruleId === 'pe-rwx-section');
+      const epFindings = peFindings.filter((f) => f.ruleId?.startsWith('pe-entry-point'));
+
+      if (formatFinding) {
+        lines.push(`| Format | ${formatFinding.description || formatFinding.title} |`);
+      }
+      if (compilerFinding) {
+        lines.push(`| Compiler | ${compilerFinding.description || compilerFinding.title} |`);
+      }
+      if (packerFinding) {
+        lines.push(`| Packer | ${packerFinding.description || packerFinding.title} |`);
+      }
+      if (sigFindings.length > 0) {
+        const sigDesc = sigFindings.map((f) => f.description || f.title).join('; ');
+        lines.push(`| Signature | ${sigDesc} |`);
+      }
+      if (rwxFindings.length > 0) {
+        const rwxDesc = rwxFindings.map((f) => f.description || f.title).join('; ');
+        lines.push(`| RWX Sections | ${rwxDesc} |`);
+      }
+      if (epFindings.length > 0) {
+        const epDesc = epFindings.map((f) => f.description || f.title).join('; ');
+        lines.push(`| Entry Point | ${epDesc} |`);
+      }
+
+      lines.push('');
+
+      // Section-level details
+      const detailFindings = peFindings.filter(
+        (f) => f.ruleId !== 'pe-format' && f.ruleId !== 'pe-compiler',
+      );
+      if (detailFindings.length > 0) {
+        lines.push('### Detailed Findings');
+        lines.push('');
+        lines.push('| Type | Severity | Detail |');
+        lines.push('|------|----------|-------|');
+        for (const f of detailFindings) {
+          lines.push(
+            `| \`${f.ruleId}\` | ${f.severity.level} | ${escapeMarkdownTable(f.description || f.title)} |`,
+          );
+        }
+        lines.push('');
+      }
+    }
+
     // Findings section
     if (report.findings.length > 0) {
       const maxFindings = options?.maxFindings ?? report.findings.length;
@@ -146,6 +214,38 @@ class MarkdownExporterImpl implements Exporter {
     lines.push(`| Trust Score | ${(report.trustProfile.trustScore * 100).toFixed(1)}% |`);
     lines.push(`| Finding Density | ${report.trustProfile.findingDensity.toFixed(4)} |`);
     lines.push('');
+
+    // Knowledge Enrichment section
+    if (report.knowledgeEnrichments && report.knowledgeEnrichments.length > 0) {
+      lines.push('## Knowledge Enrichment');
+      lines.push('');
+      lines.push(
+        `The following knowledge pack enrichments were applied based on evidence matching:`,
+      );
+      lines.push('');
+
+      for (const ke of report.knowledgeEnrichments) {
+        lines.push(`### ${ke.name}`);
+        lines.push('');
+        lines.push(`- **Pack:** \`${ke.sourcePack}\` v${ke.packVersion}`);
+        lines.push(`- **Category:** ${ke.family}`);
+        lines.push(`- **Entry:** \`${ke.entryId}\``);
+        lines.push(`- **Severity:** ${ke.severity}`);
+        lines.push(`- **Confidence:** ${(ke.matchConfidence * 100).toFixed(1)}%`);
+        if (ke.description) lines.push(`- **Description:** ${ke.description}`);
+        if (ke.behavior) lines.push(`- **Behavior:** ${ke.behavior}`);
+        if (ke.remediation) lines.push(`- **Remediation:** ${ke.remediation}`);
+        if (ke.mitreTechniques.length > 0) {
+          lines.push(`- **MITRE ATT&CK:** ${ke.mitreTechniques.join(', ')}`);
+        }
+        if (ke.references.length > 0) {
+          for (const ref of ke.references) {
+            lines.push(`- **Reference:** [${ref.label}](${ref.url})`);
+          }
+        }
+        lines.push('');
+      }
+    }
 
     const content = lines.join('\n');
 
@@ -258,6 +358,30 @@ class HtmlExporterImpl implements Exporter {
     <tr><td>Trust Score</td><td>${(report.trustProfile.trustScore * 100).toFixed(1)}%</td></tr>
     <tr><td>Finding Density</td><td>${report.trustProfile.findingDensity.toFixed(4)}</td></tr>
   </table>
+
+  ${
+    report.knowledgeEnrichments && report.knowledgeEnrichments.length > 0
+      ? `
+  <h2>Knowledge Enrichment</h2>
+  <p>The following knowledge pack enrichments were applied:</p>
+  <table>
+    <tr><th>Name</th><th>Pack</th><th>Category</th><th>Severity</th><th>Confidence</th><th>MITRE</th></tr>
+    ${report.knowledgeEnrichments
+      .map(
+        (ke) => `<tr>
+      <td><strong>${escapeHtml(ke.name)}</strong></td>
+      <td><code>${escapeHtml(ke.sourcePack)}</code> v${escapeHtml(ke.packVersion)}</td>
+      <td>${escapeHtml(ke.family)}</td>
+      <td>${escapeHtml(ke.severity)}</td>
+      <td>${(ke.matchConfidence * 100).toFixed(1)}%</td>
+      <td>${ke.mitreTechniques.length > 0 ? ke.mitreTechniques.join(', ') : '-'}</td>
+    </tr>`,
+      )
+      .join('\n          ')}
+  </table>
+  `
+      : ''
+  }
 
   <div class="footer">
     <p>Generated by VERIS ${report.session.engineVersion} | Schema ${report.session.schemaVersion}</p>
@@ -457,6 +581,11 @@ function escapeXml(value: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&apos;');
+}
+
+/** Escape pipe characters for markdown table cells. */
+function escapeMarkdownTable(value: string): string {
+  return value.replace(/\|/g, '\\|').replace(/\n/g, ' ');
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

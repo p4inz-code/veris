@@ -26,8 +26,8 @@ summarizes reports — it never participates in detection or scoring.
 
 ### Is VERIS free?
 
-Contact VERIS sales at [veris.com](https://veris.com) for pricing and licensing
-information.
+VERIS is an open-source security analysis platform. Run it with
+`npx veris-cli`, install globally, or build from source.
 
 ## Installation
 

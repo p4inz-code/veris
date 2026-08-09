@@ -25,45 +25,22 @@ import { runCompletion, parseCompletionArgs, COMPLETION_HELP } from './commands/
 import { runExplain, parseExplainArgs, EXPLAIN_HELP } from './commands/explain.js';
 import { registerCommand, dispatchCommand, type CliCommand } from './commands/index.js';
 import { runInit, parseInitArgs, INIT_HELP } from './commands/init.js';
+import { runPack, PACK_HELP } from './commands/pack.js';
 import { runReport, parseReportArgs, REPORT_HELP } from './commands/report.js';
 import { runScan, parseScanArgs, SCAN_HELP } from './commands/scan.js';
 import { runSummarize, parseSummarizeArgs, SUMMARIZE_HELP } from './commands/summarize.js';
 import { runValidate, parseValidateArgs, VALIDATE_HELP } from './commands/validate.js';
-import { ExitCode, CLI_VERSION } from './wirer.js';
+import { parseCompatibilityFlags, formatCliError, renderGlobalHelp } from './ui/index.js';
+import { ExitCode, CLI_VERSION, CliError } from './wirer.js';
 
 // ── Global Help Text ──
 
-const GLOBAL_HELP = `
-VERIS — Deterministic Security Analysis Platform v${CLI_VERSION}
+/** @internal Builds global help text. */
+function buildGlobalHelp(): string {
+  return renderGlobalHelp().join('\n');
+}
 
-USAGE
-  veris <command> [options]
-
-COMMANDS
-  scan              Run analysis on artifacts
-  report            Generate and export reports
-  init              Initialize VERIS configuration
-  validate          Validate configuration or rules
-  explain           Explain findings using AI
-  summarize         Summarize scan report using AI
-  version           Show version information
-  completion        Generate shell completions
-
-GLOBAL OPTIONS
-  --help, -h        Show help for any command
-  --version, -v     Show version information
-
-EXAMPLES
-  veris scan                        Run a scan on the current directory
-  veris explain fin_abc123          Explain a finding
-  veris explain fin_abc123 --json   Explain as JSON
-  veris summarize                   Summarize the latest scan
-
-Run 'veris <command> --help' for command-specific help.
-`;
-
-// ── Version Text ──
-
+/** @internal Version display text. */
 const VERSION_TEXT = `veris v${CLI_VERSION}`;
 
 // ── Register Commands ──
@@ -138,6 +115,22 @@ function registerAllCommands(): void {
     },
   };
 
+  // Pack command
+  const packCommand: CliCommand = {
+    name: 'pack',
+    description: 'Manage knowledge packs',
+    usage:
+      'veris pack list || veris pack info <pack> || veris pack validate [path] || veris pack verify [path] || veris pack doctor',
+    async run(args: readonly string[]): Promise<number> {
+      if (args[0] === '--help' || args[0] === '-h') {
+        process.stdout.write(PACK_HELP);
+        return ExitCode.SUCCESS;
+      }
+      const { exitCode } = await runPack(args);
+      return exitCode;
+    },
+  };
+
   // Validate command
   const validateCommand: CliCommand = {
     name: 'validate',
@@ -202,6 +195,7 @@ function registerAllCommands(): void {
   registerCommand(summarizeCommand);
   registerCommand(scanCommand);
   registerCommand(reportCommand);
+  registerCommand(packCommand);
   registerCommand(validateCommand);
   registerCommand(initCommand);
   registerCommand(versionCommand);
@@ -213,7 +207,8 @@ function registerAllCommands(): void {
 /**
  * Main CLI entry point.
  *
- * Parses the command from argv and dispatches to the appropriate handler.
+ * Parses the command from argv, handles compatibility flags, and
+ * dispatches to the appropriate command handler.
  *
  * @param argv - The raw process.argv array.
  */
@@ -221,7 +216,13 @@ export async function main(argv: string[]): Promise<void> {
   // Skip node binary and script path
   const args = argv.slice(2);
 
+  // Parse compatibility flags first (consumes --no-color, --no-unicode, --no-animation)
+  parseCompatibilityFlags(args);
+
   registerAllCommands();
+
+  // Build help text after potential compatibility flag changes
+  const GLOBAL_HELP = buildGlobalHelp();
 
   // No arguments — show global help
   if (args.length === 0) {
@@ -251,13 +252,10 @@ export async function main(argv: string[]): Promise<void> {
     const exitCode = await dispatchCommand(firstArg, args.slice(1));
     process.exit(exitCode);
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    process.stderr.write(`Error: ${message}\n`);
-    process.exit(
-      error instanceof Object && 'exitCode' in (error as object)
-        ? (error as { exitCode: number }).exitCode
-        : ExitCode.ERROR,
-    );
+    const exitCode = error instanceof CliError ? error.exitCode : ExitCode.ERROR;
+    const verbose = args.includes('--verbose');
+    process.stderr.write(formatCliError(error, exitCode, { command: firstArg, verbose }) + '\n');
+    process.exit(exitCode);
   }
 }
 

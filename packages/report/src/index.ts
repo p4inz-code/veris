@@ -36,6 +36,7 @@ import type {
   Recommendation,
   Artifact,
   ArtifactRef,
+  ReportKnowledgeEnrichment,
 } from '@veris/core';
 import {
   createSeverity,
@@ -59,6 +60,8 @@ export interface ReportBuilderOptions {
   readonly target?: string;
   /** Profile name used for the scan. */
   readonly profile?: string;
+  /** Knowledge pack enrichments to include in the report. */
+  readonly knowledgeEnrichments?: readonly ReportKnowledgeEnrichment[];
 }
 
 /**
@@ -164,11 +167,18 @@ export function buildReport(
         return acc;
       }, {}),
     ),
-    findingsByCategory: Object.freeze({}),
+    findingsByCategory: Object.freeze(
+      findings.reduce<Record<string, number>>((acc, f) => {
+        // Derive category from the first segment of the ruleId
+        const category = (f.ruleId ?? 'unknown').split(/[-_\s]/)[0]?.toLowerCase() ?? 'unknown';
+        acc[category] = (acc[category] ?? 0) + 1;
+        return acc;
+      }, {}),
+    ),
     riskScore: assessment?.riskScore ?? 0,
     trustScore: 1 - (assessment?.riskScore ?? 0) / 10,
-    scanDurationMs: pipelineResult.diagnostics?.matchCount ?? 0,
-    rulesApplied: pipelineResult.diagnostics?.matchCount ?? 0,
+    scanDurationMs: pipelineResult.diagnostics?.totalRuntimeMs ?? 0,
+    rulesApplied: new Set(pipelineResult.ruleMatches?.map((m) => m.ruleId) ?? []).size,
     behaviorsDetected: behaviorChains.length,
   });
 
@@ -199,6 +209,7 @@ export function buildReport(
   });
 
   // Build final report
+  const enrichments = options?.knowledgeEnrichments;
   const reportId = deterministicId('rep', sessionId ?? '');
   const report: CanonicalReport = Object.freeze({
     id: reportId,
@@ -208,6 +219,8 @@ export function buildReport(
     behaviorChains: behaviorChains.length > 0 ? Object.freeze(behaviorChains) : undefined,
     trustProfile,
     riskProfile,
+    knowledgeEnrichments:
+      enrichments && enrichments.length > 0 ? Object.freeze([...enrichments]) : undefined,
     summary,
     generatedAt,
   });

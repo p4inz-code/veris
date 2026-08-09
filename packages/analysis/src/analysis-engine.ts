@@ -114,6 +114,7 @@ export class AnalysisEngine {
    * @param sessionId - The owning session ID
    * @param features - Features extracted from this artifact
    * @param options - Analysis options
+   * @param content - Optional raw binary content for deep analysis
    * @returns ArtifactAnalysisResult with evidence and diagnostics
    */
   async analyzeArtifact(
@@ -121,11 +122,12 @@ export class AnalysisEngine {
     sessionId: string,
     features: readonly FeatureReference[],
     options?: AnalysisOptions,
+    content?: Buffer | null,
   ): Promise<ArtifactAnalysisResult> {
     const context: AnalysisContext = {
       artifact,
       sessionId,
-      content: null, // Content may not be available at analysis stage
+      content: content ?? null,
       features,
       config: undefined,
     };

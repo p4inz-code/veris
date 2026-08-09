@@ -62,6 +62,7 @@ export type {
   RiskDriver,
   RiskProfile,
   CanonicalReport,
+  ReportKnowledgeEnrichment,
 } from './report.js';
 
 export type {

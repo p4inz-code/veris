@@ -1,0 +1,8 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Box > renders box matching snapshot 1`] = `
+"+--------- Section ----------+
+| Line 1                     |
+| Line 2                     |
++----------------------------+"
+`;

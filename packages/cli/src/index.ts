@@ -29,6 +29,8 @@ export { main as runCli } from './cli.js';
 export { runExplain, parseExplainArgs, EXPLAIN_HELP } from './commands/explain.js';
 export type { ExplainOptions } from './commands/explain.js';
 
+export { runPack, PACK_HELP } from './commands/pack.js';
+
 export { runSummarize, parseSummarizeArgs, SUMMARIZE_HELP } from './commands/summarize.js';
 export type { SummarizeOptions } from './commands/summarize.js';
 
@@ -51,6 +53,26 @@ export type { CompletionOptions } from './commands/completion.js';
 
 export { registerCommand, getCommand, getAllCommands, dispatchCommand } from './commands/index.js';
 export type { CliCommand } from './commands/index.js';
+
+// ── UI Framework ──
+
+export * from './ui/index.js';
+export {
+  renderHelpPage,
+  renderUsageHint,
+  renderGlobalHelp,
+  formatCliError,
+  parseCompatibilityFlags,
+  applyCompatibilityOptions,
+  type CompatibilityOptions,
+  type CliErrorContext,
+  type HelpPage,
+  type HelpSection,
+  type HelpArgument,
+  type HelpOption,
+  type HelpExample,
+  type HelpExitCode,
+} from './ui/index.js';
 
 // ── Wiring ──
 

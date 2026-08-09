@@ -157,6 +157,8 @@ export interface PipelineDiagnostics {
   readonly matchCount: number;
   readonly correlationCount: number;
   readonly contributionsTruncated: boolean;
+  /** Total pipeline runtime in milliseconds. */
+  readonly totalRuntimeMs: number;
   /** Cache diagnostics. */
   readonly cacheHit?: boolean;
   readonly cacheHitCount?: number;
@@ -281,6 +283,7 @@ export class PipelineOrchestrator {
   async run(input: PipelineInput): Promise<PipelineResult> {
     const pipelineId = deterministicId('pl', input.sessionId);
     const executedAt = this.config.riskEvaluator?.computedAt ?? new Date().toISOString();
+    const pipelineStartMs = performance.now();
 
     // Stage 1 — transform evidence into Engine types.
     const evidenceRefs = this.toEvidenceRefs(input.evidence);
@@ -323,6 +326,7 @@ export class PipelineOrchestrator {
       matchCount: ruleEngineResult.matches.length,
       correlationCount: correlationEngineResult.correlations.length,
       contributionsTruncated: assessment.contributionsTruncated,
+      totalRuntimeMs: Math.max(0, performance.now() - pipelineStartMs),
     };
 
     // Stage 7 — optionally explain via injected Explainer.

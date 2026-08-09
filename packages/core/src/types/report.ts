@@ -12,6 +12,29 @@ import type { Finding, BehaviorChain, Recommendation } from './finding.js';
 import type { Severity } from './severity.js';
 import type { TaxonomyId } from './taxonomy.js';
 
+/** @internal Knowledge enrichment attached to a report. */
+export interface ReportKnowledgeEnrichment {
+  readonly packId: string;
+  readonly entryId: string;
+  readonly name: string;
+  readonly family: string;
+  readonly description: string;
+  readonly behavior: string;
+  readonly severity: 'critical' | 'high' | 'medium' | 'low' | 'info';
+  readonly remediation: string;
+  readonly references: readonly {
+    readonly label: string;
+    readonly url: string;
+    readonly source: string;
+  }[];
+  readonly mitreTechniques: readonly string[];
+  readonly cweIds: readonly string[];
+  readonly matchConfidence: number;
+  readonly matchedIndicators: readonly string[];
+  readonly sourcePack: string;
+  readonly packVersion: string;
+}
+
 /** Report ID (prefix: "rep_"). */
 export type ReportId = string;
 
@@ -129,6 +152,8 @@ export interface CanonicalReport {
   readonly riskProfile: RiskProfile;
   /** Remediation recommendations. */
   readonly recommendations?: readonly Recommendation[];
+  /** Knowledge pack enrichments attached to evidence. */
+  readonly knowledgeEnrichments?: readonly ReportKnowledgeEnrichment[];
   /** High-level summary. */
   readonly summary: ReportSummary;
   /** Errors encountered during analysis. */

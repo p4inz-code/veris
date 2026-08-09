@@ -1,19 +1,19 @@
 /**
  * @veris/knowledge — VERIS Knowledge Layer
  *
- * Implements the Feature extraction and normalization pipeline that converts
- * classified artifacts into canonical Features. This is the first stage of
- * the analysis pipeline after discovery and classification.
+ * Implements the Feature extraction and normalization pipeline and the
+ * Knowledge Pack System for offline threat intelligence enrichment.
  *
- * ## Pipeline
- * Raw Input → Feature Extraction → Normalization → Validation → Emission → Knowledge Layer
+ * ## Sub-modules
+ * - Feature extraction: converts classified artifacts into canonical Features
+ * - Capability detection: identifies artifact capabilities
+ * - Knowledge Packs: deterministic offline threat intelligence databases
  *
  * ## Invariants
  * - Features are immutable after creation
  * - Feature IDs are deterministic (content-addressed)
  * - Features carry complete provenance
- * - The engine ONLY extracts knowledge — it never produces findings,
- *   risk, severity, or performs rule matching
+ * - Knowledge Packs are offline-first, deterministic, versioned
  * - All outputs are deterministic (same input → same output)
  *
  * @module @veris/knowledge
@@ -69,3 +69,7 @@ export type {
   ArtifactKnowledgeResult,
   BatchKnowledgeResult,
 } from './engine/knowledge-engine.js';
+
+// ── Knowledge Pack System ──
+
+export * from './packs/index.js';
