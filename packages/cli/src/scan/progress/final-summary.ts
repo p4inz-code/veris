@@ -24,7 +24,12 @@
 import { getSymbolSet } from '../../ui/renderer/index.js';
 import { horizontalDivider } from '../../ui/styles/index.js';
 import { detectTerminal } from '../../ui/terminal/index.js';
-import { getResolvedTheme, severityFromScore, type SeverityLevel } from '../../ui/theme/index.js';
+import {
+  getResolvedTheme,
+  ansiReset,
+  severityFromScore,
+  type SeverityLevel,
+} from '../../ui/theme/index.js';
 import { wrapText } from '../../ui/utilities/index.js';
 import type { ScanSummary, ScanSession } from '../scan-session.js';
 
@@ -67,6 +72,7 @@ export function renderFinalSummary(
   const caps = detectTerminal();
   const theme = getResolvedTheme();
   const symbols = getSymbolSet();
+  const R = ansiReset();
   const width = Math.min(caps.width, MAX_WIDTH);
   const cancelled = options.cancelled ?? summary.cancelled ?? false;
   const outputFiles = options.outputFiles ?? summary.outputFiles ?? [];
@@ -76,10 +82,10 @@ export function renderFinalSummary(
   lines.push('');
 
   // ── RESULT ──
-  lines.push(...renderResultHeader(cancelled, summary, theme, symbols, width));
+  lines.push(...renderResultHeader(cancelled, summary, theme, symbols, width, R));
 
   // ── SUMMARY ──
-  lines.push(` ${theme.ui.accent}SUMMARY\x1b[0m`);
+  lines.push(` ${theme.ui.accent}SUMMARY${R}`);
   const summaryRows: Array<{ label: string; value: string; color?: string }> = [
     { label: 'files', value: formatNumber(summary.filesScanned) },
     { label: 'evidence', value: formatNumber(summary.evidenceCollected) },
@@ -120,24 +126,24 @@ export function renderFinalSummary(
       color: theme.ui.textDim,
     });
   }
-  lines.push(...renderAlignedRows(summaryRows, theme, symbols, width));
+  lines.push(...renderAlignedRows(summaryRows, theme, symbols, width, R));
 
   // ── FINDINGS ──
-  const severityRows = renderSeverityRows(summary, theme, symbols);
+  const severityRows = renderSeverityRows(summary, theme, symbols, R);
   if (severityRows.length > 0) {
-    lines.push(` ${theme.ui.accent}FINDINGS\x1b[0m`);
+    lines.push(` ${theme.ui.accent}FINDINGS${R}`);
     lines.push(...severityRows);
   }
 
   // ── PERFORMANCE ──
-  lines.push(` ${theme.ui.accent}PERFORMANCE\x1b[0m`);
+  lines.push(` ${theme.ui.accent}PERFORMANCE${R}`);
   const perfRows: Array<{ label: string; value: string; color?: string }> = [
     { label: 'elapsed', value: formatDuration(summary.durationMs) },
   ];
   if (session.throughput > 0) {
     perfRows.push({ label: 'throughput', value: `${session.throughput.toFixed(1)} files/s` });
   }
-  lines.push(...renderAlignedRows(perfRows, theme, symbols, width));
+  lines.push(...renderAlignedRows(perfRows, theme, symbols, width, R));
 
   // ── ANALYSIS ──
   const analysisRows: Array<{ label: string; value: string; color?: string }> = [];
@@ -148,18 +154,18 @@ export function renderFinalSummary(
     analysisRows.push({ label: 'packs', value: formatNumber(summary.knowledgePacksLoaded) });
   }
   if (analysisRows.length > 0) {
-    lines.push(` ${theme.ui.accent}ANALYSIS\x1b[0m`);
-    lines.push(...renderAlignedRows(analysisRows, theme, symbols, width));
+    lines.push(` ${theme.ui.accent}ANALYSIS${R}`);
+    lines.push(...renderAlignedRows(analysisRows, theme, symbols, width, R));
   }
 
   // ── OUTPUT ──
   if (outputFiles.length > 0) {
-    lines.push(` ${theme.ui.accent}OUTPUT\x1b[0m`);
-    lines.push(...renderOutputRows(outputFiles, theme, width));
+    lines.push(` ${theme.ui.accent}OUTPUT${R}`);
+    lines.push(...renderOutputRows(outputFiles, theme, width, R));
   }
 
   // ── NEXT ──
-  lines.push(` ${theme.ui.accent}NEXT\x1b[0m`);
+  lines.push(` ${theme.ui.accent}NEXT${R}`);
   // Commands are never truncated: the column fits the longest suggestion,
   // and the hint (secondary) is trimmed or dropped first.
   const commandWidth = Math.min(COMMAND_WIDTH, Math.max(LONGEST_COMMAND, width - 26));
@@ -173,12 +179,12 @@ export function renderFinalSummary(
           ? step.hint.slice(0, Math.max(1, hintWidth - symbols.ellipsis.length)) + symbols.ellipsis
           : step.hint;
     lines.push(
-      ` ${ROW_INDENT}${theme.ui.text}${command.padEnd(commandWidth)}\x1b[0m ${theme.ui.textDim}${hint}\x1b[0m`,
+      ` ${ROW_INDENT}${theme.ui.text}${command.padEnd(commandWidth)}${R} ${theme.ui.textDim}${hint}${R}`,
     );
   }
 
   // ── Footer divider ──
-  lines.push(` ${theme.ui.border}${horizontalDivider(width - 2)}\x1b[0m`);
+  lines.push(` ${theme.ui.border}${horizontalDivider(width - 2)}${R}`);
   lines.push('');
 
   return lines;
@@ -192,28 +198,25 @@ function renderResultHeader(
   theme: ReturnType<typeof getResolvedTheme>,
   symbols: ReturnType<typeof getSymbolSet>,
   width: number,
+  R: string,
 ): readonly string[] {
   const lines: string[] = [];
 
   if (cancelled) {
-    lines.push(
-      ` ${theme.status.warning}${symbols.warning}\x1b[0m ${theme.ui.text}Scan Cancelled\x1b[0m`,
-    );
+    lines.push(` ${theme.status.warning}${symbols.warning}${R} ${theme.ui.text}Scan Cancelled${R}`);
   } else if (summary.errors > 0) {
-    lines.push(` ${theme.status.error}${symbols.error}\x1b[0m ${theme.ui.text}Scan Failed\x1b[0m`);
+    lines.push(` ${theme.status.error}${symbols.error}${R} ${theme.ui.text}Scan Failed${R}`);
   } else {
-    lines.push(
-      ` ${theme.status.success}${symbols.success}\x1b[0m ${theme.ui.text}Scan Complete\x1b[0m`,
-    );
+    lines.push(` ${theme.status.success}${symbols.success}${R} ${theme.ui.text}Scan Complete${R}`);
     if (summary.warnings > 0) {
       const plural = summary.warnings === 1 ? 'warning' : 'warnings';
       lines.push(
-        ` ${theme.status.warning}${symbols.warning}\x1b[0m ${theme.ui.textDim}Completed with ${formatNumber(summary.warnings)} ${plural}\x1b[0m`,
+        ` ${theme.status.warning}${symbols.warning}${R} ${theme.ui.textDim}Completed with ${formatNumber(summary.warnings)} ${plural}${R}`,
       );
     }
   }
 
-  lines.push(` ${theme.ui.border}${horizontalDivider(width - 2)}\x1b[0m`);
+  lines.push(` ${theme.ui.border}${horizontalDivider(width - 2)}${R}`);
   lines.push('');
   return lines;
 }
@@ -226,23 +229,23 @@ function renderResultHeader(
  * Labels are dimmed and padded to a fixed column; values start at the same
  * column on every row. Values are short (numbers, percentages, risk), so a
  * width cap with an ellipsis is only a safety net for extreme widths.
- */
-function renderAlignedRows(
+ */ function renderAlignedRows(
   rows: ReadonlyArray<{ label: string; value: string; color?: string }>,
   theme: ReturnType<typeof getResolvedTheme>,
   symbols: ReturnType<typeof getSymbolSet>,
   width: number,
+  R: string,
 ): readonly string[] {
   const { labelWidth, valueWidth } = columnLayout(width);
 
   const lines: string[] = [];
   for (const row of rows) {
-    const prefix = `${ROW_INDENT}${theme.ui.textDim}${row.label.padEnd(labelWidth)}\x1b[0m  `;
+    const prefix = `${ROW_INDENT}${theme.ui.textDim}${row.label.padEnd(labelWidth)}${R}  `;
     const value =
       row.value.length <= valueWidth
         ? row.value
         : row.value.slice(0, Math.max(1, valueWidth - symbols.ellipsis.length)) + symbols.ellipsis;
-    lines.push(`${prefix}${row.color ?? theme.ui.text}${value}\x1b[0m`);
+    lines.push(`${prefix}${row.color ?? theme.ui.text}${value}${R}`);
   }
   return lines;
 }
@@ -274,6 +277,7 @@ function renderSeverityRows(
   summary: ScanSummary,
   theme: ReturnType<typeof getResolvedTheme>,
   symbols: ReturnType<typeof getSymbolSet>,
+  R: string,
 ): readonly string[] {
   const order: readonly SeverityLevel[] = ['critical', 'high', 'medium', 'low', 'info'];
   const rows: string[] = [];
@@ -284,7 +288,7 @@ function renderSeverityRows(
     const color = theme.severity[level];
     const indicator = levelSymbol(level, symbols);
     rows.push(
-      `   ${color}${indicator}\x1b[0m ${levelLabel(level).toLowerCase().padEnd(9)}${color}${formatNumber(count)}\x1b[0m`,
+      `   ${color}${indicator}${R} ${levelLabel(level).toLowerCase().padEnd(9)}${color}${formatNumber(count)}${R}`,
     );
   }
 
@@ -323,23 +327,24 @@ function renderOutputRows(
   files: readonly string[],
   theme: ReturnType<typeof getResolvedTheme>,
   width: number,
+  R: string,
 ): readonly string[] {
   const { labelWidth, valueColumn, valueWidth } = columnLayout(width);
   const continuation = ' '.repeat(valueColumn);
 
   const lines: string[] = [];
   for (const file of files) {
-    const prefix = `${ROW_INDENT}${theme.ui.textDim}${'report'.padEnd(labelWidth)}\x1b[0m  `;
+    const prefix = `${ROW_INDENT}${theme.ui.textDim}${'report'.padEnd(labelWidth)}${R}  `;
     if (file.length <= valueWidth) {
-      lines.push(`${prefix}${theme.ui.text}${file}\x1b[0m`);
+      lines.push(`${prefix}${theme.ui.text}${file}${R}`);
       continue;
     }
     const chunks = wrapText(file, valueWidth, '');
     chunks.forEach((chunk, index) => {
       lines.push(
         index === 0
-          ? `${prefix}${theme.ui.text}${chunk}\x1b[0m`
-          : ` ${continuation}${theme.ui.text}${chunk}\x1b[0m`,
+          ? `${prefix}${theme.ui.text}${chunk}${R}`
+          : ` ${continuation}${theme.ui.text}${chunk}${R}`,
       );
     });
   }

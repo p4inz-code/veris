@@ -20,7 +20,7 @@
 import { ExitCode, type ExitCodeValue } from '../wirer.js';
 
 import { getSymbolSet } from './renderer/index.js';
-import { getResolvedTheme } from './theme/index.js';
+import { getResolvedTheme, ansiReset } from './theme/index.js';
 
 /** Context available when formatting a top-level error. */
 export interface CliErrorContext {
@@ -63,7 +63,7 @@ export function formatCliError(
   const symbols = getSymbolSet();
   const message = error instanceof Error ? error.message : String(error);
   // Reset is only emitted when color is active — no-color output is clean.
-  const R = theme.ui.text !== '' ? '\x1b[0m' : '';
+  const R = ansiReset();
 
   const lines: string[] = [];
   lines.push(`${theme.status.error}${symbols.error}${R} ${theme.ui.text}${message}${R}`);

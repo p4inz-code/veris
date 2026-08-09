@@ -26,7 +26,7 @@
  */
 
 import { getSymbolSet } from '../../ui/renderer/index.js';
-import { getResolvedTheme } from '../../ui/theme/index.js';
+import { getResolvedTheme, ansiReset } from '../../ui/theme/index.js';
 import type { StageState, StageStatus } from '../scan-session.js';
 
 /** Options for pipeline visualization. */
@@ -107,12 +107,13 @@ export function renderPipelineVisualization(
 ): readonly string[] {
   const theme = getResolvedTheme();
   const symbols = getSymbolSet();
+  const R = ansiReset();
   const ascii = symbols.hLine === '-';
   const { showItems = false, width, title } = options;
 
   const lines: string[] = [];
   if (title) {
-    lines.push(` ${theme.ui.accent}${title}\x1b[0m`);
+    lines.push(` ${theme.ui.accent}${title}${R}`);
   }
 
   for (const phase of PIPELINE_PHASES) {
@@ -122,12 +123,12 @@ export function renderPipelineVisualization(
     // Wide enough for the longest ASCII tag row: "  [done] Discover" (16 cols).
     const maxWidth = Math.max(16, (width ?? 80) - 4);
 
-    let row = `  ${color}${marker}\x1b[0m ${theme.ui.text}${phase.label}\x1b[0m`;
+    let row = `  ${color}${marker}${R} ${theme.ui.text}${phase.label}${R}`;
 
     if (showItems && status === 'completed') {
       const items = phaseItems(stages, phase);
       if (items > 0) {
-        row += `  ${theme.ui.textDim}${formatNumber(items)} items\x1b[0m`;
+        row += `  ${theme.ui.textDim}${formatNumber(items)} items${R}`;
       }
     }
 

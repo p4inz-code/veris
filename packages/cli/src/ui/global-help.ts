@@ -21,7 +21,7 @@ import { CLI_VERSION } from '../wirer.js';
 import { getSymbolSet } from './renderer/index.js';
 import { horizontalDivider } from './styles/index.js';
 import { detectTerminal } from './terminal/index.js';
-import { getResolvedTheme } from './theme/index.js';
+import { getResolvedTheme, ansiReset } from './theme/index.js';
 import { wrapText } from './utilities/index.js';
 
 /** Maximum help width in characters. */
@@ -125,8 +125,7 @@ export function renderGlobalHelp(widthOverride?: number): readonly string[] {
   const theme = getResolvedTheme();
   const symbols = getSymbolSet();
   const width = Math.min(widthOverride ?? caps.width, MAX_WIDTH);
-  const color = theme.ui.brand !== ''; // colors resolve to '' only when disabled
-  const R = color ? '\x1b[0m' : ''; // reset — only emitted when color is active
+  const R = ansiReset(); // reset — only emitted when color is active
   const separator = symbols.separator === '-' ? '-' : '—';
 
   const lines: string[] = [];

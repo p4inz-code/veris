@@ -13,6 +13,7 @@ export {
   getResolvedTheme,
   getSeverityColor,
   getStatusColor,
+  ansiReset,
   severityFromScore,
   type SeverityLevel,
   SEVERITY_ORDER,

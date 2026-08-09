@@ -20,7 +20,7 @@
 import { getSymbolSet, type SymbolSet } from '../../ui/renderer/index.js';
 import { horizontalDivider } from '../../ui/styles/index.js';
 import { detectTerminal, type TerminalCapabilities } from '../../ui/terminal/index.js';
-import { getResolvedTheme, type ResolvedTheme } from '../../ui/theme/index.js';
+import { getResolvedTheme, ansiReset, type ResolvedTheme } from '../../ui/theme/index.js';
 import { wrapText } from '../../ui/utilities/index.js';
 import { CLI_VERSION } from '../../wirer.js';
 import type { ScanConfig } from '../scan-session.js';
@@ -76,6 +76,7 @@ export function renderStartupScreen(
   const caps = detectTerminal();
   const theme = getResolvedTheme();
   const symbols = getSymbolSet();
+  const R = ansiReset();
   const width = Math.min(caps.width, MAX_WIDTH);
   const unicode = isUnicodeSymbols(symbols);
 
@@ -88,24 +89,24 @@ export function renderStartupScreen(
   lines.push('');
 
   // ── Banner ──
-  lines.push(...renderBanner(theme, symbols));
+  lines.push(...renderBanner(theme, symbols, R));
 
   // ── Identity ──
   const identity = `VERIS v${version}  ${dash(unicode)} Deterministic Security Analysis Platform`;
-  lines.push(...wrapText(` ${theme.ui.text}${identity}\x1b[0m`, width - 1, ' '));
+  lines.push(...wrapText(` ${theme.ui.text}${identity}${R}`, width - 1, ' '));
 
   const meta = [`Node ${nodeVersion}`, platform, terminal, describeColor(caps)].join(
     separator(unicode),
   );
-  lines.push(...wrapText(` ${theme.ui.textDim}${meta}\x1b[0m`, width - 1, ' '));
+  lines.push(...wrapText(` ${theme.ui.textDim}${meta}${R}`, width - 1, ' '));
   lines.push('');
 
   // ── Divider ──
-  lines.push(` ${theme.ui.border}${horizontalDivider(width - 2)}\x1b[0m`);
+  lines.push(` ${theme.ui.border}${horizontalDivider(width - 2)}${R}`);
   lines.push('');
 
   // ── Configuration ──
-  lines.push(` ${theme.ui.accent}Configuration\x1b[0m`);
+  lines.push(` ${theme.ui.accent}Configuration${R}`);
   const configRows: Array<{ label: string; value: string }> = [
     { label: 'Target', value: config.target },
     { label: 'Preset', value: config.preset },
@@ -121,7 +122,7 @@ export function renderStartupScreen(
   lines.push('');
 
   // ── Engines ──
-  lines.push(` ${theme.ui.accent}Engines\x1b[0m`);
+  lines.push(` ${theme.ui.accent}Engines${R}`);
   const engineRows: Array<{ label: string; value: string }> = [
     {
       label: 'Analyzers',
@@ -138,9 +139,9 @@ export function renderStartupScreen(
   lines.push('');
 
   // ── Divider + starting indicator ──
-  lines.push(` ${theme.ui.border}${horizontalDivider(width - 2)}\x1b[0m`);
+  lines.push(` ${theme.ui.border}${horizontalDivider(width - 2)}${R}`);
   lines.push('');
-  lines.push(` ${theme.ui.accent}${symbols.arrow}\x1b[0m ${theme.ui.text}Starting scan...\x1b[0m`);
+  lines.push(` ${theme.ui.accent}${symbols.arrow}${R} ${theme.ui.text}Starting scan...${R}`);
   lines.push('');
 
   return lines;
@@ -154,13 +155,13 @@ export function renderStartupScreen(
  * Uses the Unicode block logo when the terminal supports Unicode and falls
  * back to a spaced ASCII wordmark otherwise.
  */
-function renderBanner(theme: ResolvedTheme, symbols: SymbolSet): readonly string[] {
+function renderBanner(theme: ResolvedTheme, symbols: SymbolSet, R: string): readonly string[] {
   const brand = theme.ui.brand;
 
   if (!isUnicodeSymbols(symbols)) {
     // ASCII wordmark — minimal, professional, safe on every terminal.
     // The tagline follows on the identity line below, so keep this clean.
-    return [` ${brand}V E R I S\x1b[0m`];
+    return [` ${brand}V E R I S${R}`];
   }
 
   const LOGO = [
@@ -172,7 +173,7 @@ function renderBanner(theme: ResolvedTheme, symbols: SymbolSet): readonly string
     '  ╚═══╝  ╚══════╝╚═╝  ╚═╝╚═╝╚══════╝',
   ];
 
-  return LOGO.map((line) => ` ${brand}${line}\x1b[0m`);
+  return LOGO.map((line) => ` ${brand}${line}${R}`);
 }
 
 // ── Key/Value Rows ──
@@ -194,8 +195,9 @@ function renderKeyValueRows(
   const continuation = ' '.repeat(valueColumn);
 
   const lines: string[] = [];
+  const R = ansiReset();
   for (const row of rows) {
-    const prefix = `${ROW_INDENT}${theme.ui.textDim}${row.label.padEnd(LABEL_WIDTH)}\x1b[0m  `;
+    const prefix = `${ROW_INDENT}${theme.ui.textDim}${row.label.padEnd(LABEL_WIDTH)}${R}  `;
     if (row.value.length <= valueWidth) {
       lines.push(`${prefix}${row.value}`);
       continue;

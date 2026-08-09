@@ -12,11 +12,10 @@
  */
 
 import { getSymbolSet } from '../../ui/renderer/index.js';
-import { getResolvedTheme } from '../../ui/theme/index.js';
+import { getResolvedTheme, ansiReset } from '../../ui/theme/index.js';
 import type { HealthIssue } from '../scan-session.js';
 
 import type { ErrorInfo } from './renderer.js';
-
 
 // ── Error Code Registry ──
 
@@ -115,7 +114,7 @@ export function getErrorDefinition(code: string): ErrorDefinition {
  */
 export function formatError(error: ErrorInfo, verbose?: boolean): string {
   const theme = getResolvedTheme();
-  const symbols = getSymbolSet();
+  const R = ansiReset();
   const def = getErrorDefinition(error.code);
 
   const lines: string[] = [];
@@ -128,23 +127,23 @@ export function formatError(error: ErrorInfo, verbose?: boolean): string {
         ? theme.status.error
         : theme.status.warning;
   const severityLabel = def.severity.toUpperCase();
-  lines.push(`  ${severityColor}${severityLabel}\\x1b[0m ${def.problem}`);
+  lines.push(`  ${severityColor}${severityLabel}${R} ${def.problem}`);
 
   // Reason
-  lines.push(`    ${theme.ui.textDim}Reason: ${error.reason ?? def.reason}\\x1b[0m`);
+  lines.push(`    ${theme.ui.textDim}Reason: ${error.reason ?? def.reason}${R}`);
 
   // Action
-  lines.push(`    ${theme.ui.textDim}Action: ${error.action ?? def.action}\\x1b[0m`);
+  lines.push(`    ${theme.ui.textDim}Action: ${error.action ?? def.action}${R}`);
 
   // File path if available
   if (error.artifactPath) {
-    lines.push(`    ${theme.ui.textDim}File: ${error.artifactPath}\\x1b[0m`);
+    lines.push(`    ${theme.ui.textDim}File: ${error.artifactPath}${R}`);
   }
 
   // Stack trace only in verbose mode
   if (verbose && error.stackTrace) {
     lines.push('');
-    lines.push(`    ${theme.ui.textDim}Stack:\\x1b[0m`);
+    lines.push(`    ${theme.ui.textDim}Stack:${R}`);
     for (const stackLine of error.stackTrace.split('\n')) {
       lines.push(`      ${stackLine}`);
     }
@@ -176,6 +175,7 @@ export function formatHealthIssue(issue: HealthIssue, verbose?: boolean): string
 export function formatErrorLine(error: ErrorInfo): string {
   const theme = getResolvedTheme();
   const symbols = getSymbolSet();
+  const R = ansiReset();
   const def = getErrorDefinition(error.code);
 
   const color =
@@ -186,7 +186,7 @@ export function formatErrorLine(error: ErrorInfo): string {
         : theme.status.warning;
 
   const path = error.artifactPath ? ` (${error.artifactPath})` : '';
-  return `${color}${symbols.error}\\x1b[0m ${def.problem}${path}`;
+  return `${color}${symbols.error}${R} ${def.problem}${path}`;
 }
 
 /**

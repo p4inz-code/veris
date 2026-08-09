@@ -29,7 +29,7 @@ import {
 
 import { getSymbolSet } from '../ui/renderer/index.js';
 import { horizontalDivider } from '../ui/styles/index.js';
-import { getResolvedTheme } from '../ui/theme/index.js';
+import { getResolvedTheme, ansiReset } from '../ui/theme/index.js';
 import { ExitCode } from '../wirer.js';
 
 // ── Help Text ──
@@ -122,30 +122,28 @@ async function cmdList(args: readonly string[]): Promise<{ exitCode: number }> {
 
   // Header
   const theme = getResolvedTheme();
-  const symbols = getSymbolSet();
+  const R = ansiReset();
   const divider = horizontalDivider(60);
 
   process.stdout.write(
-    `\n ${theme.ui.accent}Packs\x1b[0m  ${theme.ui.text}${packs.length} loaded\x1b[0m\n`,
+    `\n ${theme.ui.accent}Packs${R}  ${theme.ui.text}${packs.length} loaded${R}\n`,
   );
   process.stdout.write(` ${divider}\n`);
 
   // Summary line
-  process.stdout.write(`   ${theme.ui.textDim}Entries\x1b[0m    ${countAllEntries(registry)}\n`);
-  process.stdout.write(`   ${theme.ui.textDim}Categories\x1b[0m  ${countCategories(packs)}\n`);
+  process.stdout.write(`   ${theme.ui.textDim}Entries${R}    ${countAllEntries(registry)}\n`);
+  process.stdout.write(`   ${theme.ui.textDim}Categories${R}  ${countCategories(packs)}\n`);
   if (diag.totalErrors > 0)
-    process.stdout.write(`   ${theme.status.error}Errors\x1b[0m      ${diag.totalErrors}\n`);
+    process.stdout.write(`   ${theme.status.error}Errors${R}      ${diag.totalErrors}\n`);
   if (diag.totalWarnings > 0)
-    process.stdout.write(`   ${theme.status.warning}Warnings\x1b[0m    ${diag.totalWarnings}\n`);
+    process.stdout.write(`   ${theme.status.warning}Warnings${R}    ${diag.totalWarnings}\n`);
   process.stdout.write('\n');
 
   // Pack list table
   const headerId = 'ID'.padEnd(28);
   const headerVer = 'Version'.padEnd(14);
   const headerEnt = 'Entries'.padEnd(10);
-  process.stdout.write(
-    `  ${theme.ui.textDim}${headerId}${headerVer}${headerEnt}Categories\x1b[0m\n`,
-  );
+  process.stdout.write(`  ${theme.ui.textDim}${headerId}${headerVer}${headerEnt}Categories${R}\n`);
   process.stdout.write(` ${divider}\n`);
 
   for (const meta of packs) {
@@ -196,60 +194,55 @@ async function cmdInfo(args: readonly string[]): Promise<{ exitCode: number }> {
   const isVerbose = args.includes('--verbose');
 
   const theme = getResolvedTheme();
+  const R = ansiReset();
   const symbols = getSymbolSet();
   const divider = horizontalDivider(60);
 
   // Pack header
-  process.stdout.write(`\n ${theme.ui.accent}${meta.name}\x1b[0m\n`);
+  process.stdout.write(`\n ${theme.ui.accent}${meta.name}${R}\n`);
   process.stdout.write(` ${divider}\n`);
 
   // Basic info
-  process.stdout.write(`   ${theme.ui.highlight}ID\x1b[0m          ${meta.id}\n`);
-  process.stdout.write(`   ${theme.ui.highlight}Version\x1b[0m     ${meta.version}\n`);
-  process.stdout.write(`   ${theme.ui.highlight}Author\x1b[0m      ${meta.author}\n`);
-  process.stdout.write(`   ${theme.ui.highlight}License\x1b[0m     ${meta.license}\n`);
-  process.stdout.write(`   ${theme.ui.highlight}Source\x1b[0m      ${meta.source}\n`);
+  process.stdout.write(`   ${theme.ui.highlight}ID${R}          ${meta.id}\n`);
+  process.stdout.write(`   ${theme.ui.highlight}Version${R}     ${meta.version}\n`);
+  process.stdout.write(`   ${theme.ui.highlight}Author${R}      ${meta.author}\n`);
+  process.stdout.write(`   ${theme.ui.highlight}License${R}     ${meta.license}\n`);
+  process.stdout.write(`   ${theme.ui.highlight}Source${R}      ${meta.source}\n`);
+  process.stdout.write(`   ${theme.ui.highlight}Veris${R}       ${meta.supportedVerisVersion}\n`);
+  process.stdout.write(`   ${theme.ui.highlight}Created${R}     ${meta.createdAt.split('T')[0]}\n`);
+  process.stdout.write(`   ${theme.ui.highlight}Updated${R}     ${meta.updatedAt.split('T')[0]}\n`);
+  process.stdout.write(`   ${theme.ui.highlight}Entries${R}     ${pack.entries.length}\n`);
   process.stdout.write(
-    `   ${theme.ui.highlight}Veris\x1b[0m       ${meta.supportedVerisVersion}\n`,
-  );
-  process.stdout.write(
-    `   ${theme.ui.highlight}Created\x1b[0m     ${meta.createdAt.split('T')[0]}\n`,
-  );
-  process.stdout.write(
-    `   ${theme.ui.highlight}Updated\x1b[0m     ${meta.updatedAt.split('T')[0]}\n`,
-  );
-  process.stdout.write(`   ${theme.ui.highlight}Entries\x1b[0m     ${pack.entries.length}\n`);
-  process.stdout.write(
-    `   ${theme.ui.highlight}Content\x1b[0m     ${pack.contentHash.slice(0, 16)}...\n`,
+    `   ${theme.ui.highlight}Content${R}     ${pack.contentHash.slice(0, 16)}...\n`,
   );
   process.stdout.write('\n');
 
   // Description
-  process.stdout.write(` ${theme.ui.accent}Description\x1b[0m\n`);
+  process.stdout.write(` ${theme.ui.accent}Description${R}\n`);
   process.stdout.write(`   ${meta.description}\n`);
   process.stdout.write('\n');
 
   // Categories
-  process.stdout.write(` ${theme.ui.accent}Categories\x1b[0m\n`);
+  process.stdout.write(` ${theme.ui.accent}Categories${R}\n`);
   process.stdout.write(`   ${meta.categories.join(', ')}\n`);
   process.stdout.write('\n');
 
   // Tags
   if (meta.tags.length > 0) {
-    process.stdout.write(` ${theme.ui.accent}Tags\x1b[0m\n`);
+    process.stdout.write(` ${theme.ui.accent}Tags${R}\n`);
     process.stdout.write(`   ${meta.tags.join(', ')}\n`);
     process.stdout.write('\n');
   }
 
   // Dependencies
   if (meta.dependencies.length > 0) {
-    process.stdout.write(` ${theme.ui.accent}Dependencies\x1b[0m\n`);
+    process.stdout.write(` ${theme.ui.accent}Dependencies${R}\n`);
     for (const dep of meta.dependencies) {
       const satisfied = registry.resolveDependencies(dep.id).satisfied;
       const statusSym = satisfied ? symbols.success : symbols.error;
       const statusColor = satisfied ? theme.status.success : theme.status.error;
       process.stdout.write(
-        `   ${statusColor}${statusSym}\x1b[0m ${dep.id}@${dep.version}${dep.optional ? ` ${theme.ui.textDim}(optional)\x1b[0m` : ''}\n`,
+        `   ${statusColor}${statusSym}${R} ${dep.id}@${dep.version}${dep.optional ? ` ${theme.ui.textDim}(optional)${R}` : ''}\n`,
       );
     }
     process.stdout.write('\n');
@@ -257,17 +250,17 @@ async function cmdInfo(args: readonly string[]): Promise<{ exitCode: number }> {
 
   // References
   if (meta.references.length > 0) {
-    process.stdout.write(` ${theme.ui.accent}References\x1b[0m\n`);
+    process.stdout.write(` ${theme.ui.accent}References${R}\n`);
     for (const ref of meta.references) {
       process.stdout.write(`   ${symbols.bullet} ${ref.label} (${ref.source})\n`);
-      process.stdout.write(`     ${theme.ui.textDim}${ref.url}\x1b[0m\n`);
+      process.stdout.write(`     ${theme.ui.textDim}${ref.url}${R}\n`);
     }
     process.stdout.write('\n');
   }
 
   // Entries section (detail in verbose mode, summary otherwise)
   process.stdout.write(
-    ` ${theme.ui.accent}Entries\x1b[0m  ${theme.ui.text}${pack.entries.length}\x1b[0m\n`,
+    ` ${theme.ui.accent}Entries${R}  ${theme.ui.text}${pack.entries.length}${R}\n`,
   );
 
   // Group by category
@@ -280,7 +273,7 @@ async function cmdInfo(args: readonly string[]): Promise<{ exitCode: number }> {
 
   for (const [cat, entries] of byCategory) {
     process.stdout.write(
-      `    ${theme.ui.textDim}${cat}\x1b[0m  ${theme.ui.text}${entries.length}\x1b[0m\n`,
+      `    ${theme.ui.textDim}${cat}${R}  ${theme.ui.text}${entries.length}${R}\n`,
     );
     if (isVerbose) {
       for (const entry of entries) {
@@ -288,22 +281,22 @@ async function cmdInfo(args: readonly string[]): Promise<{ exitCode: number }> {
           theme.severity[entry.severity.toLowerCase() as keyof typeof theme.severity] ??
           theme.severity.info;
         process.stdout.write(
-          `      ${symbols.bullet} ${entry.name} ${sevColor}[${entry.severity}]\x1b[0m\n`,
+          `      ${symbols.bullet} ${entry.name} ${sevColor}[${entry.severity}]${R}\n`,
         );
         process.stdout.write(
           `        ${entry.description.slice(0, 120)}${entry.description.length > 120 ? '...' : ''}\n`,
         );
         process.stdout.write(
-          `        ${theme.ui.textDim}Indicators\x1b[0m: ${entry.indicators.length}\n`,
+          `        ${theme.ui.textDim}Indicators${R}: ${entry.indicators.length}\n`,
         );
         if (entry.references.length > 0) {
           process.stdout.write(
-            `        ${theme.ui.textDim}References\x1b[0m: ${entry.references.length}\n`,
+            `        ${theme.ui.textDim}References${R}: ${entry.references.length}\n`,
           );
         }
         if (entry.mitreTechniques.length > 0) {
           process.stdout.write(
-            `        ${theme.ui.textDim}MITRE\x1b[0m: ${entry.mitreTechniques.join(', ')}\n`,
+            `        ${theme.ui.textDim}MITRE${R}: ${entry.mitreTechniques.join(', ')}\n`,
           );
         }
       }
@@ -313,7 +306,7 @@ async function cmdInfo(args: readonly string[]): Promise<{ exitCode: number }> {
           theme.severity[entry.severity.toLowerCase() as keyof typeof theme.severity] ??
           theme.severity.info;
         process.stdout.write(
-          `      ${symbols.bullet} ${entry.name} ${sevColor}[${entry.severity}]\x1b[0m\n`,
+          `      ${symbols.bullet} ${entry.name} ${sevColor}[${entry.severity}]${R}\n`,
         );
         process.stdout.write(
           `        ${entry.description.slice(0, 80)}${entry.description.length > 80 ? '...' : ''}\n`,
@@ -355,11 +348,12 @@ async function cmdValidate(args: readonly string[]): Promise<{ exitCode: number 
   }
 
   const theme = getResolvedTheme();
+  const R = ansiReset();
   const symbols = getSymbolSet();
   const divider = horizontalDivider(60);
 
   process.stdout.write(
-    `\n ${theme.ui.accent}Validate\x1b[0m  ${theme.ui.text}${files.length} file(s) from ${targetPath}\x1b[0m\n`,
+    `\n ${theme.ui.accent}Validate${R}  ${theme.ui.text}${files.length} file(s) from ${targetPath}${R}\n`,
   );
   process.stdout.write(` ${divider}\n`);
 
@@ -376,13 +370,13 @@ async function cmdValidate(args: readonly string[]): Promise<{ exitCode: number 
 
       if (result.valid) {
         totalPassed++;
-        process.stdout.write(`  ${theme.status.success}${symbols.success}\x1b[0m ${fileName}\n`);
+        process.stdout.write(`  ${theme.status.success}${symbols.success}${R} ${fileName}\n`);
       } else {
         totalFailed++;
-        process.stdout.write(`  ${theme.status.error}${symbols.error}\x1b[0m ${fileName}\n`);
+        process.stdout.write(`  ${theme.status.error}${symbols.error}${R} ${fileName}\n`);
         for (const error of result.errors) {
           process.stdout.write(
-            `    ${theme.status.error}Error\x1b[0m [${error.code}]: ${error.message}\n`,
+            `    ${theme.status.error}Error${R} [${error.code}]: ${error.message}\n`,
           );
         }
       }
@@ -390,20 +384,20 @@ async function cmdValidate(args: readonly string[]): Promise<{ exitCode: number 
       for (const warning of result.warnings) {
         totalWarnings++;
         if (isStrict) {
-          process.stdout.write(`    ${theme.status.error}${symbols.error}\x1b[0m ${warning}\n`);
+          process.stdout.write(`    ${theme.status.error}${symbols.error}${R} ${warning}\n`);
         } else {
-          process.stdout.write(`    ${theme.status.warning}${symbols.warning}\x1b[0m ${warning}\n`);
+          process.stdout.write(`    ${theme.status.warning}${symbols.warning}${R} ${warning}\n`);
         }
       }
 
       if (!isStrict && result.valid && result.warnings.length === 0) {
-        process.stdout.write(`    ${theme.ui.textDim}All checks passed.\x1b[0m\n`);
+        process.stdout.write(`    ${theme.ui.textDim}All checks passed.${R}\n`);
       }
     } catch (err) {
       totalFailed++;
-      process.stdout.write(`  ${theme.status.error}${symbols.error}\x1b[0m ${fileName}\n`);
+      process.stdout.write(`  ${theme.status.error}${symbols.error}${R} ${fileName}\n`);
       process.stdout.write(
-        `    ${theme.status.error}Error\x1b[0m: ${err instanceof Error ? err.message : String(err)}\n`,
+        `    ${theme.status.error}Error${R}: ${err instanceof Error ? err.message : String(err)}\n`,
       );
     }
     process.stdout.write('\n');
@@ -413,12 +407,12 @@ async function cmdValidate(args: readonly string[]): Promise<{ exitCode: number 
   process.stdout.write(` ${divider}\n`);
   const resultColor = totalFailed > 0 ? theme.status.error : theme.status.success;
   process.stdout.write(
-    ` ${resultColor}Result\x1b[0m: ${totalPassed} passed, ${totalFailed} failed, ${totalWarnings} warnings\n`,
+    ` ${resultColor}Result${R}: ${totalPassed} passed, ${totalFailed} failed, ${totalWarnings} warnings\n`,
   );
 
   if (totalFailed > 0 && isStrict) {
     process.stdout.write(
-      ` ${theme.ui.textDim}Exit code: 3 (strict mode \u2014 failures detected)\x1b[0m\n`,
+      ` ${theme.ui.textDim}Exit code: 3 (strict mode \u2014 failures detected)${R}\n`,
     );
   }
   process.stdout.write('\n');
@@ -450,11 +444,12 @@ async function cmdVerify(args: readonly string[]): Promise<{ exitCode: number }>
   }
 
   const theme = getResolvedTheme();
+  const R = ansiReset();
   const symbols = getSymbolSet();
   const divider = horizontalDivider(60);
 
   process.stdout.write(
-    `\n ${theme.ui.accent}Verify\x1b[0m  ${theme.ui.text}${files.length} pack file(s)\x1b[0m\n`,
+    `\n ${theme.ui.accent}Verify${R}  ${theme.ui.text}${files.length} pack file(s)${R}\n`,
   );
   process.stdout.write(` ${divider}\n`);
 
@@ -469,7 +464,7 @@ async function cmdVerify(args: readonly string[]): Promise<{ exitCode: number }>
 
       if (!raw.metadata) {
         process.stdout.write(
-          `  ${theme.status.error}${symbols.error}\x1b[0m ${fileName} \u2014 missing metadata\n`,
+          `  ${theme.status.error}${symbols.error}${R} ${fileName} \u2014 missing metadata\n`,
         );
         failed++;
         continue;
@@ -488,17 +483,17 @@ async function cmdVerify(args: readonly string[]): Promise<{ exitCode: number }>
         const valid = validateChecksum(content, checksumField);
         if (valid) {
           process.stdout.write(
-            `    ${theme.status.success}${symbols.success}\x1b[0m Checksum verified\n`,
+            `    ${theme.status.success}${symbols.success}${R} Checksum verified\n`,
           );
         } else {
           process.stdout.write(
-            `    ${theme.status.error}${symbols.error}\x1b[0m Checksum MISMATCH (expected: ${checksumField})\n`,
+            `    ${theme.status.error}${symbols.error}${R} Checksum MISMATCH (expected: ${checksumField})\n`,
           );
           failed++;
         }
       } else {
         process.stdout.write(
-          `    ${theme.status.warning}${symbols.warning}\x1b[0m No checksum field to verify\n`,
+          `    ${theme.status.warning}${symbols.warning}${R} No checksum field to verify\n`,
         );
       }
 
@@ -506,7 +501,7 @@ async function cmdVerify(args: readonly string[]): Promise<{ exitCode: number }>
       const entries = raw.entries;
       if (entries && entries.length > 0) {
         process.stdout.write(
-          `    ${theme.status.success}${symbols.success}\x1b[0m ${entries.length} entries\n`,
+          `    ${theme.status.success}${symbols.success}${R} ${entries.length} entries\n`,
         );
 
         // Check for duplicate IDs
@@ -518,20 +513,20 @@ async function cmdVerify(args: readonly string[]): Promise<{ exitCode: number }>
         }
         if (dupCount > 0) {
           process.stdout.write(
-            `    ${theme.status.error}${symbols.error}\x1b[0m ${dupCount} duplicate entry ID(s) found\n`,
+            `    ${theme.status.error}${symbols.error}${R} ${dupCount} duplicate entry ID(s) found\n`,
           );
           failed++;
         }
       } else {
         process.stdout.write(
-          `    ${theme.status.warning}${symbols.warning}\x1b[0m No entries found\n`,
+          `    ${theme.status.warning}${symbols.warning}${R} No entries found\n`,
         );
       }
 
       passed++;
     } catch (err) {
       process.stdout.write(
-        `  ${theme.status.error}${symbols.error}\x1b[0m ${fileName} \u2014 ${err instanceof Error ? err.message : String(err)}\n`,
+        `  ${theme.status.error}${symbols.error}${R} ${fileName} \u2014 ${err instanceof Error ? err.message : String(err)}\n`,
       );
       failed++;
     }
@@ -540,9 +535,7 @@ async function cmdVerify(args: readonly string[]): Promise<{ exitCode: number }>
 
   process.stdout.write(` ${divider}\n`);
   const finalColor = failed > 0 ? theme.status.error : theme.status.success;
-  process.stdout.write(
-    ` ${finalColor}Result\x1b[0m: ${passed - failed} verified, ${failed} failed\n`,
-  );
+  process.stdout.write(` ${finalColor}Result${R}: ${passed - failed} verified, ${failed} failed\n`);
   process.stdout.write('\n');
 
   return { exitCode: failed > 0 ? 3 : ExitCode.SUCCESS };
@@ -559,44 +552,43 @@ async function cmdDoctor(args: readonly string[]): Promise<{ exitCode: number }>
   }
 
   const theme = getResolvedTheme();
+  const R = ansiReset();
   const symbols = getSymbolSet();
   const divider = horizontalDivider(60);
   const packDir = findPackDirectory(args);
 
-  process.stdout.write(`\n ${theme.ui.accent}Diagnostics\x1b[0m\n`);
+  process.stdout.write(`\n ${theme.ui.accent}Diagnostics${R}\n`);
   process.stdout.write(` ${divider}\n`);
 
   // Check 1: Pack directory
   const resolvedDir = path.resolve(packDir);
   const dirExists = fs.existsSync(resolvedDir);
-  process.stdout.write(`\n   ${theme.ui.highlight}Pack directory\x1b[0m  ${resolvedDir}\n`);
+  process.stdout.write(`\n   ${theme.ui.highlight}Pack directory${R}  ${resolvedDir}\n`);
   process.stdout.write(
-    `   ${theme.ui.highlight}Status\x1b[0m        ${dirExists ? `${theme.status.success}${symbols.success} Found\x1b[0m` : `${theme.status.error}${symbols.error} Not found\x1b[0m`}\n`,
+    `   ${theme.ui.highlight}Status${R}        ${dirExists ? `${theme.status.success}${symbols.success} Found${R}` : `${theme.status.error}${symbols.error} Not found${R}`}\n`,
   );
 
   if (!dirExists) {
     process.stdout.write(
-      `\n   ${theme.ui.textDim}Recommendation: Create pack directory or specify --path.\x1b[0m\n`,
+      `\n   ${theme.ui.textDim}Recommendation: Create pack directory or specify --path.${R}\n`,
     );
-    process.stdout.write(`   ${theme.ui.textDim}Default pack directory: ./packs/\x1b[0m\n`);
+    process.stdout.write(`   ${theme.ui.textDim}Default pack directory: ./packs/${R}\n`);
     return { exitCode: ExitCode.NOT_FOUND };
   }
 
   // Check 2: Discover pack files
   const packFiles = collectPackFiles(resolvedDir);
-  process.stdout.write(
-    `\n   ${theme.ui.highlight}Pack files\x1b[0m    ${packFiles.length} found\n`,
-  );
+  process.stdout.write(`\n   ${theme.ui.highlight}Pack files${R}    ${packFiles.length} found\n`);
   if (packFiles.length === 0) {
     process.stdout.write(
-      `   ${theme.ui.textDim}Expected files with .veris-pack.json extension.\x1b[0m\n`,
+      `   ${theme.ui.textDim}Expected files with .veris-pack.json extension.${R}\n`,
     );
     process.stdout.write('\n');
     return { exitCode: ExitCode.SUCCESS };
   }
 
   // Check 3: Load packs
-  process.stdout.write(`\n   ${theme.ui.highlight}Loading\x1b[0m\n`);
+  process.stdout.write(`\n   ${theme.ui.highlight}Loading${R}\n`);
   const registry = await loadPacksFromDirectory(resolvedDir);
   const loadedPacks = registry.listWithMetadata();
   const failedPacks = registry.getFailedPacks();
@@ -604,14 +596,14 @@ async function cmdDoctor(args: readonly string[]): Promise<{ exitCode: number }>
   const conflicts = registry.detectConflicts();
 
   process.stdout.write(
-    `    ${theme.ui.text}Loaded\x1b[0m: ${loadedPacks.length}/${packFiles.length}\n`,
+    `    ${theme.ui.text}Loaded${R}: ${loadedPacks.length}/${packFiles.length}\n`,
   );
   if (failedPacks.size > 0) {
-    process.stdout.write(`    ${theme.status.error}Failed\x1b[0m: ${failedPacks.size}\n`);
+    process.stdout.write(`    ${theme.status.error}Failed${R}: ${failedPacks.size}\n`);
     for (const [id, errors] of failedPacks) {
       for (const err of errors) {
         process.stdout.write(
-          `      ${theme.status.error}${symbols.error}\x1b[0m ${id}: [${err.code}] ${err.message}\n`,
+          `      ${theme.status.error}${symbols.error}${R} ${id}: [${err.code}] ${err.message}\n`,
         );
       }
     }
@@ -620,40 +612,40 @@ async function cmdDoctor(args: readonly string[]): Promise<{ exitCode: number }>
   // Check 4: Version conflicts
   if (conflicts.length > 0) {
     process.stdout.write(
-      `\n   ${theme.status.warning}${symbols.warning}\x1b[0m Version conflicts detected:\n`,
+      `\n   ${theme.status.warning}${symbols.warning}${R} Version conflicts detected:\n`,
     );
     for (const conflict of conflicts) {
-      process.stdout.write(`      ${theme.status.error}${symbols.error}\x1b[0m ${conflict}\n`);
+      process.stdout.write(`      ${theme.status.error}${symbols.error}${R} ${conflict}\n`);
     }
   } else {
     process.stdout.write(
-      `\n   ${theme.status.success}${symbols.success}\x1b[0m No version conflicts\n`,
+      `\n   ${theme.status.success}${symbols.success}${R} No version conflicts\n`,
     );
   }
 
   // Check 5: Dependency resolution
   if (loadedPacks.length > 0) {
-    process.stdout.write(`\n   ${theme.ui.highlight}Dependencies\x1b[0m\n`);
+    process.stdout.write(`\n   ${theme.ui.highlight}Dependencies${R}\n`);
     let depIssues = 0;
     for (const meta of loadedPacks) {
       const depResult = registry.resolveDependencies(meta.id);
       if (!depResult.satisfied) {
         depIssues++;
         process.stdout.write(
-          `    ${theme.status.warning}${symbols.warning}\x1b[0m ${meta.id}: missing dependencies \u2014 ${depResult.missing.join(', ')}\n`,
+          `    ${theme.status.warning}${symbols.warning}${R} ${meta.id}: missing dependencies \u2014 ${depResult.missing.join(', ')}\n`,
         );
       }
     }
     if (depIssues === 0) {
       process.stdout.write(
-        `    ${theme.status.success}${symbols.success}\x1b[0m All dependencies satisfied\n`,
+        `    ${theme.status.success}${symbols.success}${R} All dependencies satisfied\n`,
       );
     }
   }
 
   // Check 6: Category usage
   if (loadedPacks.length > 0) {
-    process.stdout.write(`\n   ${theme.ui.highlight}Categories\x1b[0m\n`);
+    process.stdout.write(`\n   ${theme.ui.highlight}Categories${R}\n`);
     const allCategories = getAllCategories();
     const usedCategories = new Set<string>();
     for (const meta of loadedPacks) {
@@ -663,26 +655,26 @@ async function cmdDoctor(args: readonly string[]): Promise<{ exitCode: number }>
       const used = usedCategories.has(cat.id);
       const statSym = used ? symbols.success : '\u25CB';
       const statColor = used ? theme.status.success : theme.ui.textDim;
-      process.stdout.write(`    ${statColor}${statSym}\x1b[0m ${cat.name}\n`);
+      process.stdout.write(`    ${statColor}${statSym}${R} ${cat.name}\n`);
     }
     process.stdout.write('\n');
   }
 
   // Summary
   process.stdout.write(` ${divider}\n`);
-  process.stdout.write(` ${theme.ui.accent}Summary\x1b[0m\n`);
-  process.stdout.write(`   ${theme.ui.textDim}Loaded\x1b[0m     ${loadedPacks.length}\n`);
-  process.stdout.write(`   ${theme.ui.textDim}Failed\x1b[0m     ${failedPacks.size}\n`);
-  process.stdout.write(`   ${theme.ui.textDim}Conflicts\x1b[0m  ${conflicts.length}\n`);
-  process.stdout.write(`   ${theme.ui.textDim}Entries\x1b[0m    ${countAllEntries(registry)}\n`);
+  process.stdout.write(` ${theme.ui.accent}Summary${R}\n`);
+  process.stdout.write(`   ${theme.ui.textDim}Loaded${R}     ${loadedPacks.length}\n`);
+  process.stdout.write(`   ${theme.ui.textDim}Failed${R}     ${failedPacks.size}\n`);
+  process.stdout.write(`   ${theme.ui.textDim}Conflicts${R}  ${conflicts.length}\n`);
+  process.stdout.write(`   ${theme.ui.textDim}Entries${R}    ${countAllEntries(registry)}\n`);
 
   if (diag.totalErrors > 0 || failedPacks.size > 0 || conflicts.length > 0) {
     process.stdout.write(
-      ` ${theme.status.warning}${symbols.warning}\x1b[0m Issues found \u2014 review recommendations above.\n`,
+      ` ${theme.status.warning}${symbols.warning}${R} Issues found \u2014 review recommendations above.\n`,
     );
   } else {
     process.stdout.write(
-      ` ${theme.status.success}${symbols.success}\x1b[0m All checks passed \u2014 packs are healthy.\n`,
+      ` ${theme.status.success}${symbols.success}${R} All checks passed \u2014 packs are healthy.\n`,
     );
   }
   process.stdout.write('\n');

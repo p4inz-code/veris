@@ -14,7 +14,7 @@
  */
 
 import { getSymbolSet } from '../../ui/renderer/index.js';
-import { getResolvedTheme } from '../../ui/theme/index.js';
+import { getResolvedTheme, ansiReset } from '../../ui/theme/index.js';
 import type { ProfilerSnapshot } from '../profiler.js';
 import type { ScanSession, CurrentFile, HealthIssue, ScanSummary } from '../scan-session.js';
 import type { StageStatus } from '../scan-session.js';
@@ -60,7 +60,8 @@ export class SilentRenderer implements ProgressRenderer {
     if (issue.severity === 'fatal') {
       const theme = getResolvedTheme();
       const symbols = getSymbolSet();
-      process.stderr.write(`${theme.status.error}${symbols.error}\x1b[0m ${issue.message}\n`);
+      const R = ansiReset();
+      process.stderr.write(`${theme.status.error}${symbols.error}${R} ${issue.message}\n`);
     }
     if (issue.severity === 'warning') {
       this.warnings++;
@@ -85,10 +86,8 @@ export class SilentRenderer implements ProgressRenderer {
   onCancel(session: ScanSession): void {
     const theme = getResolvedTheme();
     const symbols = getSymbolSet();
-    const lines: string[] = [
-      '',
-      `${theme.status.warning}${symbols.warning}\x1b[0m Scan cancelled.`,
-    ];
+    const R = ansiReset();
+    const lines: string[] = ['', `${theme.status.warning}${symbols.warning}${R} Scan cancelled.`];
     if (session.filesProcessed > 0) {
       lines.push(`  Files processed: ${session.filesProcessed}`);
     }
@@ -143,16 +142,17 @@ export class SilentRenderer implements ProgressRenderer {
   private buildSummary(session: ScanSession, summary: ScanSummary): string {
     const theme = getResolvedTheme();
     const symbols = getSymbolSet();
+    const R = ansiReset();
 
     const lines: string[] = [''];
 
     // Result header (status-aware)
     if (summary.cancelled) {
-      lines.push(`${theme.status.warning}${symbols.warning}\x1b[0m Scan Cancelled\x1b[0m`);
+      lines.push(`${theme.status.warning}${symbols.warning}${R} Scan Cancelled${R}`);
     } else if (summary.errors > 0) {
-      lines.push(`${theme.status.error}${symbols.error}\x1b[0m Scan Failed\x1b[0m`);
+      lines.push(`${theme.status.error}${symbols.error}${R} Scan Failed${R}`);
     } else {
-      lines.push(`${theme.status.success}${symbols.success}\x1b[0m Scan Complete\x1b[0m`);
+      lines.push(`${theme.status.success}${symbols.success}${R} Scan Complete${R}`);
     }
     lines.push('');
 
@@ -191,7 +191,7 @@ export class SilentRenderer implements ProgressRenderer {
     const labelWidth = Math.max(...rows.map((r) => r.label.length));
     for (const row of rows) {
       lines.push(
-        `  ${theme.ui.textDim}${row.label.padEnd(labelWidth)}\x1b[0m  ${row.color ?? theme.ui.text}${row.value}\x1b[0m`,
+        `  ${theme.ui.textDim}${row.label.padEnd(labelWidth)}${R}  ${row.color ?? theme.ui.text}${row.value}${R}`,
       );
     }
 

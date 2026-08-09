@@ -41,6 +41,7 @@ export {
   getResolvedTheme,
   getSeverityColor,
   getStatusColor,
+  ansiReset,
   severityFromScore,
   AnsiWriter,
   getAnsiWriter,

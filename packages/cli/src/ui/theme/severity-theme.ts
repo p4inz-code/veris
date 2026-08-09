@@ -53,6 +53,17 @@ export function getResolvedTheme(): ResolvedTheme {
 }
 
 /**
+ * Get the ANSI reset sequence, or an empty string when color is disabled.
+ *
+ * All renderers must use this instead of hardcoding `\x1b[0m` so that
+ * `--no-color` and non-TTY output contain zero ANSI sequences.
+ */
+export function ansiReset(): string {
+  const caps = detectTerminal();
+  return caps.colorDepth === 'none' ? '' : '\x1b[0m';
+}
+
+/**
  * Helper to get a severity color directly.
  */
 export function getSeverityColor(level: SeverityLevel): string {

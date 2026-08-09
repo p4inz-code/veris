@@ -23,7 +23,7 @@
 
 import { getSymbolSet } from '../../ui/renderer/index.js';
 import { type TerminalCapabilities, detectTerminal } from '../../ui/terminal/index.js';
-import { getResolvedTheme } from '../../ui/theme/index.js';
+import { getResolvedTheme, ansiReset } from '../../ui/theme/index.js';
 import { truncateStart } from '../../ui/utilities/index.js';
 import { CLI_VERSION } from '../../wirer.js';
 import type { ProfilerSnapshot } from '../profiler.js';
@@ -231,12 +231,13 @@ export class DashboardRenderer implements ProgressRenderer {
     // Show cancellation info
     const theme = getResolvedTheme();
     const symbols = getSymbolSet();
+    const R = ansiReset();
     const lines: string[] = [
       '',
-      ` ${theme.status.warning}${symbols.warning}\x1b[0m ${theme.ui.text}Scan Cancelled\x1b[0m`,
-      `   ${theme.ui.textDim}Files processed: ${session.filesProcessed}\x1b[0m`,
-      `   ${theme.ui.textDim}Elapsed: ${formatDuration(session.elapsedMs)}\x1b[0m`,
-      `   ${theme.ui.textDim}Progress: ${(session.progress * 100).toFixed(1)}%\x1b[0m`,
+      ` ${theme.status.warning}${symbols.warning}${R} ${theme.ui.text}Scan Cancelled${R}`,
+      `   ${theme.ui.textDim}Files processed: ${session.filesProcessed}${R}`,
+      `   ${theme.ui.textDim}Elapsed: ${formatDuration(session.elapsedMs)}${R}`,
+      `   ${theme.ui.textDim}Progress: ${(session.progress * 100).toFixed(1)}%${R}`,
       '',
     ];
     for (const line of lines) {
@@ -322,10 +323,11 @@ export class DashboardRenderer implements ProgressRenderer {
   private buildDashboardLines(session: ScanSession, width: number, narrow: boolean): string[] {
     const theme = getResolvedTheme();
     const symbols = getSymbolSet();
+    const R = ansiReset();
     const lines: string[] = [];
 
     // ── CURRENT ──
-    lines.push(` ${theme.ui.accent}CURRENT\x1b[0m`);
+    lines.push(` ${theme.ui.accent}CURRENT${R}`);
     lines.push(this.renderCurrentLine(session, width, narrow));
 
     // ── Progress (how much work processed) ──
@@ -334,16 +336,16 @@ export class DashboardRenderer implements ProgressRenderer {
     }
 
     // ── PIPELINE ──
-    lines.push(` ${theme.ui.accent}PIPELINE\x1b[0m`);
+    lines.push(` ${theme.ui.accent}PIPELINE${R}`);
     lines.push(...renderPipelineVisualization(session.stages, { width }));
 
     // ── STATISTICS ──
-    lines.push(` ${theme.ui.accent}STATISTICS\x1b[0m`);
-    lines.push(...this.renderStatisticsLines(session, theme));
+    lines.push(` ${theme.ui.accent}STATISTICS${R}`);
+    lines.push(...this.renderStatisticsLines(session, theme, R));
 
     // ── PERFORMANCE ──
-    lines.push(` ${theme.ui.accent}PERFORMANCE\x1b[0m`);
-    lines.push(...this.renderPerformanceLines(session, theme));
+    lines.push(` ${theme.ui.accent}PERFORMANCE${R}`);
+    lines.push(...this.renderPerformanceLines(session, theme, R));
 
     return lines;
   }
@@ -354,8 +356,9 @@ export class DashboardRenderer implements ProgressRenderer {
     const symbols = getSymbolSet();
     const phaseLabel = PHASE_LABEL_BY_STAGE[session.currentStage] ?? session.currentStage;
 
+    const R = ansiReset();
     if (!session.currentFile) {
-      return `    ${theme.ui.text}${phaseLabel}\x1b[0m  ${theme.ui.textDim}-\x1b[0m`;
+      return `    ${theme.ui.text}${phaseLabel}${R}  ${theme.ui.textDim}-${R}`;
     }
 
     const file = session.currentFile;
@@ -363,7 +366,7 @@ export class DashboardRenderer implements ProgressRenderer {
     const maxFileWidth = Math.max(10, width - 6 - phaseLabel.length - sizeSuffix.length);
     const filename = truncateStart(file.filename, maxFileWidth, symbols.ellipsis);
 
-    return `    ${theme.ui.text}${phaseLabel}\x1b[0m  ${theme.ui.text}${filename}\x1b[0m${theme.ui.textDim}${sizeSuffix}\x1b[0m`;
+    return `    ${theme.ui.text}${phaseLabel}${R}  ${theme.ui.text}${filename}${R}${theme.ui.textDim}${sizeSuffix}${R}`;
   }
 
   /** Single-line compact progress bar with count and percentage. */
@@ -378,9 +381,11 @@ export class DashboardRenderer implements ProgressRenderer {
     const count = `${session.filesProcessed} / ${session.totalFiles}`;
     const percent = `${(pct * 100).toFixed(0)}%`;
 
+    const R = ansiReset();
+
     // Extremely narrow terminals: keep the count, drop the bar.
     if (width < 24) {
-      return `    ${theme.ui.text}${count}\x1b[0m`;
+      return `    ${theme.ui.text}${count}${R}`;
     }
 
     const barWidth = Math.max(6, Math.min(28, width - (narrow ? 14 : 26)));
@@ -389,14 +394,15 @@ export class DashboardRenderer implements ProgressRenderer {
 
     const text = narrow
       ? `    ${bar}  ${count}`
-      : `    ${bar}  ${count}  ${theme.ui.textDim}${percent}\x1b[0m`;
-    return ` ${theme.ui.text}${text}\x1b[0m`;
+      : `    ${bar}  ${count}  ${theme.ui.textDim}${percent}${R}`;
+    return ` ${theme.ui.text}${text}${R}`;
   }
 
   /** STATISTICS — existing pipeline counters only. */
   private renderStatisticsLines(
     session: ScanSession,
     theme: ReturnType<typeof getResolvedTheme>,
+    R: string,
   ): string[] {
     const stats = session.statistics;
     const rows: Array<{ label: string; value: number; color?: string }> = [
@@ -415,7 +421,7 @@ export class DashboardRenderer implements ProgressRenderer {
     const labelWidth = Math.max(...rows.map((r) => r.label.length));
     return rows.map((row) => {
       const color = row.color ?? theme.ui.text;
-      return `    ${theme.ui.textDim}${row.label.padEnd(labelWidth)}\x1b[0m  ${color}${formatNumber(row.value)}\x1b[0m`;
+      return `    ${theme.ui.textDim}${row.label.padEnd(labelWidth)}${R}  ${color}${formatNumber(row.value)}${R}`;
     });
   }
 
@@ -423,6 +429,7 @@ export class DashboardRenderer implements ProgressRenderer {
   private renderPerformanceLines(
     session: ScanSession,
     theme: ReturnType<typeof getResolvedTheme>,
+    R: string,
   ): string[] {
     const rows: Array<{ label: string; value: string }> = [
       { label: 'elapsed', value: formatDuration(session.elapsedMs) },
@@ -434,7 +441,7 @@ export class DashboardRenderer implements ProgressRenderer {
     const labelWidth = Math.max(...rows.map((r) => r.label.length));
     return rows.map(
       (row) =>
-        `    ${theme.ui.textDim}${row.label.padEnd(labelWidth)}\x1b[0m  ${theme.ui.text}${row.value}\x1b[0m`,
+        `    ${theme.ui.textDim}${row.label.padEnd(labelWidth)}${R}  ${theme.ui.text}${row.value}${R}`,
     );
   }
 

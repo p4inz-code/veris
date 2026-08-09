@@ -13,7 +13,7 @@
 import { getSymbolSet } from '../../ui/renderer/index.js';
 import { horizontalDivider } from '../../ui/styles/index.js';
 import { detectTerminal } from '../../ui/terminal/index.js';
-import { getResolvedTheme } from '../../ui/theme/index.js';
+import { getResolvedTheme, ansiReset } from '../../ui/theme/index.js';
 import type { ScanSession } from '../scan-session.js';
 
 /** Result of a cancelled scan. */
@@ -29,6 +29,7 @@ export interface CancellationResult {
 export function renderCancellationSummary(result: CancellationResult): readonly string[] {
   const theme = getResolvedTheme();
   const symbols = getSymbolSet();
+  const R = ansiReset();
   const caps = detectTerminal();
   const width = Math.min(caps.width, 100);
 
@@ -36,10 +37,8 @@ export function renderCancellationSummary(result: CancellationResult): readonly 
   lines.push('');
 
   // ── Header ──
-  lines.push(
-    ` ${theme.status.warning}${symbols.warning}\\x1b[0m ${theme.ui.text}Scan Cancelled\\x1b[0m`,
-  );
-  lines.push(` ${theme.ui.border}${horizontalDivider(width - 2)}\\x1b[0m`);
+  lines.push(` ${theme.status.warning}${symbols.warning}${R} ${theme.ui.text}Scan Cancelled${R}`);
+  lines.push(` ${theme.ui.border}${horizontalDivider(width - 2)}${R}`);
   lines.push('');
 
   // ── Stats ──
@@ -61,15 +60,13 @@ export function renderCancellationSummary(result: CancellationResult): readonly 
 
   const maxLabelWidth = Math.max(...stats.map((s) => s.label.length));
   for (const stat of stats) {
-    lines.push(
-      `   ${theme.ui.highlight}${stat.label.padEnd(maxLabelWidth)}\\x1b[0m  ${stat.value}`,
-    );
+    lines.push(`   ${theme.ui.highlight}${stat.label.padEnd(maxLabelWidth)}${R}  ${stat.value}`);
   }
 
   // ── Partial report info ──
   if (result.partialReportSaved && result.outputFiles.length > 0) {
     lines.push('');
-    lines.push(` ${theme.ui.accent}Partial Results\\x1b[0m`);
+    lines.push(` ${theme.ui.accent}Partial Results${R}`);
     lines.push('');
     for (const file of result.outputFiles) {
       lines.push(`   ${symbols.file} ${file}`);
@@ -78,7 +75,7 @@ export function renderCancellationSummary(result: CancellationResult): readonly 
 
   lines.push('');
   lines.push(
-    ` ${theme.status.warning}${symbols.info}\\x1b[0m ${theme.ui.textDim}Scan was cancelled. Partial results may be incomplete.\\x1b[0m`,
+    ` ${theme.status.warning}${symbols.info}${R} ${theme.ui.textDim}Scan was cancelled. Partial results may be incomplete.${R}`,
   );
   lines.push('');
 
@@ -90,7 +87,8 @@ export function renderCancellationSummary(result: CancellationResult): readonly 
  */
 export function formatCancellationLine(session: ScanSession): string {
   const theme = getResolvedTheme();
-  return `${theme.status.warning}Cancelled\\x1b[0m after ${session.filesProcessed} files (${session.elapsedMs > 0 ? `${(session.elapsedMs / 1000).toFixed(1)}s` : '0s'})`;
+  const R = ansiReset();
+  return `${theme.status.warning}Cancelled${R} after ${session.filesProcessed} files (${session.elapsedMs > 0 ? `${(session.elapsedMs / 1000).toFixed(1)}s` : '0s'})`;
 }
 
 function formatDuration(ms: number): string {
