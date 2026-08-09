@@ -2,6 +2,8 @@
  * Tests for ManifestBuilder — export manifest generation.
  */
 
+import * as path from 'node:path';
+
 import { describe, it, expect } from 'vitest';
 import { ManifestBuilder } from '../../../src/export/export-manifest.js';
 
@@ -89,17 +91,18 @@ describe('ManifestBuilder', () => {
   });
 
   it('uses forward slashes for relative paths', () => {
+    const baseDir = path.join('C:', 'Users', 'test', 'output');
     const manifest = builder.build(
       [
         {
-          absolutePath: 'C:\\Users\\test\\output\\report.md',
+          absolutePath: path.join(baseDir, 'report.md'),
           hash: 'hash',
           size: 100,
           format: 'markdown',
           subjectId: 'fin_001',
         },
       ],
-      'C:\\Users\\test\\output',
+      baseDir,
     );
 
     expect(manifest.files[0].relativePath).toBe('report.md');
