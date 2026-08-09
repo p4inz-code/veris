@@ -11,7 +11,7 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "../..");
 
-const repoUrl = "https://github.com/veris/veris";
+const repoUrl = "https://github.com/p4inz-code/veris";
 const repo = { type: "git", url: repoUrl + ".git" };
 const bugs = { url: repoUrl + "/issues" };
 const homepage = repoUrl;

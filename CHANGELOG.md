@@ -62,7 +62,7 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Programmatic API
 - Plugin system architecture (V2+)
 
-[1.0.0]: https://github.com/veris/veris/releases/tag/v1.0.0
-[0.1.3]: https://github.com/veris/veris/releases/tag/v0.1.3
-[0.1.2]: https://github.com/veris/veris/releases/tag/v0.1.2
-[0.1.0]: https://github.com/veris/veris/releases/tag/v0.1.0
+[1.0.0]: https://github.com/p4inz-code/veris/releases/tag/v1.0.0
+[0.1.3]: https://github.com/p4inz-code/veris/releases/tag/v0.1.3
+[0.1.2]: https://github.com/p4inz-code/veris/releases/tag/v0.1.2
+[0.1.0]: https://github.com/p4inz-code/veris/releases/tag/v0.1.0
