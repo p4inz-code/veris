@@ -52,7 +52,7 @@ describe('renderStartupScreen', () => {
 
   it('defaults the version to CLI_VERSION', () => {
     const out = render(createTestConfig());
-    expect(out).toContain('VERIS v0.1.3');
+    expect(out).toContain('VERIS v1.0.0');
   });
 
   it('shows platform and Node version when provided', () => {
@@ -159,7 +159,7 @@ describe('DashboardRenderer startup integration', () => {
     renderer.onStart(session, { knowledgePackCount: 6 });
 
     const joined = output.join('');
-    expect(joined).toContain('VERIS v0.1.3');
+    expect(joined).toContain('VERIS v1.0.0');
     expect(joined).toContain('6 packs');
     expect(joined).toContain('12 loaded');
     expect(joined).toContain('Starting scan');
@@ -170,7 +170,7 @@ describe('DashboardRenderer startup integration', () => {
     renderer.onStart(session);
 
     const joined = output.join('');
-    expect(joined).toContain('VERIS v0.1.3');
+    expect(joined).toContain('VERIS v1.0.0');
     expect(joined).not.toContain('Knowledge');
   });
 });

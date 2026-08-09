@@ -65,7 +65,7 @@ veris --version
 Expected output:
 
 ```
-veris 0.1.3
+veris 1.0.0
 ```
 
 ## Troubleshooting

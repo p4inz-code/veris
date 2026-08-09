@@ -5,6 +5,18 @@ All notable changes to VERIS are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2026-08-09
+
+### Added
+
+- Production-ready CLI UX: startup screen, progress dashboard, pipeline visualization, final scan summary, global help, and structured error presentation
+- Responsive terminal support (40-180+ columns) with ASCII and no-color fallbacks
+
+### Changed
+
+- Version bumped from 0.1.3 to 1.0.0 — first stable release
+- Deterministic analysis — identical inputs produce identical findings, evidence, ordering, and risk scores; report files record run metadata (IDs and timestamps) per the report contract
+
 ## [0.1.3] - 2026-07-05
 
 ### Changed
@@ -50,6 +62,7 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Programmatic API
 - Plugin system architecture (V2+)
 
+[1.0.0]: https://github.com/veris/veris/releases/tag/v1.0.0
 [0.1.3]: https://github.com/veris/veris/releases/tag/v0.1.3
 [0.1.2]: https://github.com/veris/veris/releases/tag/v0.1.2
 [0.1.0]: https://github.com/veris/veris/releases/tag/v0.1.0

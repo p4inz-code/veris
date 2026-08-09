@@ -1,8 +1,6 @@
-
 <p align="center">
   <img src="https://github.com/p4inz-code/veris/blob/main/assets/banner.png?raw=true" alt="VERIS Banner" width="100%">
 </p>
-
 
 <p align="center">
   <strong>Vulnerability Enumeration & Risk Intelligence System</strong><br>
@@ -22,7 +20,7 @@
 
 VERIS is a **deterministic security analysis platform** that scans files and directories for security risks and produces reproducible, explainable reports.
 
-The entire analysis pipeline runs **100% offline**. No network calls, no telemetry, no cloud dependency. Every scan produces bit-identical output from the same input — guaranteed.
+The entire analysis pipeline runs **100% offline**. No network calls, no telemetry, no cloud dependency. Identical inputs always produce identical analysis results — findings, evidence, ordering, and risk scores are byte-for-byte reproducible. Report files also record a run ID and timestamps as part of the report contract.
 
 ```bash
 # Scan the current directory
@@ -37,7 +35,7 @@ npm install -g veris-cli
 | Property      | VERIS                                      | Typical Tools               |
 | ------------- | ------------------------------------------ | --------------------------- |
 | Offline-first | ✅ Fully local                             | Usually require cloud       |
-| Deterministic | ✅ Same input → same output                | Non-deterministic           |
+| Deterministic | ✅ Same input → same analysis              | Non-deterministic           |
 | Explainable   | ✅ Every finding traces to evidence        | Opaque scores               |
 | AI-assisted   | ✅ AI explains results (consumer only)     | AI participates in analysis |
 | Open format   | ✅ JSON, Markdown, HTML, SARIF, CSV, JUnit | Proprietary formats         |
@@ -53,8 +51,8 @@ npm install -g veris-cli
 
 ### Determinism
 
-- Bit-identical output from identical input
-- No `Math.random()`, no `crypto.randomUUID()`, no `Date.now()` in pipeline
+- Identical analysis results from identical input — findings, evidence, ordering, and risk scores are reproducible
+- No randomness in analysis — no `Math.random()`, no `crypto.randomUUID()`; a single run timestamp is captured at scan start and injected as report metadata
 - Stable ordering across all collections
 - Immutable output objects (frozen at construction)
 
@@ -202,7 +200,7 @@ VERIS performs deep static analysis of Portable Executable (PE/COFF) binaries:
 
 VERIS is built on the principle that security analysis must be **reproducible**:
 
-1. **Same input, same output** — Always. Guaranteed.
+1. **Same input, same analysis** — Findings, evidence, ordering, and risk scores are reproducible; reports also record run metadata (ID and timestamps) for traceability.
 2. **No randomness** — Analysis uses no random sources.
 3. **Offline-first** — Zero network calls during analysis. No telemetry.
 4. **Immutable outputs** — All results are frozen at construction time.

@@ -1,4 +1,4 @@
-# Release v0.1.3
+# Release v1.0.0
 
 ## Changes
 
@@ -53,7 +53,7 @@ npm install -g veris-cli
 veris --version
 ```
 
-Output: `veris 0.1.3`
+Output: `veris 1.0.0`
 
 ## Links
 

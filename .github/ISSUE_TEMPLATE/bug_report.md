@@ -22,7 +22,7 @@ Steps to reproduce:
 
 - OS: [e.g. Ubuntu 22.04, macOS 14, Windows 11]
 - Node.js version: [e.g. 18, 20, 22]
-- VERIS version: [e.g. 0.1.3]
+- VERIS version: [e.g. 1.0.0]
 - Installation method: [npx, npm global, from source]
 
 ## Logs

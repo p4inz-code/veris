@@ -13,7 +13,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 import { getSymbolSet } from '../ui/renderer/index.js';
-import { getResolvedTheme } from '../ui/theme/index.js';
+import { ansiReset, getResolvedTheme } from '../ui/theme/index.js';
 import { ExitCode, CliError } from '../wirer.js';
 
 // ── Init Command Options ──
@@ -110,9 +110,10 @@ export async function runInit(options: InitOptions): Promise<{ exitCode: number 
     fs.writeFileSync(configPath, content, 'utf-8');
 
     const theme = getResolvedTheme();
+    const R = ansiReset();
     const symbols = getSymbolSet();
     process.stdout.write(
-      ` ${theme.status.success}${symbols.success}\x1b[0m Created configuration: ${configPath}\n`,
+      ` ${theme.status.success}${symbols.success}${R} Created configuration: ${configPath}\n`,
     );
     process.stdout.write('\nNext steps:\n');
     process.stdout.write('  1. Edit veris.config.json to customize settings\n');

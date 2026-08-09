@@ -47,7 +47,7 @@ Exports to JSON, Markdown, HTML, SARIF, CSV, and JUnit.
 
 ## Key properties
 
-- **Deterministic** — Same input always produces bit-identical output
+- **Deterministic** — Same input always produces identical analysis results (findings, evidence, ordering, risk scores)
 - **Offline-first** — Analysis requires no network access
 - **Immutable** — All outputs are frozen at construction
 - **Explainable** — Every finding traces to specific evidence
@@ -56,7 +56,7 @@ Exports to JSON, Markdown, HTML, SARIF, CSV, and JUnit.
 ## Design constraints
 
 - No `Math.random()`, `crypto.randomUUID()`, or other randomness in analysis
-- No `Date.now()` in the pipeline — all timestamps are injected
+- No randomness in analysis — a single run timestamp is captured at scan start and injected as report metadata
 - Stable ordering in all collections
 - Immutable output objects
 - No circular dependencies between components
