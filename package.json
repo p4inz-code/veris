@@ -2,7 +2,7 @@
   "name": "veris-monorepo",
   "private": true,
   "version": "0.1.0",
-  "description": "VERIS — Deterministic Static Security Analysis Platform",
+  "description": "VERIS \u2014 Deterministic Static Security Analysis Platform",
   "license": "UNLICENSED",
   "author": "VERIS",
   "homepage": "https://github.com/veris/veris",
@@ -17,7 +17,7 @@
     "node": ">=18.0.0",
     "pnpm": ">=8.0.0"
   },
-  "packageManager": "pnpm@11.9.0",
+  "packageManager": "pnpm@9.15.9",
   "scripts": {
     "build": "pnpm build:core && pnpm build:layers",
     "build:core": "pnpm --filter=@veris/core --filter=@veris/shared build",
