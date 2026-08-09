@@ -1,5 +1,5 @@
 {
-  "name": "veris",
+  "name": "veris-cli",
   "version": "1.0.0",
   "description": "VERIS CLI — scan, report, init, validate, version, completions",
   "license": "UNLICENSED",
