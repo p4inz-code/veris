@@ -4,6 +4,13 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    // Force deterministic terminal capabilities in tests. CI sets
+    // GITHUB_ACTIONS=true, which would otherwise enable truecolor + Unicode
+    // rendering and break length-based layout tests (see detectTerminal).
+    env: {
+      VERIS_COLOR: '0',
+      VERIS_UNICODE: '0',
+    },
     pool: 'forks',
     poolOptions: {
       forks: {
