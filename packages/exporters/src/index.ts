@@ -425,7 +425,7 @@ class SarifExporterImpl implements Exporter {
             driver: {
               name: 'VERIS',
               version: report.session.engineVersion,
-              informationUri: 'https://github.com/veris/veris',
+              informationUri: 'https://github.com/p4inz-code/veris',
             },
           },
           results: report.findings.slice(0, options?.maxFindings).map((f) => ({

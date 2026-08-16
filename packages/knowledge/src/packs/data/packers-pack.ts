@@ -381,7 +381,7 @@ export const PACKERS_PACK: KnowledgePack = Object.freeze({
       'Executable packers, cryptors, protectors, and obfuscation tools used to conceal malicious code, including UPX, Themida, VMProtect, ConfuserEx, and others.',
     author: 'VERIS Team',
     license: 'UNLICENSED',
-    source: 'https://github.com/veris/veris',
+    source: 'https://github.com/p4inz-code/veris',
     checksum: '',
     categories: ['packers'],
     tags: ['packers', 'obfuscation', 'compression', 'cryptors', 'protectors'],

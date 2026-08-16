@@ -6,8 +6,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  perf:
-    name: Performance Benchmarks
+  nightly-validation:
+    name: Nightly Validation
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,35 +18,13 @@ jobs:
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
-      - run: pnpm bench
-        continue-on-error: true
+      - run: pnpm test
 
-  security:
-    name: Security Tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      - run: pnpm test:security
-        continue-on-error: true
-
-  integration:
-    name: Integration Tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      - run: pnpm test:integration
-        continue-on-error: true
+  # Note: there is no performance benchmark suite and no security/fuzz test
+  # suite in the repository. The former `perf` job ran `pnpm bench` (root
+  # script did not exist) and the former `security` job ran `pnpm test:security`
+  # (root script did not exist). Pointing them at the tool packages did not
+  # help: tools/perf contains no *.bench.ts files (and the pinned vitest 2.x
+  # rejects `vitest run --bench`), and tools/security contains no test files.
+  # Both jobs therefore always failed and were replaced by the single
+  # nightly-validation job above (install + build + test on main).

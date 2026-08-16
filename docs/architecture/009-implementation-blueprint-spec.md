@@ -1170,7 +1170,7 @@ release:
 
 ```bash
 # 1. Clone and install
-git clone https://github.com/veris/veris.git
+git clone https://github.com/p4inz-code/veris.git
 cd veris
 pnpm install
 
@@ -1202,7 +1202,7 @@ Node.js >= 18
 pnpm >= 8
 
 # Clone
-git clone https://github.com/veris/veris.git
+git clone https://github.com/p4inz-code/veris.git
 cd veris
 
 # Install

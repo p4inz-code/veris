@@ -5,7 +5,7 @@ VERIS AI explanation layer — explains deterministic analysis results via LLM p
 ## Overview
 
 `@veris/explain` provides AI-generated explanations of VERIS deterministic analysis results.
-It is a read-only consumer of the [CanonicalReport](https://github.com/veris/veris) —
+It is a read-only consumer of the [CanonicalReport](https://github.com/p4inz-code/veris) —
 it never modifies findings, evidence, risk scores, or any canonical object.
 
 ## Principles

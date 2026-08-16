@@ -1,0 +1,5 @@
+# Vitest snapshot files must stay LF. On Windows checkouts with
+# core.autocrlf=true, vitest rewrites .snap files with LF while git expects
+# CRLF, which makes every test run dirty the working tree. Pinning them to
+# LF keeps snapshot churn out of git status on all platforms.
+*.snap text eol=lf

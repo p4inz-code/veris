@@ -10,11 +10,11 @@
 
 ## Getting help
 
-| Channel                                                          | Purpose                              |
-| ---------------------------------------------------------------- | ------------------------------------ |
-| [GitHub Issues](https://github.com/veris/veris/issues)           | Bug reports, feature requests        |
-| [GitHub Discussions](https://github.com/veris/veris/discussions) | Questions, ideas, general discussion |
-| [Security](SECURITY.md)                                          | Vulnerability reports                |
+| Channel                                                               | Purpose                              |
+| --------------------------------------------------------------------- | ------------------------------------ |
+| [GitHub Issues](https://github.com/p4inz-code/veris/issues)           | Bug reports, feature requests        |
+| [GitHub Discussions](https://github.com/p4inz-code/veris/discussions) | Questions, ideas, general discussion |
+| [Security](SECURITY.md)                                               | Vulnerability reports                |
 
 ## Community
 

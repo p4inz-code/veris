@@ -6,7 +6,7 @@ contributors.
 
 ## Getting started
 
-1. Clone the repository: `git clone https://github.com/veris/veris.git`
+1. Clone the repository: `git clone https://github.com/p4inz-code/veris.git`
 2. Install dependencies: `pnpm install`
 3. Build all packages: `pnpm build`
 4. Run tests: `pnpm test`
@@ -66,5 +66,5 @@ comply with the invariants defined there.
 
 ## Questions
 
-Open a [GitHub Discussion](https://github.com/veris/veris/discussions) for
+Open a [GitHub Discussion](https://github.com/p4inz-code/veris/discussions) for
 questions about contributing.

@@ -410,7 +410,7 @@ export const SUSPICIOUS_APIS_PACK: KnowledgePack = Object.freeze({
       'Windows API call patterns associated with malicious behavior including process injection, credential theft, anti-debugging, anti-VM, code injection, persistence, and network communication.',
     author: 'VERIS Team',
     license: 'UNLICENSED',
-    source: 'https://github.com/veris/veris',
+    source: 'https://github.com/p4inz-code/veris',
     checksum: '',
     categories: ['suspicious-apis'],
     tags: ['windows-api', 'system-calls', 'native-api', 'win32', 'injection', 'anti-debug'],

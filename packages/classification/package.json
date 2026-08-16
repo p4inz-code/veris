@@ -43,11 +43,11 @@
   "sideEffects": false,
   "repository": {
     "type": "git",
-    "url": "https://github.com/veris/veris.git"
+    "url": "https://github.com/p4inz-code/veris.git"
   },
-  "homepage": "https://github.com/veris/veris",
+  "homepage": "https://github.com/p4inz-code/veris",
   "bugs": {
-    "url": "https://github.com/veris/veris/issues"
+    "url": "https://github.com/p4inz-code/veris/issues"
   },
   "keywords": [
     "security",

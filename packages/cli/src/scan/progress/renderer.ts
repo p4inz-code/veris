@@ -94,6 +94,12 @@ export interface ProgressRenderer {
   /** Get the final rendered summary string (for after scan ends). */
   getFinalSummary(): string;
 
-  /** Cleanup any resources. */
-  dispose(): void;
+  /**
+   * Cleanup any resources.
+   *
+   * May be asynchronous: the dashboard renderer uses dispose() to finish a
+   * deferred final transition (startup presentation window). Callers should
+   * await the result before the process exits.
+   */
+  dispose(): void | Promise<void>;
 }

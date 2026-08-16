@@ -12,3 +12,6 @@ coverage/
 Thumbs.db
 *.tgz
 .package.json.bak
+
+# Default scan/report output (veris scan writes to ./veris-output)
+veris-output/

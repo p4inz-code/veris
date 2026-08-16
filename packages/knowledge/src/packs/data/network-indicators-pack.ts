@@ -349,7 +349,7 @@ export const NETWORK_INDICATORS_PACK: KnowledgePack = Object.freeze({
       'Network-based indicators of compromise including C2 beaconing patterns, DNS tunneling, domain generation algorithms, data exfiltration techniques, reverse shells, and proxy/redirector infrastructure.',
     author: 'VERIS Team',
     license: 'UNLICENSED',
-    source: 'https://github.com/veris/veris',
+    source: 'https://github.com/p4inz-code/veris',
     checksum: '',
     categories: ['network-indicators'],
     tags: ['network', 'c2', 'dga', 'dns', 'exfiltration', 'reverse-shell', 'p2p'],

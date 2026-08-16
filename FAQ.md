@@ -88,6 +88,6 @@ runs. VERIS is deterministic — the same input always produces the same output.
 
 ### How do I report a bug?
 
-Open a [GitHub Issue](https://github.com/veris/veris/issues). Include your
+Open a [GitHub Issue](https://github.com/p4inz-code/veris/issues). Include your
 VERIS version (`veris --version`), operating system, Node.js version, and
 steps to reproduce.

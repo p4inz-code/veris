@@ -425,7 +425,7 @@ export const LOBINS_PACK: KnowledgePack = Object.freeze({
       'Legitimate system binaries and scripts commonly abused by attackers for code execution, download, encoding, and persistence. Based on the LOLBAS project.',
     author: 'VERIS Team',
     license: 'UNLICENSED',
-    source: 'https://github.com/veris/veris',
+    source: 'https://github.com/p4inz-code/veris',
     checksum: '',
     categories: ['lolbins', 'living-off-the-land'],
     tags: ['lolbins', 'lolbas', 'living-off-the-land', 'execution', 'download', 'defense-evasion'],

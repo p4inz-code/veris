@@ -57,6 +57,6 @@ Output: `veris 1.0.0`
 
 ## Links
 
-- GitHub: https://github.com/veris/veris
+- GitHub: https://github.com/p4inz-code/veris
 - npm: https://www.npmjs.com/package/veris-cli
-- Issues: https://github.com/veris/veris/issues
+- Issues: https://github.com/p4inz-code/veris/issues

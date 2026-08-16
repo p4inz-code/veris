@@ -21,5 +21,5 @@ jobs:
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
-      - name: Build API docs
-        run: pnpm docs:generate
+      # Note: no API-doc generator exists in the repository (docs/ are
+      # hand-written markdown), so there is no docs:generate step.

@@ -1,8 +1,8 @@
 blank_issues_enabled: true
 contact_links:
   - name: VERIS Documentation
-    url: https://github.com/veris/veris#readme
+    url: https://github.com/p4inz-code/veris#readme
     about: Check the documentation before opening an issue
   - name: GitHub Discussions
-    url: https://github.com/veris/veris/discussions
+    url: https://github.com/p4inz-code/veris/discussions
     about: Ask questions and discuss ideas in Discussions

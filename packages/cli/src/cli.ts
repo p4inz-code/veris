@@ -27,7 +27,7 @@ import { registerCommand, dispatchCommand, type CliCommand } from './commands/in
 import { runInit, parseInitArgs, INIT_HELP } from './commands/init.js';
 import { runPack, PACK_HELP } from './commands/pack.js';
 import { runReport, parseReportArgs, REPORT_HELP } from './commands/report.js';
-import { runScan, parseScanArgs, SCAN_HELP } from './commands/scan.js';
+import { isScanActive, runScan, parseScanArgs, SCAN_HELP } from './commands/scan.js';
 import { runSummarize, parseSummarizeArgs, SUMMARIZE_HELP } from './commands/summarize.js';
 import { runValidate, parseValidateArgs, VALIDATE_HELP } from './commands/validate.js';
 import { parseCompatibilityFlags, formatCliError, renderGlobalHelp } from './ui/index.js';
@@ -277,6 +277,14 @@ export function onShutdown(handler: () => void | Promise<void>): void {
  * Cancels the running pipeline, flushes diagnostics, and exits cleanly.
  */
 function handleShutdown(signal: string): void {
+  // While a scan is running, the scan command owns cancellation via its own
+  // SIGINT handler (it renders a cancellation screen and exits cleanly). If
+  // this global handler also ran, both would finalize and this one would
+  // process.exit() before the scan's cancellation screen could render.
+  if (isScanActive()) {
+    return;
+  }
+
   const runCleanup = async (): Promise<void> => {
     process.stderr.write(`\nReceived ${signal}. Shutting down gracefully...\n`);
 

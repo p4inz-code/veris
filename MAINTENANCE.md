@@ -9,12 +9,13 @@ All VERIS packages use independent versioning managed by [Changesets](https://gi
 
 ## Release Process
 
-1. Run `pnpm changeset` to create a new changeset
+1. Create a changeset: `pnpm changeset`
 2. Commit the changeset file
 3. Create a PR with the changeset
 4. Merge to `main`
-5. The Release GitHub Action creates a release PR
-6. Merge the release PR to publish to npm
+5. Tag the release commit as `v<version>` (e.g. `git tag v1.0.0`)
+6. Push the tag — the Release GitHub Action publishes the CLI package to npm
+   and creates the GitHub Release
 
 ## Development Setup
 
@@ -47,7 +48,7 @@ pnpm test
 
 ## Testing
 
-- **Unit tests**: `pnpm test` — 2,795+ tests across all packages
+- **Unit tests**: `pnpm test` — full suite across all packages (3,500+)
 - **Determinism tests**: Verifies same input → same output across repeated runs
 - **Coverage**: Minimum 80% threshold across all packages
 
@@ -70,12 +71,12 @@ pnpm test
 
 - **CI**: Build, lint, test on push/PR to main/next (Node 18, 20, 22 on Ubuntu, Windows, macOS)
 - **Release**: Automated npm publishing via Changesets on main
-- **Nightly**: Performance benchmarks, security tests, integration tests
+- **Nightly**: Daily validation job (install + build + test) — see `.github/workflows/nightly.yml`
 - **Documentation**: Auto-build on docs/source changes
 
 ## Performance Monitoring
 
-- Run benchmarks: `pnpm bench`
+- The repo currently ships no benchmark suite (see `.github/workflows/nightly.yml`)
 - Monitor memory usage in CI
 - Track test execution times across runs
 

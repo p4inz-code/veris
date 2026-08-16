@@ -51,6 +51,17 @@ import { renderStartupScreen } from './startup-screen.js';
 
 const DASHBOARD_INTERVAL_MS = 200;
 
+/**
+ * Minimum time the startup screen stays visible on an interactive TTY.
+ *
+ * The startup identity (logo + configuration) must be presented for at
+ * least this long before the dashboard or the final summary may replace
+ * it. This is a deterministic lifecycle invariant, not a cosmetic delay:
+ * without it the first progress event or an instant completion erases the
+ * logo within milliseconds (fast scans showed ~30ms of logo visibility).
+ */
+export const STARTUP_MIN_DISPLAY_MS = 1200;
+
 /** Cap the dashboard width to keep wide terminals readable. */
 const MAX_WIDTH = 100;
 
@@ -73,11 +84,18 @@ const PHASE_LABEL_BY_STAGE: Readonly<Record<string, string>> = Object.freeze(
  * and only when its content actually changes. In non-TTY mode it prints a
  * single deterministic line per phase completion.
  */
+/** Options for the dashboard renderer. */
+export interface DashboardRendererOptions {
+  /** Injectable clock for deterministic lifecycle tests. Defaults to Date.now. */
+  readonly now?: () => number;
+}
+
 export class DashboardRenderer implements ProgressRenderer {
   readonly supportsAnimation = true;
 
   private caps: TerminalCapabilities;
   private readonly injectedCaps: TerminalCapabilities | null;
+  private readonly now: () => number;
   private currentSession: ScanSession | null = null;
   private timer: ReturnType<typeof setInterval> | null = null;
   private lastRenderedLineCount: number = 0;
@@ -88,9 +106,18 @@ export class DashboardRenderer implements ProgressRenderer {
   private knowledgePackCount: number | undefined = undefined;
   private readonly printedPhases: Set<string> = new Set();
 
-  constructor(caps?: TerminalCapabilities) {
+  /** When the startup screen was first presented (lifecycle invariant). */
+  private startupPresentedAt: number = 0;
+  /** Errors raised while the startup screen is still on display. */
+  private pendingErrors: string[] = [];
+  /** Completion/cancellation output deferred until the startup window ends. */
+  private pendingFinalize: boolean = false;
+  private finalSummaryLines: readonly string[] = [];
+
+  constructor(caps?: TerminalCapabilities, options?: DashboardRendererOptions) {
     this.injectedCaps = caps ?? null;
     this.caps = caps ?? detectTerminal();
+    this.now = options?.now ?? ((): number => Date.now());
   }
 
   onStart(session: ScanSession, context?: StartContext): void {
@@ -113,6 +140,10 @@ export class DashboardRenderer implements ProgressRenderer {
     }
     this.lastRenderedLineCount = startupLines.length;
     this.lastRenderedContent = '';
+    this.startupPresentedAt = this.now();
+    this.pendingErrors = [];
+    this.pendingFinalize = false;
+    this.finalSummaryLines = [];
 
     // Start animation loop for interactive TTY
     if (this.caps.isTty && !this.caps.prefersReducedMotion) {
@@ -191,9 +222,19 @@ export class DashboardRenderer implements ProgressRenderer {
   onError(error: ErrorInfo): void {
     if (!this.currentSession) return;
 
-    // Show error immediately below dashboard
     if (this.caps.isTty) {
+      // During the startup presentation window the logo must not be wiped by
+      // an error. Queue the error text; it is flushed together with the first
+      // transition (dashboard paint or final summary).
+      if (!this.startupWindowElapsed()) {
+        this.pendingErrors.push(formatError(error));
+        this.lastRenderedContent = '';
+        return;
+      }
+
+      // Show error immediately below dashboard
       this.clearDashboard();
+      this.flushPendingErrors();
       process.stdout.write(formatError(error) + '\n');
       // The dashboard was cleared; force the next render to repaint even if
       // the session content is unchanged (otherwise the dashboard could stay
@@ -206,27 +247,42 @@ export class DashboardRenderer implements ProgressRenderer {
     this.stopAnimation();
     this.currentSession = session;
 
-    // Clear the dashboard
-    this.clearDashboard();
-
-    // Render final summary
+    // Render final summary (text is captured immediately so getFinalSummary
+    // stays available; the screen write may be deferred below).
     const summaryLines = renderFinalSummary(session, summary, {
       outputFiles: summary.outputFiles,
     });
-    for (const line of summaryLines) {
-      process.stdout.write(line + '\n');
-    }
     this.finalSummaryText = summaryLines.join('\n');
     this.finalSummaryShown = true;
     this.lastRenderedContent = '';
+    this.finalSummaryLines = summaryLines;
+
+    // Non-TTY: stable sequential output, never deferred.
+    if (!this.caps.isTty) {
+      for (const line of summaryLines) {
+        process.stdout.write(line + '\n');
+      }
+      return;
+    }
+
+    // Interactive TTY: guarantee the startup identity was actually visible
+    // before transitioning to the final summary. If the scan finished before
+    // the presentation window elapsed, defer the wipe + summary to dispose().
+    if (!this.startupWindowElapsed()) {
+      this.pendingFinalize = true;
+      return;
+    }
+
+    this.clearDashboard();
+    this.flushPendingErrors();
+    for (const line of summaryLines) {
+      process.stdout.write(line + '\n');
+    }
   }
 
   onCancel(session: ScanSession): void {
     this.stopAnimation();
     this.currentSession = session;
-
-    // Clear the dashboard
-    this.clearDashboard();
 
     // Show cancellation info
     const theme = getResolvedTheme();
@@ -240,12 +296,28 @@ export class DashboardRenderer implements ProgressRenderer {
       `   ${theme.ui.textDim}Progress: ${(session.progress * 100).toFixed(1)}%${R}`,
       '',
     ];
-    for (const line of lines) {
-      process.stdout.write(line + '\n');
-    }
     this.finalSummaryText = lines.join('\n');
     this.finalSummaryShown = true;
     this.lastRenderedContent = '';
+    this.finalSummaryLines = lines;
+
+    if (!this.caps.isTty) {
+      for (const line of lines) {
+        process.stdout.write(line + '\n');
+      }
+      return;
+    }
+
+    if (!this.startupWindowElapsed()) {
+      this.pendingFinalize = true;
+      return;
+    }
+
+    this.clearDashboard();
+    this.flushPendingErrors();
+    for (const line of lines) {
+      process.stdout.write(line + '\n');
+    }
   }
 
   onProfilerSnapshot(_snapshot: ProfilerSnapshot): void {
@@ -256,8 +328,31 @@ export class DashboardRenderer implements ProgressRenderer {
     return this.finalSummaryText;
   }
 
-  dispose(): void {
+  async dispose(): Promise<void> {
     this.stopAnimation();
+
+    // If the scan finished before the startup presentation window elapsed,
+    // onComplete/onCancel deferred the final transition. Finish it here so
+    // the startup identity is seen for the full window before the summary
+    // (or cancellation screen) replaces it. runScan awaits dispose(), so the
+    // process does not exit before this output is flushed.
+    if (!this.pendingFinalize) return;
+
+    // Claim the deferred finalization up front so repeated or concurrent
+    // dispose() calls can never double-write the summary (idempotency
+    // invariant: exactly one finalization per scan).
+    this.pendingFinalize = false;
+
+    const remaining = STARTUP_MIN_DISPLAY_MS - (this.now() - this.startupPresentedAt);
+    if (remaining > 0) {
+      await new Promise((resolve) => setTimeout(resolve, remaining));
+    }
+
+    this.clearDashboard();
+    this.flushPendingErrors();
+    for (const line of this.finalSummaryLines) {
+      process.stdout.write(line + '\n');
+    }
   }
 
   // ── Animation ──
@@ -266,6 +361,12 @@ export class DashboardRenderer implements ProgressRenderer {
     if (this.timer !== null) return;
     this.timer = setInterval(() => {
       if (this.needsRedraw) {
+        // Keep the startup screen on display until its minimum presentation
+        // window has elapsed; the redraw flag stays set so the first tick
+        // after the window performs the transition exactly once.
+        if (this.caps.isTty && !this.startupWindowElapsed()) {
+          return;
+        }
         this.renderDashboard();
         this.needsRedraw = false;
       }
@@ -299,6 +400,12 @@ export class DashboardRenderer implements ProgressRenderer {
 
   private renderDashboard(): void {
     if (!this.currentSession) return;
+
+    // Never replace the startup screen before its presentation window ends.
+    if (this.caps.isTty && !this.startupWindowElapsed()) {
+      return;
+    }
+
     const session = this.currentSession;
     const caps = this.caps;
     const width = Math.min(caps.width, MAX_WIDTH);
@@ -313,6 +420,7 @@ export class DashboardRenderer implements ProgressRenderer {
     }
 
     this.clearDashboard();
+    this.flushPendingErrors();
     for (const line of dashboardLines) {
       process.stdout.write(line + '\n');
     }
@@ -443,6 +551,20 @@ export class DashboardRenderer implements ProgressRenderer {
       (row) =>
         `    ${theme.ui.textDim}${row.label.padEnd(labelWidth)}${R}  ${theme.ui.text}${row.value}${R}`,
     );
+  }
+
+  /** Whether the startup screen has been displayed for its minimum window. */
+  private startupWindowElapsed(): boolean {
+    return this.now() - this.startupPresentedAt >= STARTUP_MIN_DISPLAY_MS;
+  }
+
+  /** Write errors that arrived while the startup screen was on display. */
+  private flushPendingErrors(): void {
+    if (this.pendingErrors.length === 0) return;
+    for (const text of this.pendingErrors) {
+      process.stdout.write(text + '\n');
+    }
+    this.pendingErrors = [];
   }
 
   /** Non-TTY: print one line per phase as it completes. */

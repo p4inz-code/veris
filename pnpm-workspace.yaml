@@ -2,7 +2,9 @@ packages:
   - "packages/*"
   - "packages/plugin-sdk"
   - "tools/*"
-allowBuilds:
-  better-sqlite3: set this to true or false
-  esbuild: true
-onlyBuiltDependencies: '[]'
+# pnpm 9 (pinned via packageManager) — no dependency postinstall scripts are
+# approved. esbuild ships platform binaries via optionalDependencies and
+# better-sqlite3 ships prebuilds, so builds work without postinstall scripts.
+# An explicit empty list also prevents pnpm's interactive build prompt on
+# fresh installs (non-interactive in CI).
+onlyBuiltDependencies: []

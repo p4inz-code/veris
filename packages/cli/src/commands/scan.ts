@@ -199,10 +199,21 @@ interface ScanDiagnostic {
 // ── Cancel State ──
 
 let cancelRequested = false;
+let scanActive = false;
 
 /** Check if cancellation was requested. */
 export function isCancelRequested(): boolean {
   return cancelRequested;
+}
+
+/**
+ * Whether a scan command is currently running.
+ *
+ * Used by the CLI's global signal handler to defer graceful shutdown to the
+ * scan's own cancellation flow (avoiding duplicate cleanup/finalization).
+ */
+export function isScanActive(): boolean {
+  return scanActive;
 }
 
 // ── Progress Renderer Factory ──
@@ -284,12 +295,16 @@ export async function runScan(options: ScanOptions): Promise<{ exitCode: number 
   const renderer = createRenderer(options);
   let cancelled = false;
   let savedOutputFiles: string[] = [];
+  scanActive = true;
 
-  // SIGINT handler for graceful cancellation
+  // SIGINT handler for graceful cancellation. The first Ctrl+C cancels the
+  // scan; a second Ctrl+C forces an immediate exit (standard CLI convention).
   const sigintHandler = (): void => {
     if (!cancelled) {
       cancelled = true;
       cancelRequested = true;
+    } else {
+      process.exit(130);
     }
   };
   process.on('SIGINT', sigintHandler);
@@ -1103,8 +1118,15 @@ export async function runScan(options: ScanOptions): Promise<{ exitCode: number 
     process.stderr.write(`\nError: ${message}\n`);
     return { exitCode: ExitCode.ERROR };
   } finally {
+    // The active flag is cleared before the deferred finalize (below) so a
+    // Ctrl+C during the startup presentation window is still handled by the
+    // CLI's global shutdown handler instead of being swallowed.
+    scanActive = false;
     process.removeListener('SIGINT', sigintHandler);
-    renderer.dispose();
+    // dispose() may finish a deferred final transition (startup presentation
+    // window); await it so the process does not exit before the screen is
+    // complete on interactive terminals.
+    await renderer.dispose();
   }
 }
 

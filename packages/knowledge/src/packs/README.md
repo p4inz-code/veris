@@ -42,7 +42,7 @@ Knowledge Packs are JSON files (`.veris-pack.json`) with the following structure
     "description": "Known malware families and credential theft tools",
     "author": "VERIS Team",
     "license": "UNLICENSED",
-    "source": "https://github.com/veris/veris",
+    "source": "https://github.com/p4inz-code/veris",
     "checksum": "sha256-of-file-content",
     "categories": ["malware-families", "credential-theft"],
     "tags": ["malware", "credentials"],

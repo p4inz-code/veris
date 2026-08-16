@@ -59,6 +59,18 @@ function ttyCaps(width = 80): TerminalCapabilities {
   return makeCaps({ width, isTty: true, prefersReducedMotion: true, unicode: true });
 }
 
+/**
+ * Build a TTY dashboard renderer whose clock advances on every read, so the
+ * startup presentation window is always elapsed by the first dashboard
+ * repaint and tests can exercise the dashboard/transition behavior directly.
+ * (The window itself is covered by the dedicated real-TTY lifecycle
+ * regression tests.)
+ */
+function ttyRenderer(width = 80): DashboardRenderer {
+  let t = 0;
+  return new DashboardRenderer(ttyCaps(width), { now: () => (t += 10_000) });
+}
+
 /** Strip ANSI escape codes for readable assertions. */
 function stripAnsi(text: string): string {
   return text.replace(/\x1b\[[0-9;]*m/g, '');
@@ -124,7 +136,7 @@ describe('DashboardRenderer', () => {
 
   it('writes the startup screen on start', () => {
     const caps = captureStdout();
-    const renderer = new DashboardRenderer(ttyCaps());
+    const renderer = ttyRenderer();
     try {
       renderer.onStart(sessionWithStages(), { knowledgePackCount: 3 });
       const joined = caps.lines.join('');
@@ -139,7 +151,7 @@ describe('DashboardRenderer', () => {
   it('renders the four dashboard sections with real counters', () => {
     setSymbolSet('unicode');
     const caps = captureStdout();
-    const renderer = new DashboardRenderer(ttyCaps());
+    const renderer = ttyRenderer();
     try {
       renderer.onStart(sessionWithStages());
       renderer.onStageChange('discovery', 'completed');
@@ -185,7 +197,7 @@ describe('DashboardRenderer', () => {
   it('reflects stage changes in the pipeline visualization', () => {
     setSymbolSet('unicode');
     const caps = captureStdout();
-    const renderer = new DashboardRenderer(ttyCaps());
+    const renderer = ttyRenderer();
     try {
       renderer.onStart(sessionWithStages());
       // Complete discovery + classification → Discover phase done.
@@ -206,7 +218,7 @@ describe('DashboardRenderer', () => {
   it('never marks a phase complete before its stages complete', () => {
     setSymbolSet('unicode');
     const caps = captureStdout();
-    const renderer = new DashboardRenderer(ttyCaps());
+    const renderer = ttyRenderer();
     try {
       renderer.onStart(sessionWithStages());
       // Only discovery completed — classification still waiting.
@@ -224,7 +236,7 @@ describe('DashboardRenderer', () => {
   it('uses ASCII tags in the dashboard when Unicode is unavailable', () => {
     setSymbolSet('ascii');
     const caps = captureStdout();
-    const renderer = new DashboardRenderer(ttyCaps());
+    const renderer = ttyRenderer();
     try {
       renderer.onStart(sessionWithStages());
       renderer.onStageChange('discovery', 'completed');
@@ -243,7 +255,7 @@ describe('DashboardRenderer', () => {
   it('drops secondary details on narrow terminals without losing counters', () => {
     setSymbolSet('ascii');
     const caps = captureStdout();
-    const renderer = new DashboardRenderer(ttyCaps(40));
+    const renderer = ttyRenderer(40);
     try {
       renderer.onStart(sessionWithStages());
       renderer.onStageChange('discovery', 'completed');
@@ -279,7 +291,7 @@ describe('DashboardRenderer', () => {
   it('does not repaint when the rendered content is unchanged', () => {
     setSymbolSet('ascii');
     const caps = captureStdout();
-    const renderer = new DashboardRenderer(ttyCaps());
+    const renderer = ttyRenderer();
     try {
       renderer.onStart(sessionWithStages());
       renderer.onProgress({ stage: 'extraction', filesProcessed: 5, totalFiles: 100 });
@@ -304,7 +316,7 @@ describe('DashboardRenderer', () => {
   it('repaints after an error even if progress is otherwise unchanged', () => {
     setSymbolSet('ascii');
     const caps = captureStdout();
-    const renderer = new DashboardRenderer(ttyCaps());
+    const renderer = ttyRenderer();
     try {
       renderer.onStart(sessionWithStages());
       renderer.onProgress({ stage: 'extraction', filesProcessed: 5, totalFiles: 100 });
@@ -332,7 +344,7 @@ describe('DashboardRenderer', () => {
   it('repaints when progress actually changes', () => {
     setSymbolSet('ascii');
     const caps = captureStdout();
-    const renderer = new DashboardRenderer(ttyCaps());
+    const renderer = ttyRenderer();
     try {
       renderer.onStart(sessionWithStages());
       renderer.onProgress({ stage: 'extraction', filesProcessed: 5, totalFiles: 100 });

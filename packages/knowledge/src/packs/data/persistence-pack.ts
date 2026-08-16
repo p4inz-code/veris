@@ -418,7 +418,7 @@ export const PERSISTENCE_PACK: KnowledgePack = Object.freeze({
       'Windows persistence mechanisms including registry run keys, services, scheduled tasks, WMI subscriptions, DLL hijacking, COM hijacking, IFEO, bootkits, and startup folders.',
     author: 'VERIS Team',
     license: 'UNLICENSED',
-    source: 'https://github.com/veris/veris',
+    source: 'https://github.com/p4inz-code/veris',
     checksum: '',
     categories: ['persistence'],
     tags: ['persistence', 'registry', 'services', 'dll', 'wmi', 'bootkit', 'autorun'],
