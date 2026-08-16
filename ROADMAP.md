@@ -1,5 +1,8 @@
 # VERIS Roadmap
 
+> **Status**: v1.0.0 is released and frozen (maintenance mode, bug fixes only).
+> The V2+ section below is the deferred work list.
+
 ## Legend
 
 - ✅ **Complete**

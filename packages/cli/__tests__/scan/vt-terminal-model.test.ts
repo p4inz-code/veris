@@ -13,10 +13,16 @@
  * disappears the moment the body is taller than the screen.
  *
  * This file replays the real renderer's byte stream through a faithful
- * finite-height VT model (scroll-on-overflow, DECSTBM scroll regions,
+ * finite-height VT model (scroll-on-overflow, alternate screen buffer,
  * clamped cursor movement, CUP/ED/EL) and asserts the header STAYS VISIBLE
  * while the body advances — the assertion the manual Windows recordings
- * proved the old implementation violated.
+ * proved the old implementations violated.
+ *
+ * The renderer under test uses the ALTERNATE SCREEN + FULL-FRAME REDRAW
+ * model: every repaint is `\x1b[H` + header lines + body lines + `\x1b[0J`,
+ * re-anchoring the header at the top of every frame. That is the mechanism
+ * that is structurally correct on Windows Terminal/ConPTY, where DECSTBM
+ * scroll-region pinning is unreliable (microsoft/terminal#19016, #3673).
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -125,7 +131,11 @@ function buildTestSummary(): ScanSummary {
  * - FINITE screen: `rows` × `cols`.
  * - SCROLL on newline when the cursor is at the bottom of the scroll region:
  *   the region shifts up one row; rows above the region never move.
- * - DECSTBM (`\x1b[<top>;<bottom>r`, `\x1b[r`): scroll region, 1-based.
+ * - DECSTBM (`\x1b[<top>;<bottom>r`, `\x1b[r`): scroll region, 1-based
+ *   (kept for faithfulness; the renderer no longer emits it).
+ * - ALTERNATE SCREEN BUFFER: `\x1b[?1049h` enters (clears) it, `\x1b[?1049l`
+ *   leaves it — the canvas is blank both ways in this model, matching the
+ *   real terminal for a session that starts on a fresh primary screen.
  * - Cursor movement is CLAMPED: CUU cannot go above row 0, CUD/scroll is
  *   confined to the region (matches xterm/ConPTY).
  * - CUP (`\x1b[<row>;<col>H`) is screen-absolute (DECOM off), so it can
@@ -230,6 +240,8 @@ class VtTerminal {
     let i = at + 1;
     if (text[i] === '[') {
       i++;
+      // Private-mode sequences (`\x1b[?...`) carry a '?' prefix.
+      if (text[i] === '?') i++;
       const params: number[] = [];
       let num = '';
       while (i < text.length && /[0-9;]/.test(text[i])) {
@@ -279,6 +291,22 @@ class VtTerminal {
       case 'K': // EL
         if (p(0, 0) === 2) {
           for (let c = 0; c < this.cols; c++) this.screen[this.cursorRow][c] = ' ';
+        }
+        break;
+      case 'h': // SM — enter alternate screen buffer (?1049h)
+        if (p(0, 0) === 1049) {
+          for (let r = 0; r < this.rows; r++)
+            this.screen[r] = Array.from({ length: this.cols }, () => ' ');
+          this.cursorRow = 0;
+          this.cursorCol = 0;
+        }
+        break;
+      case 'l': // RM — leave alternate screen buffer (?1049l)
+        if (p(0, 0) === 1049) {
+          for (let r = 0; r < this.rows; r++)
+            this.screen[r] = Array.from({ length: this.cols }, () => ' ');
+          this.cursorRow = 0;
+          this.cursorCol = 0;
         }
         break;
       case 'r': // DECSTBM — 1-based; `\x1b[r` resets to full screen.
@@ -400,21 +428,24 @@ describe('persistent header against a REAL finite-height terminal (VT model)', (
     );
 
     const identity = vt.rowsContaining('VERIS v1.0.0');
-    expect(identity.length).toBe(1); // rendered exactly once, still visible
+    // The final screen shows exactly one header instance: every frame
+    // overwrites the previous one, so the header is always re-anchored at
+    // the top rows (0..H-1) — it never accumulates or scrolls away.
+    expect(identity.length).toBe(1);
     expect(identity[0]).toBe(IDENTITY_ROW);
     expect(vt.visibleContains('\u2588')).toBe(true); // logo still visible
-    // The dashboard was rendered (present in the byte stream even after the
-    // region scrolled) and the final body (summary tail) is visible below.
+    // The dashboard was rendered (present in the byte stream) and the body
+    // (clipped summary head on a 24-row screen) is visible below the header.
     expect(bytes).toContain('STATISTICS');
-    expect(vt.visibleContains('report')).toBe(true); // summary tail visible
+    expect(vt.visibleContains('Scan Complete')).toBe(true);
     expect(bytes).toContain('Scan Complete'); // summary rendered
   });
 
   it('keeps the header pinned on every usable terminal height', () => {
     // Height 10 is deliberately excluded: the 10-row header fills the whole
     // screen, leaving no room for a body region (nothing can be pinned there).
-    // The body may scroll within its region on short terminals; the header
-    // must be pinned in every case.
+    // The body is clipped to the visible rows below the header on short
+    // terminals; the header must stay pinned in every case.
     for (const height of [12, 24, 30, 50]) {
       const { vt, bytes } = runInTerminal(height, 80, (renderer, session) =>
         fullLifecycle(renderer, session, 120),
@@ -458,10 +489,10 @@ describe('persistent header against a REAL finite-height terminal (VT model)', (
     expect(summaryRow).toBeGreaterThan(IDENTITY_ROW);
   });
 
-  it('releases the scroll region on dispose so the shell prompt returns to normal', () => {
-    // dispose() must reset DECSTBM — the byte stream must end by restoring the
-    // full-screen scroll region (otherwise the terminal is left with a stuck
-    // header region after the process exits).
+  it('leaves the alternate screen on dispose so the shell prompt returns', () => {
+    // dispose() must leave the alternate screen buffer — the byte stream must
+    // end by restoring the primary screen, otherwise the terminal is left in
+    // the interactive canvas after the process exits.
     const bytes: string[] = [];
     const orig = process.stdout.write.bind(process.stdout);
     process.stdout.write = ((str: unknown) => {
@@ -477,9 +508,36 @@ describe('persistent header against a REAL finite-height terminal (VT model)', (
       process.stdout.write = orig;
     }
     const joined = bytes.join('');
-    // DECSTBM was set at startup: `\x1b[<top>;<bottom>r` (1-based rows).
-    expect(joined).toMatch(/\x1b\[\d+;\d+r/);
-    // And reset on dispose: `\x1b[r`.
-    expect(joined.endsWith('\x1b[r')).toBe(true);
+    // The interactive session opened on the alternate screen buffer.
+    expect(joined.startsWith('\x1b[?1049h')).toBe(true);
+    // And left it on dispose (no final summary was rendered, so nothing is
+    // dumped to the primary screen).
+    expect(joined.endsWith('\x1b[?1049l')).toBe(true);
+  });
+
+  it('prints the final header + summary on the primary screen when the session completes', () => {
+    const bytes: string[] = [];
+    const orig = process.stdout.write.bind(process.stdout);
+    process.stdout.write = ((str: unknown) => {
+      bytes.push(String(str));
+      return true;
+    }) as typeof process.stdout.write;
+    const renderer = new DashboardRenderer(makeCaps({ height: 50 }));
+    try {
+      renderer.onStart(sessionWithStages());
+      renderer.onComplete(sessionWithStages(), buildTestSummary());
+      void renderer.dispose();
+    } finally {
+      process.stdout.write = orig;
+    }
+    const joined = bytes.join('');
+    // Alternate screen entered at start, left on dispose.
+    expect(joined.indexOf('\x1b[?1049h')).toBe(0);
+    expect(joined.lastIndexOf('\x1b[?1049l')).toBeGreaterThan(joined.indexOf('\x1b[?1049h'));
+    // After leaving the alternate screen, the final frame (header + summary)
+    // is printed on the PRIMARY screen so the result persists after exit.
+    const tail = joined.slice(joined.lastIndexOf('\x1b[?1049l'));
+    expect(tail).toContain('VERIS v1.0.0');
+    expect(tail).toContain('Scan Complete');
   });
 });

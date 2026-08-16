@@ -5,6 +5,22 @@ All notable changes to VERIS are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- **Persistent animated session header** — the VERIS logo + identity are now
+  session-scoped and pinned via the terminal's alternate screen buffer with
+  full-frame redraw. The header is re-anchored at the top of every frame and can
+  never scroll away or be wiped by dashboard repaints, errors, cancellation, or
+  the final summary (structurally correct on Windows Terminal/ConPTY, where
+  DECSTBM scroll-region pinning is unreliable).
+- **Animated logo intro** — the VERIS logo now draws itself in with a
+  deterministic left-to-right ghost-fill wipe (6 frames + settle, ~150ms/frame)
+  before settling into the persistent header. Character-based, so it works with
+  `--no-color` and `--no-unicode`; disabled on non-TTY, reduced-motion, and
+  `--no-animation` (static header).
+
 ## [1.0.0] - 2026-08-09
 
 ### Added

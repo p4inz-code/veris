@@ -22,6 +22,10 @@ VERIS is a **deterministic security analysis platform** that scans files and dir
 
 The entire analysis pipeline runs **100% offline**. No network calls, no telemetry, no cloud dependency. Identical inputs always produce identical analysis results — findings, evidence, ordering, and risk scores are byte-for-byte reproducible. Report files also record a run ID and timestamps as part of the report contract.
 
+> **Status**: v1.0.0 is the current stable release (frozen). Interactive scans show
+> a persistent animated VERIS header that stays pinned for the whole session —
+> see [MAINTENANCE](MAINTENANCE.md) for the freeze status and known limitations.
+
 ```bash
 # Scan the current directory
 npx veris-cli scan

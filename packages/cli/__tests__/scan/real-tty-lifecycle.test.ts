@@ -4,12 +4,15 @@
  * Guards the post-v1.0.0 reliability issue: the VERIS logo was part of the
  * scan-scoped startup screen and was wiped by the first dashboard repaint.
  * The header is now SESSION-scoped — owned by {@link SessionHeader} — and
- * renders exactly once per interactive session. No scan lifecycle event
- * (progress, dashboard repaint, error, cancellation, summary) may erase or
- * re-create it.
+ * repainted as part of EVERY full frame on the alternate screen buffer, so
+ * it is re-anchored at the top of the terminal on every update. No scan
+ * lifecycle event (progress, dashboard repaint, error, cancellation,
+ * summary) can make it disappear.
  *
  * Invariants covered:
- * - Header initializes exactly once and is never re-created.
+ * - The session starts on the alternate screen buffer and the header is
+ *   present in the stream from the first write onward (never re-created,
+ *   never absent).
  * - Header remains during progress, dashboard repaints, errors, fast scan
  *   completion, normal completion, and cancellation.
  * - The animation timer is active only while the session is active and stops
@@ -27,6 +30,10 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import { isCancelRequested, isScanActive, runScan } from '../../src/commands/scan.js';
 import { DashboardRenderer } from '../../src/scan/progress/dashboard-renderer.js';
+import {
+  HEADER_FRAME_INTERVAL_MS,
+  INTRO_FRAME_COUNT,
+} from '../../src/scan/progress/session-header.js';
 import type { TerminalCapabilities } from '../../src/ui/index.js';
 import { setSymbolSet, resetSymbolSet } from '../../src/ui/index.js';
 import {
@@ -156,23 +163,30 @@ function hasCursorControl(text: string): boolean {
   return /\x1b\[[0-9;]*[ABCDEFGHJK]/.test(text);
 }
 
-/** Count occurrences of the session header identity line (rendered once). */
+/**
+ * Count occurrences of the session header identity line in the stream.
+ *
+ * With the full-frame redraw model the header is repainted with every frame,
+ * so the invariant is "present from the first write onward" (>= 1), not
+ * "rendered exactly once". The visible-screen invariant (header pinned at
+ * the top after every update) is asserted by the VT-terminal model tests.
+ */
 function countHeaderRenders(text: string): number {
   return (text.match(/VERIS v1\.0\.0/g) ?? []).length;
 }
 
 /**
- * Count body-region repaint operations. Each body repaint positions at the
- * top of the DECSTBM body region and erases to the end of the display
- * (`\x1b[<H+1>;1H\x1b[0J`) — one `\x1b[0J` per repaint.
+ * Count full-frame erase operations. Each body repaint ends with `\x1b[0J`
+ * (erase below the frame) — one per repaint, plus the final primary-screen
+ * dump on dispose.
  */
 function countWipes(text: string): number {
   return (text.match(/\x1b\[0J/g) ?? []).length;
 }
 
-/** All CSI escapes must be well-formed (`\x1b[ ... letter`) and balanced. */
+/** All CSI escapes must be well-formed (`\x1b[ ... letter`, incl. `?` private-mode prefix) and balanced. */
 function hasMalformedAnsi(text: string): boolean {
-  const stripped = text.replace(/\x1b\[[0-9;]*[A-Za-z]/g, '');
+  const stripped = text.replace(/\x1b\[[?0-9;]*[A-Za-z]/g, '');
   return stripped.includes('\x1b');
 }
 
@@ -184,7 +198,7 @@ afterEach(() => {
 // ── PERSISTENT SESSION HEADER ──
 
 describe('persistent session header (real-TTY)', () => {
-  it('initializes exactly once and survives the full lifecycle', () => {
+  it('starts on the alternate screen and keeps the header through the full lifecycle', () => {
     const caps = captureStdout();
     const renderer = new DashboardRenderer(ttyCaps());
     try {
@@ -205,8 +219,10 @@ describe('persistent session header (real-TTY)', () => {
       void renderer.dispose();
 
       const joined = caps.lines.join('');
-      // The header was rendered exactly once — never re-created, never wiped.
-      expect(countHeaderRenders(joined)).toBe(1);
+      // The interactive session opens on the alternate screen buffer.
+      expect(joined.startsWith('\x1b[?1049h')).toBe(true);
+      // The header is present from the first write onward — never absent.
+      expect(countHeaderRenders(joined)).toBeGreaterThan(0);
       // The summary rendered below the header; the header is still present.
       expect(joined).toContain('Scan Complete');
       expect(joined.indexOf('VERIS v1.0.0')).toBeLessThan(joined.indexOf('Scan Complete'));
@@ -226,7 +242,7 @@ describe('persistent session header (real-TTY)', () => {
         renderer.onProgress({ stage: 'extraction', filesProcessed: i + 1, totalFiles: 100 });
       }
       const joined = caps.lines.join('');
-      expect(countHeaderRenders(joined)).toBe(1);
+      expect(countHeaderRenders(joined)).toBeGreaterThan(0);
       expect(joined).toContain('STATISTICS');
     } finally {
       caps.restore();
@@ -245,7 +261,7 @@ describe('persistent session header (real-TTY)', () => {
       void renderer.dispose();
 
       const joined = caps.lines.join('');
-      expect(countHeaderRenders(joined)).toBe(1);
+      expect(countHeaderRenders(joined)).toBeGreaterThan(0);
       expect(joined).toContain('Scan Complete');
     } finally {
       caps.restore();
@@ -264,7 +280,7 @@ describe('persistent session header (real-TTY)', () => {
       void renderer.dispose();
 
       const joined = caps.lines.join('');
-      expect(countHeaderRenders(joined)).toBe(1);
+      expect(countHeaderRenders(joined)).toBeGreaterThan(0);
       expect(joined).toContain('Scan Cancelled');
     } finally {
       caps.restore();
@@ -282,7 +298,7 @@ describe('persistent session header (real-TTY)', () => {
       renderer.onProgress({ stage: 'extraction', filesProcessed: 1, totalFiles: 100 });
 
       const joined = caps.lines.join('');
-      expect(countHeaderRenders(joined)).toBe(1);
+      expect(countHeaderRenders(joined)).toBeGreaterThan(0);
       expect(joined).toContain('Cannot read file');
       // The header text precedes the error text — nothing was written over it.
       expect(joined.indexOf('VERIS v1.0.0')).toBeLessThan(joined.indexOf('Cannot read file'));
@@ -360,7 +376,7 @@ describe('persistent session header (real-TTY)', () => {
       await renderer.dispose();
       await renderer.dispose();
       expect(caps.lines.length).toBe(afterFirst);
-      expect(countHeaderRenders(caps.lines.join(''))).toBe(1);
+      expect(countHeaderRenders(caps.lines.join(''))).toBeGreaterThan(0);
     } finally {
       caps.restore();
       await renderer.dispose();
@@ -380,6 +396,43 @@ describe('persistent session header (real-TTY)', () => {
       vi.advanceTimersByTime(10_000);
       expect(caps.lines.length).toBe(afterDispose);
       expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      caps.restore();
+      void renderer.dispose();
+    }
+  });
+
+  it('the logo intro completes under a burst of scan events without disturbing the dashboard', () => {
+    vi.useFakeTimers();
+    setSymbolSet('unicode');
+    const caps = captureStdout();
+    const renderer = new DashboardRenderer(animatedTtyCaps());
+    try {
+      const session = sessionWithStages();
+      renderer.onStart(session);
+
+      // Burst of scan activity while the intro is still running.
+      for (let i = 0; i < 20; i++) {
+        renderer.onProgress({ stage: 'extraction', filesProcessed: i + 1, totalFiles: 100 });
+        renderer.onStageChange('discovery', i === 0 ? 'running' : 'completed');
+      }
+
+      // Advance through the full intro (header ticks at HEADER_FRAME_INTERVAL_MS).
+      vi.advanceTimersByTime(HEADER_FRAME_INTERVAL_MS * INTRO_FRAME_COUNT + 1);
+      const joined = caps.lines.join('');
+      // The intro ran to completion: the full identity + logo are present.
+      expect(joined).toContain('VERIS v1.0.0');
+      expect(joined).toContain('\u2588');
+      // The intro was visibly progressive: the ghost silhouette (and the
+      // real logo) drew in BEFORE the identity line filled in (the wipe
+      // runs before the settle).
+      expect(joined.indexOf('\u2588')).toBeGreaterThanOrEqual(0);
+      expect(joined.indexOf('\u2588')).toBeLessThan(joined.indexOf('VERIS v1.0.0'));
+      // The dashboard body rendered below the header during the burst.
+      expect(joined).toContain('STATISTICS');
+
+      void renderer.dispose();
+      expect(vi.getTimerCount()).toBe(0); // no leaked timers
     } finally {
       caps.restore();
       void renderer.dispose();
@@ -416,7 +469,7 @@ describe('terminal-width integrity (real-TTY)', () => {
 
         const joined = caps.lines.join('');
         expect(hasMalformedAnsi(joined)).toBe(false);
-        expect(countHeaderRenders(joined)).toBe(1);
+        expect(countHeaderRenders(joined)).toBeGreaterThan(0);
         expect(joined).toContain('Scan Complete');
       } finally {
         caps.restore();
@@ -437,16 +490,16 @@ describe('terminal-width integrity (real-TTY)', () => {
       renderer.onProgress({ stage: 'extraction', filesProcessed: 2, totalFiles: 100 });
       renderer.onProgress({ stage: 'extraction', filesProcessed: 3, totalFiles: 100 });
       const joined = caps.lines.join('');
-      // Each dashboard repaint wipes only the body region (below the header).
+      // Each dashboard repaint ends with an erase-below the re-anchored frame.
       expect(countWipes(joined)).toBeGreaterThan(afterFirst);
-      expect(countHeaderRenders(joined)).toBe(1);
+      expect(countHeaderRenders(joined)).toBeGreaterThan(0);
     } finally {
       caps.restore();
       void renderer.dispose();
     }
   });
 
-  it('re-pins and redraws the body when the terminal is resized', () => {
+  it('redraws the body when the terminal is resized', () => {
     const caps = captureStdout();
     const renderer = new DashboardRenderer(ttyCaps(80));
     const hadRows = Object.getOwnPropertyDescriptor(process.stdout, 'rows');
@@ -461,8 +514,8 @@ describe('terminal-width integrity (real-TTY)', () => {
       process.stdout.emit('resize');
       const joined = caps.lines.join('');
       expect(caps.lines.length).toBeGreaterThan(before); // redrew
-      expect(joined).toContain('\x1b[0J'); // body region erased + rewritten
-      expect(countHeaderRenders(joined)).toBe(1); // header never re-created
+      expect(joined).toContain('\x1b[0J'); // frame erased below + rewritten
+      expect(countHeaderRenders(joined)).toBeGreaterThan(0); // header present
     } finally {
       if (hadRows !== undefined) {
         Object.defineProperty(process.stdout, 'rows', hadRows);

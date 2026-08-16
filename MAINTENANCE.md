@@ -1,5 +1,47 @@
 # VERIS Maintenance Guide
 
+## Current Status — v1.0.0 Frozen (maintenance freeze)
+
+**v1.0.0 is the current stable release** (tag `v1.0.0`, published as `veris-cli` on
+npm). The tag and the npm release are **immutable**: no tag movement, no republish,
+no new version without an explicit decision to end the freeze. `main` is in
+maintenance mode — bug fixes only, no new features (see `ROADMAP.md` for deferred
+work).
+
+### Shipped interactive terminal UX (post-1.0.0 hardening)
+
+- **Persistent animated session header** — `packages/cli/src/scan/progress/session-header.ts`.
+  The VERIS logo + identity are SESSION-scoped: created once at startup, never
+  re-created or wiped by scan lifecycle events (dashboard, errors, cancellation,
+  summary), and only released at `dispose()`.
+- **Rendering model** — the interactive session runs on the terminal's ALTERNATE
+  SCREEN BUFFER (`\x1b[?1049h` / `\x1b[?1049l`) with FULL-FRAME REDRAW: every
+  repaint is home + header lines + body + erase-below, so the header is
+  re-anchored at the top of every frame and can never scroll away. DECSTBM
+  scroll-region pinning is deliberately NOT used (unreliable on Windows
+  Terminal/ConPTY: microsoft/terminal#19016, #3673).
+- **Logo intro animation** — a deterministic left-to-right ghost-fill wipe
+  (6 frames) plus one settle frame at ~150ms/frame, driven by a single timer in
+  the header. Character-based, so it works with `--no-color` and `--no-unicode`;
+  disabled on non-TTY, reduced-motion, or `--no-animation` (static header).
+- **Regression tests** — `packages/cli/__tests__/scan/session-header.test.ts`,
+  `real-tty-lifecycle.test.ts`, and `vt-terminal-model.test.ts` cover the header
+  lifecycle, the animation frames, and finite-height terminal behavior.
+
+### Known limitations
+
+- The logo intro takes ~1.05s; a scan that finishes faster closes the alternate
+  screen mid-wipe and prints the completed header + summary on the primary screen.
+- No benchmark suite (see `.github/workflows/nightly.yml`).
+- AI features (`explain`/`summarize`) require API keys and are consumer-only.
+- Only the CLI package (`veris-cli`) is published; the other workspace packages are
+  internal.
+
+### Deferred work
+
+See `ROADMAP.md` (V2+): plugin SDK, AI-assisted rule writing, CI integration
+runner, web dashboard, additional rule packs, extension marketplace.
+
 ## Versioning
 
 All VERIS packages use independent versioning managed by [Changesets](https://github.com/changesets/changesets).

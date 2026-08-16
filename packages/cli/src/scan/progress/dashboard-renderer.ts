@@ -19,15 +19,30 @@
  * wiped, never re-created, and only stops animating at session close
  * (dispose()).
  *
+ * RENDERING MODEL — ALTERNATE SCREEN + FULL-FRAME REDRAW
+ * -------------------------------------------------------
+ * The interactive session runs on the terminal's alternate screen buffer
+ * (entered by the SessionHeader). Every repaint is a FULL FRAME: home +
+ * header lines + body lines + erase-below (`\x1b[H` + header + body +
+ * `\x1b[0J`). Because every frame starts at row 1 and redraws the header
+ * from scratch, the header is re-anchored at the top of every frame and can
+ * never scroll away, be erased by the body, or be pushed into scrollback —
+ * on any terminal, including Windows Terminal/ConPTY where DECSTBM
+ * scroll-region pinning is unreliable (microsoft/terminal#19016, #3673).
+ *
+ * The body is CLIPPED to the visible screen below the header so a frame
+ * never exceeds the terminal height and nothing scrolls mid-frame.
+ *
  * CURSOR PROTOCOL
  * ---------------
- * - The SessionHeader owns the top `lineCount` rows and reports its region.
- * - This renderer owns the rows below it and reports its own line count back
- *   via header.setBodyLineCount(), so the header animation can repaint itself
- *   in place without touching the body.
- * - Invariant: after any complete write, the cursor sits at the bottom of the
- *   body region. Both the header animation and this renderer restore that
+ * - The SessionHeader owns the header content and its animation and exposes
+ *   renderLines(frame); this renderer owns the frame composition.
+ * - After any complete write the cursor sits at the bottom of the written
+ *   content; both the header animation and this renderer restore that
  *   position, so their timers never corrupt each other.
+ * - dispose() leaves the alternate screen and prints the final frame
+ *   (header + summary) on the PRIMARY screen so the result persists after
+ *   the interactive session ends.
  *
  * Design rules:
  * - Stable row positions — no jumping layouts, no flicker.
@@ -128,22 +143,36 @@ export class DashboardRenderer implements ProgressRenderer {
   private finalized: boolean = false;
   /** Terminal resize handler (TTY only; bound in onStart, removed in dispose). */
   private readonly handleResize = (): void => {
-    // Re-pin the header region to the new height, then redraw the body.
-    this.header?.updateRegion();
+    const columns =
+      typeof process.stdout.columns === 'number' && process.stdout.columns > 0
+        ? process.stdout.columns
+        : this.caps.width;
+    const rows =
+      typeof process.stdout.rows === 'number' && process.stdout.rows > 0
+        ? process.stdout.rows
+        : this.caps.height;
+    this.caps = { ...this.caps, width: columns, height: rows };
+    this.header?.setSize(columns, rows);
     if (!this.caps.isTty) return;
     if (this.finalized) {
+      // Repaint the final summary frame at the new size.
       this.renderBody(this.finalSummaryText.split('\n'));
       return;
     }
-    if (this.caps.prefersReducedMotion) {
-      if (this.bodyPhase === 'config') {
-        this.renderBody(this.configBodyLines);
-      } else {
-        this.renderDashboard();
+    if (this.bodyPhase === 'config') {
+      // Re-render the startup body at the new width and repaint the frame.
+      if (this.currentSession !== null) {
+        this.configBodyLines = renderStartupBody(this.currentSession.config, {
+          version: CLI_VERSION,
+          knowledgePackCount: this.knowledgePackCount,
+        });
       }
+      this.renderBody(this.configBodyLines);
     } else {
-      // The animation loop picks up the redraw on its next tick.
-      this.needsRedraw = true;
+      // A resize can change line wrapping even when the content string is
+      // unchanged, so force a repaint rather than trusting the cache.
+      this.lastRenderedContent = '';
+      this.renderDashboard();
     }
   };
 
@@ -166,8 +195,9 @@ export class DashboardRenderer implements ProgressRenderer {
     if (this.caps.isTty) {
       // Persistent session header — created exactly once per interactive
       // session and owned by the session lifecycle (disposed in dispose()).
-      // The header pins itself at the top of the terminal with a DECSTBM
-      // scroll region so the body below can never scroll it away.
+      // It enters the alternate screen buffer; every repaint below redraws
+      // header + body together as one frame, so the header is re-anchored at
+      // the top of every frame and can never scroll away.
       if (this.header === null) {
         this.header = new SessionHeader({ caps: this.caps });
         this.header.start();
@@ -356,10 +386,30 @@ export class DashboardRenderer implements ProgressRenderer {
   async dispose(): Promise<void> {
     this.stopAnimation();
     process.stdout.removeListener('resize', this.handleResize);
-    // Stop the session header animation and restore the terminal scroll
-    // region exactly once (idempotent).
     if (this.header !== null) {
+      const wasTty = this.caps.isTty;
+      // Stop the header animation and leave the alternate screen buffer
+      // (restores the primary screen) exactly once (idempotent).
       this.header.dispose();
+      if (wasTty && this.finalSummaryText.length > 0) {
+        // Print the final frame on the PRIMARY screen so the result persists
+        // after the interactive session ends (the alternate screen canvas is
+        // discarded on exit). Clipped to the screen so the header stays
+        // visible at the top of the result. finalLines() renders the
+        // COMPLETED header (full logo + identity) even when the session
+        // ended mid-reveal.
+        const headerLines = this.header.finalLines();
+        const R = this.caps.height > 0 ? this.caps.height : 24;
+        const body = this.finalSummaryText
+          .split('\n')
+          .slice(0, Math.max(0, R - headerLines.length));
+        const frame = [...headerLines, ...body];
+        for (let i = 0; i < frame.length; i++) {
+          const isLast = i === frame.length - 1;
+          process.stdout.write(frame[i] + (isLast && frame.length >= R ? '' : '\n'));
+        }
+        process.stdout.write('\x1b[0J');
+      }
       this.header = null;
     }
   }
@@ -386,29 +436,50 @@ export class DashboardRenderer implements ProgressRenderer {
   // ── Body Region Management ──
 
   /**
-   * Write body content (errors first, then content) below the pinned header.
+   * Paint the full interactive frame: header + body, anchored at the top.
    *
-   * The header owns the top `H` rows and has pinned them with a DECSTBM
-   * scroll region. This renderer positions at the top of the body region
-   * (row H+1) with absolute CUP, erases everything below (`\x1b[0J`), and
-   * writes the new body. The terminal scrolls ONLY the body region when the
-   * body grows past the bottom — the header rows can never scroll away, no
-   * matter how tall the body gets.
+   * THE REDRAW MODEL: every paint positions at the home position and
+   * rewrites the ENTIRE frame — header lines first, then the body — and
+   * erases anything left below (`\x1b[0J`). The header is therefore
+   * re-anchored at the top of every frame: it can never scroll away, be
+   * erased by the body, or be pushed into scrollback, no matter how the
+   * terminal handles scrolling (this is the mechanism that is structurally
+   * correct on Windows Terminal/ConPTY, where DECSTBM scroll-region pinning
+   * is unreliable).
+   *
+   * The body is clipped to the visible screen below the header so a frame
+   * never exceeds the terminal height and nothing scrolls mid-frame.
    */
   private renderBody(contentLines: readonly string[]): void {
-    const H = this.header?.lineCount ?? 0;
-    if (this.caps.isTty && H > 0) {
-      process.stdout.write(`\x1b[${H + 1};1H\x1b[0J`);
+    if (this.caps.isTty && this.header !== null) {
+      const headerLines = this.header.renderLines(this.header.frameIndex);
+      const H = headerLines.length;
+      const R = this.header.height;
+      const body = [...this.pendingErrors, ...contentLines].slice(0, Math.max(0, R - H));
+      const frame = [...headerLines, ...body];
+
+      process.stdout.write('\x1b[H'); // home — re-anchor the frame at row 1
+      for (let i = 0; i < frame.length; i++) {
+        const isLast = i === frame.length - 1;
+        // Never emit a newline on the bottom row: when the frame fills the
+        // screen exactly, a trailing newline would scroll the whole frame up
+        // one row (pushing the header off the top of the screen).
+        process.stdout.write(frame[i] + (isLast && frame.length >= R ? '' : '\n'));
+      }
+      process.stdout.write('\x1b[0J'); // erase leftover rows below the frame
+
+      this.lastRenderedLineCount = body.length;
+      this.lastRenderedContent = [...this.pendingErrors, ...contentLines].join('\n');
+      this.header.setBodyLineCount(body.length);
+    } else {
+      // Defensive: non-TTY callers write sequentially (no cursor control).
+      for (const line of this.pendingErrors) {
+        process.stdout.write(line + '\n');
+      }
+      for (const line of contentLines) {
+        process.stdout.write(line + '\n');
+      }
     }
-    for (const line of this.pendingErrors) {
-      process.stdout.write(line + '\n');
-    }
-    for (const line of contentLines) {
-      process.stdout.write(line + '\n');
-    }
-    this.lastRenderedLineCount = this.errorLineCount() + contentLines.length;
-    this.lastRenderedContent = [...this.pendingErrors, ...contentLines].join('\n');
-    this.header?.setBodyLineCount(this.lastRenderedLineCount);
   }
 
   /** Total lines occupied by pending error text. */

@@ -55,8 +55,8 @@ function makeCaps(overrides: Partial<TerminalCapabilities> = {}): TerminalCapabi
   });
 }
 
-function ttyCaps(width = 80): TerminalCapabilities {
-  return makeCaps({ width, isTty: true, prefersReducedMotion: true, unicode: true });
+function ttyCaps(width = 80, height = 24): TerminalCapabilities {
+  return makeCaps({ width, height, isTty: true, prefersReducedMotion: true, unicode: true });
 }
 
 /**
@@ -67,9 +67,9 @@ function ttyCaps(width = 80): TerminalCapabilities {
  * The `now` option is accepted for compatibility but no longer affects
  * rendering — the header is session-scoped and no startup window remains.
  */
-function ttyRenderer(width = 80): DashboardRenderer {
+function ttyRenderer(width = 80, height = 24): DashboardRenderer {
   let t = 0;
-  return new DashboardRenderer(ttyCaps(width), { now: () => (t += 10_000) });
+  return new DashboardRenderer(ttyCaps(width, height), { now: () => (t += 10_000) });
 }
 
 /** Strip ANSI escape codes for readable assertions. */
@@ -152,7 +152,10 @@ describe('DashboardRenderer', () => {
   it('renders the four dashboard sections with real counters', () => {
     setSymbolSet('unicode');
     const caps = captureStdout();
-    const renderer = ttyRenderer();
+    // Tall terminal: the 10-row Unicode header leaves room for the full
+    // dashboard body (on short terminals the frame tail is clipped, which
+    // is covered by the VT-terminal model tests).
+    const renderer = ttyRenderer(80, 40);
     try {
       renderer.onStart(sessionWithStages());
       renderer.onStageChange('discovery', 'completed');
