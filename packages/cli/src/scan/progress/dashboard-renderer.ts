@@ -126,6 +126,26 @@ export class DashboardRenderer implements ProgressRenderer {
   private configBodyLines: readonly string[] = [];
   /** Whether the summary/cancellation screen has been written. */
   private finalized: boolean = false;
+  /** Terminal resize handler (TTY only; bound in onStart, removed in dispose). */
+  private readonly handleResize = (): void => {
+    // Re-pin the header region to the new height, then redraw the body.
+    this.header?.updateRegion();
+    if (!this.caps.isTty) return;
+    if (this.finalized) {
+      this.renderBody(this.finalSummaryText.split('\n'));
+      return;
+    }
+    if (this.caps.prefersReducedMotion) {
+      if (this.bodyPhase === 'config') {
+        this.renderBody(this.configBodyLines);
+      } else {
+        this.renderDashboard();
+      }
+    } else {
+      // The animation loop picks up the redraw on its next tick.
+      this.needsRedraw = true;
+    }
+  };
 
   constructor(caps?: TerminalCapabilities, _options?: DashboardRendererOptions) {
     this.injectedCaps = caps ?? null;
@@ -146,6 +166,8 @@ export class DashboardRenderer implements ProgressRenderer {
     if (this.caps.isTty) {
       // Persistent session header — created exactly once per interactive
       // session and owned by the session lifecycle (disposed in dispose()).
+      // The header pins itself at the top of the terminal with a DECSTBM
+      // scroll region so the body below can never scroll it away.
       if (this.header === null) {
         this.header = new SessionHeader({ caps: this.caps });
         this.header.start();
@@ -159,6 +181,9 @@ export class DashboardRenderer implements ProgressRenderer {
         knowledgePackCount: this.knowledgePackCount,
       });
       this.renderBody(this.configBodyLines);
+
+      // Follow terminal resizes so the pinned region tracks the new height.
+      process.stdout.on('resize', this.handleResize);
 
       // Start the body repaint loop for interactive TTY.
       if (!this.caps.prefersReducedMotion) {
@@ -263,13 +288,7 @@ export class DashboardRenderer implements ProgressRenderer {
 
     // Show errors below the header immediately and invalidate the content
     // cache so the next repaint redraws the dashboard below the errors.
-    this.clearBody();
-    for (const line of this.pendingErrors) {
-      process.stdout.write(line + '\n');
-    }
-    this.lastRenderedLineCount = this.errorLineCount();
-    this.lastRenderedContent = '';
-    this.header?.setBodyLineCount(this.lastRenderedLineCount);
+    this.renderBody([]);
     this.needsRedraw = true;
   }
 
@@ -336,7 +355,9 @@ export class DashboardRenderer implements ProgressRenderer {
 
   async dispose(): Promise<void> {
     this.stopAnimation();
-    // Stop the session header animation exactly once (idempotent).
+    process.stdout.removeListener('resize', this.handleResize);
+    // Stop the session header animation and restore the terminal scroll
+    // region exactly once (idempotent).
     if (this.header !== null) {
       this.header.dispose();
       this.header = null;
@@ -365,36 +386,20 @@ export class DashboardRenderer implements ProgressRenderer {
   // ── Body Region Management ──
 
   /**
-   * Clear the body region (rows below the header) in place.
+   * Write body content (errors first, then content) below the pinned header.
    *
-   * Cursor math (0-indexed rows, H = header line count, n = body line count):
-   * - Cursor is at row H+n (bottom of the body region, after the last `\n`).
-   * - Move up n rows to row H (top of the body region, below the header).
-   * - Erase each body line, moving down between them.
-   * - Move back up n-1 rows to row H so new content is written below the
-   *   header — the header itself is never erased.
+   * The header owns the top `H` rows and has pinned them with a DECSTBM
+   * scroll region. This renderer positions at the top of the body region
+   * (row H+1) with absolute CUP, erases everything below (`\x1b[0J`), and
+   * writes the new body. The terminal scrolls ONLY the body region when the
+   * body grows past the bottom — the header rows can never scroll away, no
+   * matter how tall the body gets.
    */
-  private clearBody(): void {
-    const n = this.lastRenderedLineCount;
-    if (n <= 0 || !this.caps.isTty) return;
-
-    process.stdout.write(`\x1b[${n}A\r`);
-    for (let i = 0; i < n; i++) {
-      process.stdout.write('\x1b[2K');
-      if (i < n - 1) {
-        process.stdout.write('\x1b[1B');
-      }
-    }
-    if (n > 1) {
-      process.stdout.write(`\x1b[${n - 1}A`);
-    }
-    this.lastRenderedLineCount = 0;
-    this.header?.setBodyLineCount(0);
-  }
-
-  /** Write body content (errors first, then content) below the header. */
   private renderBody(contentLines: readonly string[]): void {
-    this.clearBody();
+    const H = this.header?.lineCount ?? 0;
+    if (this.caps.isTty && H > 0) {
+      process.stdout.write(`\x1b[${H + 1};1H\x1b[0J`);
+    }
     for (const line of this.pendingErrors) {
       process.stdout.write(line + '\n');
     }

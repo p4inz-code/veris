@@ -161,9 +161,13 @@ function countHeaderRenders(text: string): number {
   return (text.match(/VERIS v1\.0\.0/g) ?? []).length;
 }
 
-/** Count body-region wipe operations (`\x1b[<N>A\r` clears the body below). */
+/**
+ * Count body-region repaint operations. Each body repaint positions at the
+ * top of the DECSTBM body region and erases to the end of the display
+ * (`\x1b[<H+1>;1H\x1b[0J`) — one `\x1b[0J` per repaint.
+ */
 function countWipes(text: string): number {
-  return (text.match(/\x1b\[\d+A\r/g) ?? []).length;
+  return (text.match(/\x1b\[0J/g) ?? []).length;
 }
 
 /** All CSI escapes must be well-formed (`\x1b[ ... letter`) and balanced. */
@@ -437,6 +441,34 @@ describe('terminal-width integrity (real-TTY)', () => {
       expect(countWipes(joined)).toBeGreaterThan(afterFirst);
       expect(countHeaderRenders(joined)).toBe(1);
     } finally {
+      caps.restore();
+      void renderer.dispose();
+    }
+  });
+
+  it('re-pins and redraws the body when the terminal is resized', () => {
+    const caps = captureStdout();
+    const renderer = new DashboardRenderer(ttyCaps(80));
+    const hadRows = Object.getOwnPropertyDescriptor(process.stdout, 'rows');
+    try {
+      const session = sessionWithStages();
+      renderer.onStart(session);
+      renderer.onProgress({ stage: 'extraction', filesProcessed: 1, totalFiles: 100 });
+      const before = caps.lines.length;
+
+      // Emit a resize: the renderer must re-pin the region and redraw.
+      Object.defineProperty(process.stdout, 'rows', { configurable: true, value: 30 });
+      process.stdout.emit('resize');
+      const joined = caps.lines.join('');
+      expect(caps.lines.length).toBeGreaterThan(before); // redrew
+      expect(joined).toContain('\x1b[0J'); // body region erased + rewritten
+      expect(countHeaderRenders(joined)).toBe(1); // header never re-created
+    } finally {
+      if (hadRows !== undefined) {
+        Object.defineProperty(process.stdout, 'rows', hadRows);
+      } else {
+        delete (process.stdout as { rows?: number }).rows;
+      }
       caps.restore();
       void renderer.dispose();
     }

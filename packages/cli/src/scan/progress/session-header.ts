@@ -23,15 +23,28 @@
  *   header row. The animation is purely time-driven and NEVER depends on
  *   scan progress.
  *
- * CURSOR PROTOCOL
- * ---------------
- * - The header owns the top `lineCount` rows of the terminal.
+ * CURSOR / SCROLL PROTOCOL
+ * ------------------------
+ * The header is pinned at the top of the terminal with a DECSTBM scroll
+ * region (`\x1b[<H+1>;<rows>r`): the body renders INSIDE the region, so when
+ * the body grows taller than the screen the terminal scrolls ONLY the body
+ * region — the header rows above the region can never scroll away. This is
+ * the mechanism terminals themselves use to pin status lines (vim, less,
+ * top) and it is supported by Windows Terminal/ConPTY.
+ *
+ * - The header owns the top `lineCount` rows; they are outside the scroll
+ *   region and never move.
  * - The body renderer (DashboardRenderer) owns the rows below and reports its
  *   current line count via setBodyLineCount().
- * - Invariant: after any complete write, the cursor sits at the bottom of the
- *   body region. The status-line animation moves up to the status row, erases
- *   + rewrites it, and moves back down — it never touches logo rows or body
- *   rows.
+ * - The body renderer positions at the region top (`\x1b[<H+1>;1H`) and
+ *   erases to the end of the display before every repaint, so leftover rows
+ *   from the previous body vanish without ever touching the header.
+ * - The status-line animation reaches the status row with ABSOLUTE
+ *   positioning (`\x1b[<H>;1H` — CUP is screen-absolute, DECOM off), erases
+ *   + rewrites it in place, then restores the cursor to the bottom of the
+ *   body region. It never touches logo rows or body rows.
+ * - dispose() resets the region (`\x1b[r`) so the terminal returns to normal
+ *   scrolling for the shell prompt.
  *
  * ANIMATION
  * ---------
@@ -249,6 +262,8 @@ export class SessionHeader {
   private bodyLineCount = 0;
   private started = false;
   private disposed = false;
+  /** Current terminal height in rows (updated on resize). */
+  private height: number;
   /** Logo + identity + meta lines (static; written exactly once). */
   private readonly staticLines: readonly string[];
 
@@ -257,6 +272,7 @@ export class SessionHeader {
     this.statusText = options.statusText ?? 'VERIS session active';
     this.frameIntervalMs = options.frameIntervalMs ?? HEADER_FRAME_INTERVAL_MS;
     this.noAnimation = options.noAnimation ?? false;
+    this.height = this.caps.height > 0 ? this.caps.height : 24;
     const full = renderSessionHeaderLines(this.caps, 0, {
       animated: false,
       statusText: this.statusText,
@@ -308,6 +324,12 @@ export class SessionHeader {
       process.stdout.write(line + '\n');
     }
 
+    if (this.caps.isTty) {
+      // Pin the header: confine scrolling to the body region below it. The
+      // cursor is already at the region top (one past the last header line).
+      this.setScrollRegion();
+    }
+
     if (this.shouldAnimate()) {
       this.timer = setInterval(() => {
         this.frameIndex++;
@@ -324,8 +346,10 @@ export class SessionHeader {
   /**
    * Stop the animation and release the header.
    *
-   * Exactly-once disposal: repeated calls are no-ops. No output is written
-   * by dispose() itself and no timer is left running.
+   * Exactly-once disposal: repeated calls are no-ops. The DECSTBM scroll
+   * region is reset (`\x1b[r`) so the terminal returns to normal scrolling
+   * for the shell prompt. No output is written after the reset and no timer
+   * is left running.
    */
   dispose(): void {
     if (this.disposed) return;
@@ -334,39 +358,72 @@ export class SessionHeader {
       clearInterval(this.timer);
       this.timer = null;
     }
+    // Restore the full-screen scroll region. Only on TTY (the region is
+    // never set in non-TTY mode).
+    if (this.caps.isTty) {
+      process.stdout.write('\x1b[r');
+    }
+  }
+
+  /**
+   * Re-emit the DECSTBM scroll region after the terminal is resized.
+   *
+   * Called by the session owner (DashboardRenderer) on stdout 'resize'.
+   * The header rows stay pinned; the body region follows the new height.
+   */
+  updateRegion(): void {
+    if (!this.caps.isTty || this.disposed) return;
+    if (typeof process.stdout.rows === 'number' && process.stdout.rows > 0) {
+      this.height = process.stdout.rows;
+    }
+    this.setScrollRegion();
   }
 
   // ── Internal ──
 
   /**
+   * Pin the header by confining scrolling to the body region below it.
+   *
+   * DECSTBM (`\x1b[<H+1>;<rows>r`) makes the terminal scroll only within
+   * rows H+1..rows when newlines are written at the bottom. The header rows
+   * 1..H are outside the region and can never scroll away, no matter how
+   * tall the body grows. This is the structural fix for the header
+   * scrolling into scrollback on real terminals.
+   */
+  private setScrollRegion(): void {
+    if (!this.caps.isTty || this.disposed) return;
+    const H = this.lineCount;
+    const R = this.height;
+    if (H >= R) return; // Degenerate: header taller than the screen.
+    process.stdout.write(`\x1b[${H + 1};${R}r`);
+  }
+
+  /**
    * Repaint only the status line (the last header row) in place.
    *
-   * Cursor math (0-indexed rows, relative to the start of the session
-   * output):
-   * - Header rows: 0..H-1 (H = lineCount); status line is row H-1.
-   * - Body rows: H..H+B-1 (B = bodyLineCount); after a body render the
-   *   cursor sits at row H+B (one past the last body line).
-   * - Move up B+1 rows to reach the status line at row H-1.
-   * - Erase + rewrite the status line (followed by `\n`), ending at row H.
-   * - Move back down B rows to row H+B, restoring the cursor to the bottom
-   *   of the body region.
+   * The status row is ABOVE the DECSTBM scroll region, so relative cursor
+   * movement (CUU/CUD) cannot reach it — CUP is used instead, which is
+   * screen-absolute (DECOM off) and works regardless of the scroll region:
+   * - CUP to the status row (row H), erase the line, rewrite the status.
+   * - CUP back to the body write position: the row right after the last
+   *   body line, clamped to the bottom of the screen.
    *
-   * Logo rows 0..H-2 and body rows H..H+B-1 are never touched.
+   * Logo rows 1..H-1 and body rows are never touched.
    */
   private repaintStatusLine(): void {
+    if (!this.caps.isTty) return;
+    const H = this.lineCount;
+    const R = this.height;
+    if (H >= R) return;
+
     const theme = getResolvedTheme();
     const symbols = getSymbolSet();
-    const R = ansiReset();
-    const status = renderStatusLine(theme, symbols, R, this.frameIndex, true, this.statusText);
-    const B = this.bodyLineCount;
+    const reset = ansiReset();
+    const status = renderStatusLine(theme, symbols, reset, this.frameIndex, true, this.statusText);
 
-    if (B + 1 > 0) {
-      process.stdout.write(`\x1b[${B + 1}A`);
-    }
-    process.stdout.write(`\r\x1b[2K`);
-    process.stdout.write(status + '\n');
-    if (B > 0) {
-      process.stdout.write(`\x1b[${B}B`);
-    }
+    process.stdout.write(`\x1b[${H};1H\x1b[2K`);
+    process.stdout.write(status);
+    const bodyRow = Math.min(H + 1 + this.bodyLineCount, R);
+    process.stdout.write(`\x1b[${bodyRow};1H`);
   }
 }

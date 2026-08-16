@@ -304,6 +304,10 @@ export async function runScan(options: ScanOptions): Promise<{ exitCode: number 
       cancelled = true;
       cancelRequested = true;
     } else {
+      // Second Ctrl+C: force exit. Restore the terminal first (stop the
+      // animation and reset the DECSTBM scroll region synchronously) so the
+      // shell prompt is not left inside a stuck header region.
+      void renderer.dispose();
       process.exit(130);
     }
   };

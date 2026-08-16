@@ -311,3 +311,115 @@ describe('SessionHeader lifecycle', () => {
     }
   });
 });
+
+// ── Real-Terminal Scroll-Region Protocol ──
+
+describe('SessionHeader scroll-region protocol (real-terminal pinning)', () => {
+  /** Header height for the default 80-col render: 10 rows. */
+  const H = renderSessionHeaderLines(animatableTtyCaps(), 0).length;
+  const R = 24; // caps height
+
+  it('pins the header with a DECSTBM scroll region on TTY start', () => {
+    const caps = captureStdout();
+    const header = new SessionHeader({ caps: animatableTtyCaps() });
+    try {
+      header.start();
+      const joined = caps.lines.join('');
+      // `\x1b[<H+1>;<rows>r` confines scrolling to the body region below the
+      // header, so body growth can never scroll the header away.
+      expect(joined).toContain(`\x1b[${H + 1};${R}r`);
+    } finally {
+      caps.restore();
+      header.dispose();
+    }
+  });
+
+  it('restores the full-screen scroll region on dispose (TTY)', () => {
+    const caps = captureStdout();
+    const header = new SessionHeader({ caps: animatableTtyCaps() });
+    try {
+      header.start();
+      header.dispose();
+      const joined = caps.lines.join('');
+      expect(joined.endsWith('\x1b[r')).toBe(true);
+      // Repeated dispose emits nothing further.
+      const len = caps.lines.length;
+      header.dispose();
+      header.dispose();
+      expect(caps.lines.length).toBe(len);
+    } finally {
+      caps.restore();
+    }
+  });
+
+  it('does not emit scroll-region sequences in non-TTY mode', () => {
+    const caps = captureStdout();
+    const header = new SessionHeader({ caps: makeCaps({ isTty: false }) });
+    try {
+      header.start();
+      header.dispose();
+      const joined = caps.lines.join('');
+      expect(joined).not.toContain('\x1b[');
+    } finally {
+      caps.restore();
+    }
+  });
+
+  it('repaints the status line with absolute CUP (never cursor-up through the region)', () => {
+    vi.useFakeTimers();
+    const caps = captureStdout();
+    const header = new SessionHeader({ caps: animatableTtyCaps() });
+    try {
+      header.start();
+      header.setBodyLineCount(12);
+      const before = caps.lines.length;
+      vi.advanceTimersByTime(HEADER_FRAME_INTERVAL_MS);
+      const repaint = caps.lines.slice(before).join('');
+      // CUP to the status row (row H), erase line, rewrite, CUP to the body
+      // write position (row H+1+12 clamped to the screen).
+      expect(repaint).toContain(`\x1b[${H};1H\x1b[2K`);
+      expect(repaint).toContain(`\x1b[${Math.min(H + 1 + 12, R)};1H`);
+      // No cursor-up sequences may be used to reach the status row.
+      expect(repaint).not.toMatch(/\x1b\[\d+A/);
+    } finally {
+      caps.restore();
+      header.dispose();
+    }
+  });
+
+  it('skips DECSTBM when the header fills the whole screen (degenerate)', () => {
+    const caps = captureStdout();
+    const header = new SessionHeader({ caps: makeCaps({ height: H, isTty: true }) });
+    try {
+      header.start();
+      const joined = caps.lines.join('');
+      expect(joined).not.toContain(';');
+    } finally {
+      caps.restore();
+      header.dispose();
+    }
+  });
+
+  it('re-emits the scroll region when the terminal is resized', () => {
+    const caps = captureStdout();
+    const header = new SessionHeader({ caps: animatableTtyCaps() }); // height 24
+    const hadRows = Object.getOwnPropertyDescriptor(process.stdout, 'rows');
+    try {
+      header.start();
+      expect(caps.lines.join('')).toContain(`\x1b[${H + 1};${R}r`);
+
+      // Resize the terminal to 30 rows and re-pin.
+      Object.defineProperty(process.stdout, 'rows', { configurable: true, value: 30 });
+      header.updateRegion();
+      expect(caps.lines.join('')).toContain(`\x1b[${H + 1};30r`);
+    } finally {
+      if (hadRows !== undefined) {
+        Object.defineProperty(process.stdout, 'rows', hadRows);
+      } else {
+        delete (process.stdout as { rows?: number }).rows;
+      }
+      caps.restore();
+      header.dispose();
+    }
+  });
+});
