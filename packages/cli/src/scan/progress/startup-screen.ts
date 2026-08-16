@@ -9,6 +9,20 @@
  * - Active configuration summary (target, preset, workers, limits, formats)
  * - Loaded analyzer and knowledge pack counts
  *
+ * LAYOUT (session vs scan content)
+ * --------------------------------
+ * The screen is split into two parts so the VERIS brand block can be owned by
+ * the session lifecycle while the scan-scoped configuration renders below it:
+ *
+ * - Session header lines (logo + identity + status) live in
+ *   `session-header.ts` and are rendered once by the interactive SessionHeader
+ *   (persistent for the whole session, animated on TTY).
+ * - `renderStartupBody()` renders everything below the header: the divider,
+ *   configuration, engines, and the "Starting scan" indicator. This body is
+ *   scan-scoped and is replaced by the dashboard/summary below the header.
+ * - `renderStartupScreen()` composes both for non-TTY / one-shot output
+ *   (static, deterministic, no cursor control).
+ *
  * Design rules:
  * - All colors come from the theme system (never hardcode ANSI).
  * - All symbols come from the Unicode/ASCII fallback system.
@@ -17,13 +31,14 @@
  * @module @veris/cli/scan/progress
  */
 
-import { getSymbolSet, type SymbolSet } from '../../ui/renderer/index.js';
+import { getSymbolSet } from '../../ui/renderer/index.js';
 import { horizontalDivider } from '../../ui/styles/index.js';
-import { detectTerminal, type TerminalCapabilities } from '../../ui/terminal/index.js';
+import { detectTerminal } from '../../ui/terminal/index.js';
 import { getResolvedTheme, ansiReset, type ResolvedTheme } from '../../ui/theme/index.js';
 import { wrapText } from '../../ui/utilities/index.js';
-import { CLI_VERSION } from '../../wirer.js';
 import type { ScanConfig } from '../scan-session.js';
+
+import { renderSessionHeaderLines } from './session-header.js';
 
 /** Options for the startup screen. */
 export interface StartupScreenOptions {
@@ -48,57 +63,49 @@ const LABEL_WIDTH = 14;
 /** Indent used for key/value rows (matches the summary screens). */
 const ROW_INDENT = '   ';
 
-/** Friendly names for detected terminal emulators. */
-const TERMINAL_NAMES: Record<string, string> = Object.freeze({
-  'windows-terminal': 'Windows Terminal',
-  vscode: 'VS Code',
-  iterm2: 'iTerm2',
-  kitty: 'Kitty',
-  alacritty: 'Alacritty',
-  wezterm: 'WezTerm',
-  ghostty: 'Ghostty',
-  tmux: 'tmux',
-  screen: 'screen',
-  xterm: 'xterm',
-  unknown: 'unknown',
-});
-
 /**
- * Render the startup screen as an array of lines.
+ * Render the full startup screen: session header lines (logo + identity +
+ * status) followed by the scan-scoped body (config + engines + starting).
  *
- * The returned lines are plain strings (theme colors already applied) and
- * can be written to stdout line by line.
+ * Used for non-TTY / one-shot output where the header is static and the whole
+ * screen is written sequentially (no cursor control, no animation).
  */
 export function renderStartupScreen(
   config: ScanConfig,
   options: StartupScreenOptions = {},
 ): readonly string[] {
   const caps = detectTerminal();
+  return [
+    ...renderSessionHeaderLines(caps, 0, {
+      animated: false,
+      version: options.version,
+      nodeVersion: options.nodeVersion,
+      platform: options.platform,
+      terminal: options.terminal,
+    }),
+    ...renderStartupBody(config, options),
+  ];
+}
+
+/**
+ * Render the scan-scoped startup body: divider, configuration, engines, and
+ * the "Starting scan" indicator.
+ *
+ * This is what renders BELOW the persistent session header on interactive
+ * TTY sessions. It is replaced by the dashboard and later the final summary —
+ * the header itself never moves.
+ */
+export function renderStartupBody(
+  config: ScanConfig,
+  options: StartupScreenOptions = {},
+): readonly string[] {
   const theme = getResolvedTheme();
   const symbols = getSymbolSet();
   const R = ansiReset();
+  const caps = detectTerminal();
   const width = Math.min(caps.width, MAX_WIDTH);
-  const unicode = isUnicodeSymbols(symbols);
-
-  const version = options.version ?? CLI_VERSION;
-  const nodeVersion = options.nodeVersion ?? process.version;
-  const platform = options.platform ?? describePlatform(caps);
-  const terminal = options.terminal ?? describeTerminal(caps.emulator);
 
   const lines: string[] = [];
-  lines.push('');
-
-  // ── Banner ──
-  lines.push(...renderBanner(theme, symbols, R));
-
-  // ── Identity ──
-  const identity = `VERIS v${version}  ${dash(unicode)} Deterministic Security Analysis Platform`;
-  lines.push(...wrapText(` ${theme.ui.text}${identity}${R}`, width - 1, ' '));
-
-  const meta = [`Node ${nodeVersion}`, platform, terminal, describeColor(caps)].join(
-    separator(unicode),
-  );
-  lines.push(...wrapText(` ${theme.ui.textDim}${meta}${R}`, width - 1, ' '));
   lines.push('');
 
   // ── Divider ──
@@ -147,35 +154,6 @@ export function renderStartupScreen(
   return lines;
 }
 
-// ── Banner ──
-
-/**
- * Generate the VERIS banner.
- *
- * Uses the Unicode block logo when the terminal supports Unicode and falls
- * back to a spaced ASCII wordmark otherwise.
- */
-function renderBanner(theme: ResolvedTheme, symbols: SymbolSet, R: string): readonly string[] {
-  const brand = theme.ui.brand;
-
-  if (!isUnicodeSymbols(symbols)) {
-    // ASCII wordmark — minimal, professional, safe on every terminal.
-    // The tagline follows on the identity line below, so keep this clean.
-    return [` ${brand}V E R I S${R}`];
-  }
-
-  const LOGO = [
-    '██╗   ██╗███████╗██████╗ ██╗███████╗',
-    '██║   ██║██╔════╝██╔══██╗██║██╔════╝',
-    '██║   ██║█████╗  ██████╔╝██║███████╗',
-    '╚██╗ ██╔╝██╔══╝  ██╔══██╗██║╚════██║',
-    ' ╚████╔╝ ███████╗██║  ██║██║███████║',
-    '  ╚═══╝  ╚══════╝╚═╝  ╚═╝╚═╝╚══════╝',
-  ];
-
-  return LOGO.map((line) => ` ${brand}${line}${R}`);
-}
-
 // ── Key/Value Rows ──
 
 /**
@@ -212,12 +190,6 @@ function renderKeyValueRows(
 
 // ── Helpers ──
 
-/** Whether the current symbol set is the Unicode variant. */
-function isUnicodeSymbols(symbols: SymbolSet): boolean {
-  // The ASCII fallback set uses '-' for horizontal lines.
-  return symbols.hLine !== '-';
-}
-
 /** Deterministic thousands separator (locale-independent). */
 function formatNumber(n: number): string {
   return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -225,33 +197,4 @@ function formatNumber(n: number): string {
 
 function pluralize(word: string, count: number): string {
   return count === 1 ? word : `${word}s`;
-}
-
-function describePlatform(caps: TerminalCapabilities): string {
-  return caps.isWindows ? `${caps.os} (Windows)` : caps.os;
-}
-
-function describeTerminal(emulator: TerminalCapabilities['emulator']): string {
-  return TERMINAL_NAMES[emulator] ?? emulator;
-}
-
-function describeColor(caps: TerminalCapabilities): string {
-  switch (caps.colorDepth) {
-    case 'none':
-      return 'No color';
-    case 'ansi':
-      return '16 colors';
-    case 'ansi256':
-      return '256 colors';
-    case 'truecolor':
-      return 'Truecolor';
-  }
-}
-
-function dash(unicode: boolean): string {
-  return unicode ? '—' : '-';
-}
-
-function separator(unicode: boolean): string {
-  return unicode ? ' · ' : ' | ';
 }

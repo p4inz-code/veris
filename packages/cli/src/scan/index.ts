@@ -51,6 +51,13 @@ export {
 
   // Panel components
   renderStartupScreen,
+  renderStartupBody,
+  renderSessionHeaderLines,
+  renderLogo,
+  renderStatusLine,
+  isUnicodeSymbols,
+  SessionHeader,
+  HEADER_FRAME_INTERVAL_MS,
   renderFinalSummary,
   renderCancellationSummary,
   formatCancellationLine,
@@ -70,6 +77,8 @@ export {
 
   // Option types
   type StartupScreenOptions,
+  type SessionHeaderOptions,
+  type SessionHeaderRenderOptions,
   type FinalSummaryOptions,
   type CancellationResult,
   type PipelineVizOptions,

@@ -22,7 +22,21 @@ export { DashboardRenderer } from './dashboard-renderer.js';
 export { JsonProgressRenderer } from './json-renderer.js';
 export { SilentRenderer } from './silent-renderer.js';
 
-export { renderStartupScreen, type StartupScreenOptions } from './startup-screen.js';
+export {
+  renderStartupScreen,
+  renderStartupBody,
+  type StartupScreenOptions,
+} from './startup-screen.js';
+export {
+  SessionHeader,
+  renderSessionHeaderLines,
+  renderLogo,
+  renderStatusLine,
+  isUnicodeSymbols,
+  HEADER_FRAME_INTERVAL_MS,
+  type SessionHeaderOptions,
+  type SessionHeaderRenderOptions,
+} from './session-header.js';
 export { renderFinalSummary, type FinalSummaryOptions } from './final-summary.js';
 export {
   renderCancellationSummary,

@@ -1,30 +1,34 @@
 /**
- * Regression tests for the REAL-TTY startup/runtime lifecycle.
+ * Regression tests for the REAL-TTY session lifecycle.
  *
- * Guards the two post-v1.0.0 reliability issues:
+ * Guards the post-v1.0.0 reliability issue: the VERIS logo was part of the
+ * scan-scoped startup screen and was wiped by the first dashboard repaint.
+ * The header is now SESSION-scoped — owned by {@link SessionHeader} — and
+ * renders exactly once per interactive session. No scan lifecycle event
+ * (progress, dashboard repaint, error, cancellation, summary) may erase or
+ * re-create it.
  *
- * 1. STARTUP — the logo/startup screen disappeared within ~30-200ms (wiped by
- *    the first dashboard repaint or by instant completion). The renderer now
- *    guarantees a deterministic minimum presentation window
- *    (STARTUP_MIN_DISPLAY_MS) before any transition may replace the logo.
- *
- * 2. TRANSITIONS — startup → dashboard → summary must be exactly-once,
- *    well-formed ANSI, stable in non-TTY mode, and free of duplicate
- *    finalization.
- *
- * The DashboardRenderer accepts an injectable clock so the presentation
- * window is tested deterministically without real sleeps.
+ * Invariants covered:
+ * - Header initializes exactly once and is never re-created.
+ * - Header remains during progress, dashboard repaints, errors, fast scan
+ *   completion, normal completion, and cancellation.
+ * - The animation timer is active only while the session is active and stops
+ *   before process exit (dispose()).
+ * - Repeated dispose() produces no duplicate output; no timers leak.
+ * - No cursor corruption: all ANSI is well-formed at 40/80/180 columns.
+ * - Non-TTY output contains zero cursor-control sequences.
+ * - JSON stays byte-valid NDJSON; --silent stays clean.
+ * - First Ctrl+C cancels gracefully; a second Ctrl+C forces exit.
+ * - No SIGINT listeners leak after a scan completes.
  */
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import * as fsp from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { isCancelRequested, isScanActive, runScan } from '../../src/commands/scan.js';
-import {
-  DashboardRenderer,
-  STARTUP_MIN_DISPLAY_MS,
-} from '../../src/scan/progress/dashboard-renderer.js';
+import { DashboardRenderer } from '../../src/scan/progress/dashboard-renderer.js';
 import type { TerminalCapabilities } from '../../src/ui/index.js';
+import { setSymbolSet, resetSymbolSet } from '../../src/ui/index.js';
 import {
   createScanSession,
   type ScanConfig,
@@ -68,8 +72,17 @@ function makeCaps(overrides: Partial<TerminalCapabilities> = {}): TerminalCapabi
   });
 }
 
+/**
+ * Reduced-motion TTY caps: interactive (isTty) but no animation loop, so the
+ * renderer repaints deterministically on demand (no timers in tests).
+ */
 function ttyCaps(width = 80): TerminalCapabilities {
   return makeCaps({ width, isTty: true, prefersReducedMotion: true, unicode: true });
+}
+
+/** Fully animated TTY caps: both header and dashboard animation permitted. */
+function animatedTtyCaps(width = 80): TerminalCapabilities {
+  return makeCaps({ width, isTty: true, prefersReducedMotion: false, unicode: true });
 }
 
 function sessionWithStages(): ScanSession {
@@ -123,17 +136,6 @@ function buildTestSummary(): ScanSummary {
   });
 }
 
-/** Mutable fake clock so the presentation window can be advanced deterministically. */
-function fakeClock(initial = 0): { now: () => number; advance: (ms: number) => void } {
-  let t = initial;
-  return {
-    now: () => t,
-    advance: (ms: number) => {
-      t += ms;
-    },
-  };
-}
-
 function captureStdout(): { lines: string[]; restore: () => void } {
   const lines: string[] = [];
   const orig = process.stdout.write.bind(process.stdout);
@@ -154,160 +156,243 @@ function hasCursorControl(text: string): boolean {
   return /\x1b\[[0-9;]*[ABCDEFGHJK]/.test(text);
 }
 
-/**
- * Count clearDashboard() invocations. Each one emits a cursor-up + erase-line
- * run, i.e. `\x1b[<N>A\x1b[2K` marks the start of a single wipe.
- */
+/** Count occurrences of the session header identity line (rendered once). */
+function countHeaderRenders(text: string): number {
+  return (text.match(/VERIS v1\.0\.0/g) ?? []).length;
+}
+
+/** Count body-region wipe operations (`\x1b[<N>A\r` clears the body below). */
 function countWipes(text: string): number {
-  return (text.match(/\x1b\[\d+A\x1b\[2K/g) ?? []).length;
+  return (text.match(/\x1b\[\d+A\r/g) ?? []).length;
+}
+
+/** All CSI escapes must be well-formed (`\x1b[ ... letter`) and balanced. */
+function hasMalformedAnsi(text: string): boolean {
+  const stripped = text.replace(/\x1b\[[0-9;]*[A-Za-z]/g, '');
+  return stripped.includes('\x1b');
 }
 
 afterEach(() => {
   vi.useRealTimers();
+  resetSymbolSet();
 });
 
-// ── STARTUP PRESENTATION WINDOW ──
+// ── PERSISTENT SESSION HEADER ──
 
-describe('real-TTY startup presentation window', () => {
-  it('keeps the startup screen (logo) visible despite rapid progress events', () => {
-    const clock = fakeClock();
+describe('persistent session header (real-TTY)', () => {
+  it('initializes exactly once and survives the full lifecycle', () => {
     const caps = captureStdout();
-    const renderer = new DashboardRenderer(ttyCaps(), { now: clock.now });
+    const renderer = new DashboardRenderer(ttyCaps());
     try {
-      renderer.onStart(sessionWithStages());
+      const session = sessionWithStages();
+      renderer.onStart(session, { knowledgePackCount: 6 });
 
-      // A burst of progress/stage events well within the presentation window.
+      // Progress burst + stage changes + errors + repaints.
       for (let i = 0; i < 10; i++) {
-        renderer.onProgress({ stage: 'extraction', filesProcessed: i + 1, totalFiles: 100 });
+        renderer.onProgress({
+          stage: 'extraction',
+          filesProcessed: i + 1,
+          totalFiles: 100,
+        });
         renderer.onStageChange('discovery', i === 0 ? 'running' : 'completed');
-        clock.advance(100);
       }
-
-      const joined = caps.lines.join('');
-      // Logo still on screen — nothing was wiped or overwritten.
-      expect(joined).toContain('VERIS');
-      expect(joined).toContain('Starting scan');
-      // No cursor movement / erase sequences reached the terminal.
-      expect(hasCursorControl(joined)).toBe(false);
-      // The dashboard must not leak in while the startup screen is displayed.
-      expect(joined).not.toContain('STATISTICS');
-    } finally {
-      caps.restore();
-      void renderer.dispose();
-    }
-  });
-
-  it('does not erase the logo on an error raised during the window', () => {
-    const clock = fakeClock();
-    const caps = captureStdout();
-    const renderer = new DashboardRenderer(ttyCaps(), { now: clock.now });
-    try {
-      renderer.onStart(sessionWithStages());
       renderer.onError({ code: 'FILE_READ_ERROR', message: 'Cannot read file' });
-
-      const duringWindow = caps.lines.join('');
-      expect(hasCursorControl(duringWindow)).toBe(false);
-      expect(duringWindow).toContain('VERIS');
-      // Error text is queued, not painted over the logo.
-      expect(duringWindow).not.toContain('Cannot read file');
-
-      // After the window the transition flushes the queued error below the
-      // wiped startup region, then paints the dashboard.
-      clock.advance(STARTUP_MIN_DISPLAY_MS + 50);
-      renderer.onProgress({ stage: 'extraction', filesProcessed: 1, totalFiles: 100 });
-
-      const after = caps.lines.join('');
-      expect(after).toContain('Cannot read file');
-      expect(after).toContain('STATISTICS');
-      expect(after).toMatch(/\x1b\[\d+A/);
-    } finally {
-      caps.restore();
+      renderer.onComplete(session, buildTestSummary());
       void renderer.dispose();
-    }
-  });
 
-  it('defers the dashboard paint in the animation loop until the window elapses', () => {
-    vi.useFakeTimers();
-    const caps = captureStdout();
-    const renderer = new DashboardRenderer(makeCaps({ width: 80, isTty: true, unicode: true }));
-    try {
-      renderer.onStart(sessionWithStages());
-      renderer.onProgress({ stage: 'extraction', filesProcessed: 1, totalFiles: 100 });
-
-      // Ticks before the window must not repaint (logo preserved).
-      vi.advanceTimersByTime(STARTUP_MIN_DISPLAY_MS - 100);
-      expect(hasCursorControl(caps.lines.join(''))).toBe(false);
-      expect(caps.lines.join('')).not.toContain('STATISTICS');
-
-      // First tick after the window performs the single transition.
-      vi.advanceTimersByTime(300);
       const joined = caps.lines.join('');
-      expect(joined).toContain('STATISTICS');
-      expect(countWipes(joined)).toBe(1);
-    } finally {
-      caps.restore();
-      void renderer.dispose();
-    }
-  });
-});
-
-// ── STARTUP → DASHBOARD TRANSITION ──
-
-describe('real-TTY startup → dashboard transition', () => {
-  it('transitions to the dashboard exactly once after the window', () => {
-    const clock = fakeClock();
-    const caps = captureStdout();
-    const renderer = new DashboardRenderer(ttyCaps(), { now: clock.now });
-    try {
-      renderer.onStart(sessionWithStages());
-      renderer.onProgress({ stage: 'extraction', filesProcessed: 1, totalFiles: 100 });
-      clock.advance(STARTUP_MIN_DISPLAY_MS + 50);
-
-      renderer.onProgress({ stage: 'extraction', filesProcessed: 2, totalFiles: 100 });
-      const first = caps.lines.join('');
-      expect(countWipes(first)).toBe(1);
-      expect(first).toContain('STATISTICS');
-      expect(first).toContain('2 / 100');
-
-      // Later repaints erase only the dashboard region (incremental, stable).
-      renderer.onProgress({ stage: 'extraction', filesProcessed: 3, totalFiles: 100 });
-      const second = caps.lines.join('');
-      expect(countWipes(second)).toBe(2);
+      // The header was rendered exactly once — never re-created, never wiped.
+      expect(countHeaderRenders(joined)).toBe(1);
+      // The summary rendered below the header; the header is still present.
+      expect(joined).toContain('Scan Complete');
+      expect(joined.indexOf('VERIS v1.0.0')).toBeLessThan(joined.indexOf('Scan Complete'));
     } finally {
       caps.restore();
       void renderer.dispose();
     }
   });
 
-  it('writes the final summary immediately once the window has elapsed', () => {
-    const clock = fakeClock();
+  it('remains visible during progress and dashboard repaints', () => {
     const caps = captureStdout();
-    const renderer = new DashboardRenderer(ttyCaps(), { now: clock.now });
+    const renderer = new DashboardRenderer(ttyCaps());
     try {
       const session = sessionWithStages();
       renderer.onStart(session);
-      clock.advance(STARTUP_MIN_DISPLAY_MS + 50);
-      renderer.onComplete(session, buildTestSummary());
-
+      for (let i = 0; i < 5; i++) {
+        renderer.onProgress({ stage: 'extraction', filesProcessed: i + 1, totalFiles: 100 });
+      }
       const joined = caps.lines.join('');
-      expect(joined).toContain('Scan Complete');
-      // The wipe + summary happened without needing dispose().
-      expect(joined).toMatch(/\x1b\[\d+A/);
+      expect(countHeaderRenders(joined)).toBe(1);
+      expect(joined).toContain('STATISTICS');
     } finally {
       caps.restore();
       void renderer.dispose();
     }
   });
 
-  it('emits only well-formed ANSI sequences across narrow/wide terminals', () => {
+  it('remains visible after a fast scan completion (no wipe before exit)', () => {
+    const caps = captureStdout();
+    const renderer = new DashboardRenderer(ttyCaps());
+    try {
+      const session = sessionWithStages();
+      renderer.onStart(session);
+      // Scan completes immediately — the header must not be wiped.
+      renderer.onComplete(session, buildTestSummary());
+      void renderer.dispose();
+
+      const joined = caps.lines.join('');
+      expect(countHeaderRenders(joined)).toBe(1);
+      expect(joined).toContain('Scan Complete');
+    } finally {
+      caps.restore();
+      void renderer.dispose();
+    }
+  });
+
+  it('remains visible during cancellation', () => {
+    const caps = captureStdout();
+    const renderer = new DashboardRenderer(ttyCaps());
+    try {
+      const session = sessionWithStages();
+      renderer.onStart(session);
+      renderer.onProgress({ stage: 'extraction', filesProcessed: 3, totalFiles: 100 });
+      renderer.onCancel(session);
+      void renderer.dispose();
+
+      const joined = caps.lines.join('');
+      expect(countHeaderRenders(joined)).toBe(1);
+      expect(joined).toContain('Scan Cancelled');
+    } finally {
+      caps.restore();
+      void renderer.dispose();
+    }
+  });
+
+  it('remains visible during errors (errors render below the header)', () => {
+    const caps = captureStdout();
+    const renderer = new DashboardRenderer(ttyCaps());
+    try {
+      const session = sessionWithStages();
+      renderer.onStart(session);
+      renderer.onError({ code: 'FILE_READ_ERROR', message: 'Cannot read file' });
+      renderer.onProgress({ stage: 'extraction', filesProcessed: 1, totalFiles: 100 });
+
+      const joined = caps.lines.join('');
+      expect(countHeaderRenders(joined)).toBe(1);
+      expect(joined).toContain('Cannot read file');
+      // The header text precedes the error text — nothing was written over it.
+      expect(joined.indexOf('VERIS v1.0.0')).toBeLessThan(joined.indexOf('Cannot read file'));
+    } finally {
+      caps.restore();
+      void renderer.dispose();
+    }
+  });
+
+  it('remains the FIRST content in the stream — nothing is ever written above it', () => {
+    const caps = captureStdout();
+    const renderer = new DashboardRenderer(ttyCaps());
+    try {
+      const session = sessionWithStages();
+      renderer.onStart(session);
+      renderer.onProgress({ stage: 'extraction', filesProcessed: 1, totalFiles: 100 });
+      renderer.onError({ code: 'FILE_READ_ERROR', message: 'Cannot read file' });
+      renderer.onComplete(session, buildTestSummary());
+      void renderer.dispose();
+
+      const joined = caps.lines.join('');
+      // The header leads the stream: its identity line precedes every body
+      // section (config, dashboard, errors, summary). Nothing is ever written
+      // above it.
+      const bodyPositions = [
+        joined.indexOf('Starting scan'),
+        joined.indexOf('STATISTICS'),
+        joined.indexOf('Cannot read file'),
+        joined.indexOf('Scan Complete'),
+      ].filter((p) => p >= 0);
+      expect(bodyPositions.length).toBeGreaterThan(0);
+      const firstBody = Math.min(...bodyPositions);
+      expect(joined.indexOf('VERIS v1.0.0')).toBeGreaterThanOrEqual(0);
+      expect(joined.indexOf('VERIS v1.0.0')).toBeLessThan(firstBody);
+    } finally {
+      caps.restore();
+      void renderer.dispose();
+    }
+  });
+
+  it('animation runs only while the session is active and stops at shutdown', () => {
+    vi.useFakeTimers();
+    const caps = captureStdout();
+    const renderer = new DashboardRenderer(animatedTtyCaps());
+    try {
+      const session = sessionWithStages();
+      renderer.onStart(session);
+      const afterStart = caps.lines.length;
+
+      // Header + dashboard animation ticks continue while alive.
+      vi.advanceTimersByTime(1000);
+      expect(caps.lines.length).toBeGreaterThan(afterStart);
+
+      // Shutdown stops all animation before process exit.
+      void renderer.dispose();
+      const afterDispose = caps.lines.length;
+      vi.advanceTimersByTime(5000);
+      expect(caps.lines.length).toBe(afterDispose);
+      expect(vi.getTimerCount()).toBe(0); // no leaked timers
+    } finally {
+      caps.restore();
+      void renderer.dispose();
+    }
+  });
+
+  it('repeated dispose() produces no duplicate ANSI or output', async () => {
+    const caps = captureStdout();
+    const renderer = new DashboardRenderer(ttyCaps());
+    try {
+      const session = sessionWithStages();
+      renderer.onStart(session);
+      renderer.onComplete(session, buildTestSummary());
+      await renderer.dispose();
+      const afterFirst = caps.lines.length;
+      await renderer.dispose();
+      await renderer.dispose();
+      expect(caps.lines.length).toBe(afterFirst);
+      expect(countHeaderRenders(caps.lines.join(''))).toBe(1);
+    } finally {
+      caps.restore();
+      await renderer.dispose();
+    }
+  });
+
+  it('fast process termination leaves no timer running and no trailing output', () => {
+    vi.useFakeTimers();
+    const caps = captureStdout();
+    const renderer = new DashboardRenderer(animatedTtyCaps());
+    try {
+      const session = sessionWithStages();
+      renderer.onStart(session);
+      // Process exits immediately — dispose() must stop animation cleanly.
+      void renderer.dispose();
+      const afterDispose = caps.lines.length;
+      vi.advanceTimersByTime(10_000);
+      expect(caps.lines.length).toBe(afterDispose);
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      caps.restore();
+      void renderer.dispose();
+    }
+  });
+});
+
+// ── ANSI WELL-FORMEDNESS ACROSS WIDTHS ──
+
+describe('terminal-width integrity (real-TTY)', () => {
+  it('emits only well-formed ANSI sequences across 40/80/180 columns', () => {
     for (const width of [40, 80, 180]) {
-      const clock = fakeClock();
       const caps = captureStdout();
-      const renderer = new DashboardRenderer(ttyCaps(width), { now: clock.now });
+      const renderer = new DashboardRenderer(ttyCaps(width));
       try {
         const session = sessionWithStages();
         renderer.onStart(session);
-        clock.advance(STARTUP_MIN_DISPLAY_MS + 50);
         renderer.onProgress({
           stage: 'extraction',
           currentFile: {
@@ -323,10 +408,11 @@ describe('real-TTY startup → dashboard transition', () => {
           totalFiles: 100,
         });
         renderer.onComplete(session, buildTestSummary());
+        void renderer.dispose();
 
         const joined = caps.lines.join('');
-        // Every escape is a well-formed CSI sequence (\x1b[ ... letter).
-        expect(joined.replace(/\x1b\[[0-9;]*[A-Za-z]/g, '')).not.toContain('\x1b');
+        expect(hasMalformedAnsi(joined)).toBe(false);
+        expect(countHeaderRenders(joined)).toBe(1);
         expect(joined).toContain('Scan Complete');
       } finally {
         caps.restore();
@@ -334,60 +420,126 @@ describe('real-TTY startup → dashboard transition', () => {
       }
     }
   });
-});
 
-// ── FAST-SCAN COMPLETION / CLEANUP ──
-
-describe('real-TTY completion and cleanup', () => {
-  it('defers the final summary until the startup window elapses on fast scans', async () => {
-    const clock = fakeClock();
+  it('repaints the dashboard in place without ever wiping the header region', () => {
     const caps = captureStdout();
-    const renderer = new DashboardRenderer(ttyCaps(), { now: clock.now });
+    const renderer = new DashboardRenderer(ttyCaps(80));
     try {
       const session = sessionWithStages();
       renderer.onStart(session);
-      // Scan completes immediately — well before the presentation window.
-      renderer.onComplete(session, buildTestSummary());
+      renderer.onProgress({ stage: 'extraction', filesProcessed: 1, totalFiles: 100 });
+      const afterFirst = countWipes(caps.lines.join(''));
 
-      const beforeDispose = caps.lines.join('');
-      // Logo untouched, no summary yet, no wipe sequences.
-      expect(beforeDispose).toContain('VERIS');
-      expect(beforeDispose).not.toContain('Scan Complete');
-      expect(hasCursorControl(beforeDispose)).toBe(false);
-
-      clock.advance(STARTUP_MIN_DISPLAY_MS + 50);
-      await renderer.dispose();
-
-      const after = caps.lines.join('');
-      expect(after).toContain('Scan Complete');
-      expect(after).toMatch(/\x1b\[\d+A/);
+      renderer.onProgress({ stage: 'extraction', filesProcessed: 2, totalFiles: 100 });
+      renderer.onProgress({ stage: 'extraction', filesProcessed: 3, totalFiles: 100 });
+      const joined = caps.lines.join('');
+      // Each dashboard repaint wipes only the body region (below the header).
+      expect(countWipes(joined)).toBeGreaterThan(afterFirst);
+      expect(countHeaderRenders(joined)).toBe(1);
     } finally {
       caps.restore();
-      await renderer.dispose();
+      void renderer.dispose();
+    }
+  });
+});
+
+// ── NON-TTY / MACHINE-READABLE MODES ──
+
+describe('non-TTY and machine-readable modes stay clean', () => {
+  it('never emits cursor-control sequences in non-TTY mode', () => {
+    const caps = captureStdout();
+    const renderer = new DashboardRenderer(makeCaps({ isTty: false }));
+    try {
+      const session = sessionWithStages();
+      renderer.onStart(session);
+      renderer.onStageChange('discovery', 'completed');
+      renderer.onStageChange('classification', 'completed');
+      renderer.onError({ code: 'FILE_READ_ERROR', message: 'Cannot read file' });
+      renderer.onComplete(session, buildTestSummary());
+
+      const joined = caps.lines.join('');
+      expect(hasCursorControl(joined)).toBe(false);
+      expect(joined).not.toMatch(/\x1b\[/);
+      // Sequential output: startup header first, summary last.
+      expect(joined.indexOf('Starting scan')).toBeGreaterThanOrEqual(0);
+      expect(joined.indexOf('Starting scan')).toBeLessThan(joined.indexOf('Scan Complete'));
+    } finally {
+      caps.restore();
+      void renderer.dispose();
     }
   });
 
-  it('finalizes exactly once across onComplete + repeated dispose', async () => {
-    const clock = fakeClock();
+  it('--no-unicode renders an ASCII header (no block elements)', () => {
+    setSymbolSet('ascii');
     const caps = captureStdout();
-    const renderer = new DashboardRenderer(ttyCaps(), { now: clock.now });
+    const renderer = new DashboardRenderer(makeCaps({ isTty: false, unicode: false }));
     try {
       const session = sessionWithStages();
       renderer.onStart(session);
-      renderer.onComplete(session, buildTestSummary()); // deferred
-      expect(caps.lines.join('')).not.toContain('Scan Complete');
-
-      clock.advance(STARTUP_MIN_DISPLAY_MS + 50);
-      await renderer.dispose();
-      await renderer.dispose(); // second call must be a no-op
-      await renderer.dispose();
-
       const joined = caps.lines.join('');
-      const matches = joined.match(/Scan Complete/g) ?? [];
-      expect(matches).toHaveLength(1);
+      expect(joined).toContain('V E R I S');
+      expect(joined).not.toContain('\u2588'); // no block elements
+      expect(joined).not.toContain('\u2014'); // no em-dash
     } finally {
       caps.restore();
-      await renderer.dispose();
+      void renderer.dispose();
+    }
+  });
+
+  it('JSON progress output is byte-valid NDJSON', async () => {
+    const dir = await fsp.mkdtemp(path.join(os.tmpdir(), 'veris-json-ndjson-'));
+    const out = path.join(dir, 'out');
+    const caps = captureStdout();
+    try {
+      for (let i = 0; i < 5; i++) {
+        await fsp.writeFile(path.join(dir, `f${i}.js`), `var v${i} = ${i};\n`);
+      }
+      const { exitCode } = await runScan({
+        target: dir,
+        progress: 'json',
+        computedAt: '2026-08-09T00:00:00.000Z',
+        format: ['json'],
+        output: out,
+      });
+      expect(exitCode).toBe(0);
+      // Every stdout line must parse as standalone JSON; no ANSI anywhere.
+      const joined = caps.lines.join('');
+      expect(joined).not.toMatch(/\x1b\[/);
+      const lines = joined.split('\n').filter((l) => l.trim().length > 0);
+      expect(lines.length).toBeGreaterThan(0);
+      for (const line of lines) {
+        expect(() => JSON.parse(line)).not.toThrow();
+      }
+    } finally {
+      caps.restore();
+      await fsp.rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('--silent remains clean (summary only, no dashboard, no cursor control)', async () => {
+    const dir = await fsp.mkdtemp(path.join(os.tmpdir(), 'veris-silent-clean-'));
+    const out = path.join(dir, 'out');
+    const caps = captureStdout();
+    try {
+      for (let i = 0; i < 5; i++) {
+        await fsp.writeFile(path.join(dir, `f${i}.js`), `var v${i} = ${i};\n`);
+      }
+      const { exitCode } = await runScan({
+        target: dir,
+        progress: 'silent',
+        computedAt: '2026-08-09T00:00:00.000Z',
+        format: ['json'],
+        output: out,
+      });
+      expect(exitCode).toBe(0);
+      const joined = caps.lines.join('');
+      expect(hasCursorControl(joined)).toBe(false);
+      expect(joined).toContain('Scan Complete');
+      expect(joined).not.toContain('STATISTICS');
+      expect(joined).not.toContain('PIPELINE');
+    } finally {
+      caps.restore();
+      await fsp.rm(dir, { recursive: true, force: true });
     }
   });
 });
@@ -395,7 +547,7 @@ describe('real-TTY completion and cleanup', () => {
 // ── SIGINT DEFERRAL STATE ──
 
 describe('scan command cancellation state (SIGINT deferral)', () => {
-  it('marks the scan active only while a scan is running', async () => {
+  it('marks the scan active only while a scan is running and removes its SIGINT listener', async () => {
     const dir = await fsp.mkdtemp(path.join(os.tmpdir(), 'veris-scan-active-'));
     const out = path.join(dir, 'out');
     try {
@@ -404,6 +556,7 @@ describe('scan command cancellation state (SIGINT deferral)', () => {
       }
       const caps = captureStdout();
       try {
+        const listenersBefore = process.listenerCount('SIGINT');
         const promise = runScan({
           target: dir,
           progress: 'silent',
@@ -418,6 +571,8 @@ describe('scan command cancellation state (SIGINT deferral)', () => {
         const { exitCode } = await promise;
         expect(exitCode).toBe(0);
         expect(isScanActive()).toBe(false);
+        // The scan's own SIGINT listener is removed on completion.
+        expect(process.listenerCount('SIGINT')).toBe(listenersBefore);
       } finally {
         caps.restore();
       }
@@ -484,32 +639,6 @@ describe('scan command cancellation state (SIGINT deferral)', () => {
       exitSpy.mockRestore();
       caps.restore();
       await fsp.rm(dir, { recursive: true, force: true });
-    }
-  });
-});
-
-// ── NON-TTY STABILITY ──
-
-describe('real-TTY regression: non-TTY output stays clean', () => {
-  it('never emits cursor-control sequences in non-TTY mode', () => {
-    const caps = captureStdout();
-    const renderer = new DashboardRenderer(makeCaps({ isTty: false }));
-    try {
-      const session = sessionWithStages();
-      renderer.onStart(session);
-      renderer.onStageChange('discovery', 'completed');
-      renderer.onStageChange('classification', 'completed');
-      renderer.onError({ code: 'FILE_READ_ERROR', message: 'Cannot read file' });
-      renderer.onComplete(session, buildTestSummary());
-
-      const joined = caps.lines.join('');
-      expect(joined).not.toMatch(/\x1b\[/);
-      // Sequential output: startup first, summary last.
-      expect(joined.indexOf('Starting scan')).toBeGreaterThanOrEqual(0);
-      expect(joined.indexOf('Starting scan')).toBeLessThan(joined.indexOf('Scan Complete'));
-    } finally {
-      caps.restore();
-      void renderer.dispose();
     }
   });
 });

@@ -60,11 +60,12 @@ function ttyCaps(width = 80): TerminalCapabilities {
 }
 
 /**
- * Build a TTY dashboard renderer whose clock advances on every read, so the
- * startup presentation window is always elapsed by the first dashboard
- * repaint and tests can exercise the dashboard/transition behavior directly.
- * (The window itself is covered by the dedicated real-TTY lifecycle
- * regression tests.)
+ * Build a TTY dashboard renderer for deterministic dashboard tests.
+ *
+ * Reduced-motion caps (see ttyCaps) keep the renderer timer-free: the
+ * dashboard paints immediately on progress events instead of on an interval.
+ * The `now` option is accepted for compatibility but no longer affects
+ * rendering — the header is session-scoped and no startup window remains.
  */
 function ttyRenderer(width = 80): DashboardRenderer {
   let t = 0;
