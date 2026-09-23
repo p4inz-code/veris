@@ -32,7 +32,7 @@ work).
 
 - The logo intro takes ~1.05s; a scan that finishes faster closes the alternate
   screen mid-wipe and prints the completed header + summary on the primary screen.
-- No benchmark suite (see `.github/workflows/nightly.yml`).
+- Deterministic benchmark suite established in `tools/perf` (see `docs/BENCHMARKS.md`); automated CI regression tracking is planned.
 - AI features (`explain`/`summarize`) require API keys and are consumer-only.
 - Only the CLI package (`veris-cli`) is published; the other workspace packages are
   internal.
@@ -78,6 +78,8 @@ pnpm test
 | `pnpm format`        | Check formatting                                       |
 | `pnpm test`          | Run all tests                                          |
 | `pnpm test:coverage` | Run tests with coverage                                |
+| `pnpm bench`         | Run deterministic benchmark suite (`tools/perf`)       |
+| `pnpm bench:quick`   | Run quick single-workload benchmark check              |
 | `pnpm ci:all`        | Complete CI pipeline (build + typecheck + lint + test) |
 | `pnpm circular`      | Check for circular dependencies                        |
 
@@ -118,7 +120,8 @@ pnpm test
 
 ## Performance Monitoring
 
-- The repo currently ships no benchmark suite (see `.github/workflows/nightly.yml`)
+- Deterministic benchmark suite in `tools/perf` (`pnpm bench`, `pnpm bench:quick`)
+- Stage timings, throughput, memory, and determinism verification recorded to `benchmark-results/` (see `docs/BENCHMARKS.md`)
 - Monitor memory usage in CI
 - Track test execution times across runs
 

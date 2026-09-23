@@ -113,6 +113,17 @@
 - Security audit (third-party)
 - **V1.0 Release**
 
+## Phase 4: Performance & Deterministic Benchmark Foundation
+
+- ✅ Benchmark contract (timing separated from deterministic payload validation)
+- ✅ Workload matrix (small, medium, large, security-mixed representative workloads)
+- ✅ Benchmark harness (`tools/perf`) with high-resolution stage timings
+- ✅ Baseline capture (startup, discovery, classification, extraction, rules/risk, reporting, export)
+- ✅ Determinism validation gate (canonical payload hash verification across iterations)
+- ✅ Automation-ready output (versioned schema v1.0.0 JSON + human-readable report)
+- 🔜 CI benchmark regression tracking
+- 🔜 Targeted performance optimizations (deferred until baseline analysis is complete)
+
 ## V2+ Plans
 
 - AI-assisted rule writing

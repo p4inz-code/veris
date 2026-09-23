@@ -15,3 +15,6 @@ Thumbs.db
 
 # Default scan/report output (veris scan writes to ./veris-output)
 veris-output/
+
+# Benchmark result artifacts (tools/perf generates these)
+benchmark-results/

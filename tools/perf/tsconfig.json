@@ -2,10 +2,8 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src",
-    "composite": true
+    "noEmit": true
   },
-  "references": [{ "path": "../../packages/core" }, { "path": "../../packages/analyzer" }],
-  "include": ["src"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src", "__tests__"],
+  "exclude": ["node_modules", "dist", "benchmark-results"]
 }

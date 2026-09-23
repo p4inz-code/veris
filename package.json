@@ -35,6 +35,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "bench": "pnpm --filter @veris/perf bench",
+    "bench:quick": "pnpm --filter @veris/perf bench:quick",
     "changeset": "changeset",
     "changeset:version": "changeset version",
     "changeset:publish": "changeset publish",

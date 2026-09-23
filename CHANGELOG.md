@@ -7,6 +7,10 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **Deterministic benchmark foundation** (`tools/perf`) — automated benchmark harness measuring scan throughput, startup overhead, individual pipeline stage timings (discovery, classification, extraction, analysis, rules/risk, reporting, export), and memory usage. Validates determinism across repeated iterations with canonical payload hash comparison. Produces versioned JSON (`benchmark-results.json`) and human-readable reports. Added `pnpm bench` and `pnpm bench:quick` root scripts and comprehensive documentation in `docs/BENCHMARKS.md`.
+
 ### Changed
 
 - **Persistent animated session header** — the VERIS logo + identity are now

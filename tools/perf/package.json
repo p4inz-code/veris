@@ -2,19 +2,45 @@
   "name": "@veris/perf",
   "version": "0.1.0",
   "private": true,
-  "description": "VERIS performance benchmarking suite",
-  "license": "MIT",
+  "description": "VERIS deterministic benchmark suite — measures scan throughput, stage timings, memory, and verifies determinism",
+  "license": "UNLICENSED",
   "type": "module",
   "scripts": {
-    "bench": "vitest run --bench",
-    "bench:watch": "vitest --bench"
+    "bench": "tsx src/run-benchmarks.ts",
+    "bench:quick": "tsx src/run-benchmarks.ts --workload small --iterations 2 --warmups 0",
+    "bench:json": "tsx src/run-benchmarks.ts --json",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@veris/core": "workspace:*",
-    "@veris/analyzer": "workspace:*"
+    "@veris/shared": "workspace:*",
+    "@veris/analyzer": "workspace:*",
+    "@veris/pipeline": "workspace:*",
+    "@veris/discovery": "workspace:*",
+    "@veris/classification": "workspace:*",
+    "@veris/extractors": "workspace:*",
+    "@veris/knowledge": "workspace:*",
+    "@veris/analysis": "workspace:*",
+    "@veris/report": "workspace:*",
+    "@veris/exporters": "workspace:*",
+    "@veris/config": "workspace:*",
+    "@veris/logger": "workspace:*",
+    "@veris/telemetry": "workspace:*",
+    "@veris/risk": "workspace:*",
+    "@veris/recommendations": "workspace:*",
+    "@veris/correlation": "workspace:*",
+    "@veris/rules": "workspace:*",
+    "@veris/ai": "workspace:*",
+    "@veris/renderers": "workspace:*",
+    "@veris/runners": "workspace:*",
+    "@veris/explain": "workspace:*",
+    "@veris/plugins": "workspace:*",
+    "veris-cli": "workspace:*"
   },
   "devDependencies": {
-    "vitest": "^2.0.0",
-    "typescript": "^5.5.0"
+    "tsx": "^4.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
   }
 }
