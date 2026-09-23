@@ -38,3 +38,14 @@ resolution.
 6. **Immutable outputs** — All analysis results are frozen at construction.
 7. **AI as consumer** — AI explanations are read-only and never affect analysis
    results.
+
+## Plugin Security Boundaries & Trust Model
+
+VERIS plugins operate under an evidence-first, offline-first security model:
+
+1. **Host Contract Gating**: Plugin capabilities (e.g., `target-read`, `core-types-read`) enforce host-level contract boundaries. For instance, artifact content buffers are strictly `null` unless `target-read` is declared. Capabilities represent host permissions and do not constitute OS-level process virtualization.
+2. **Forbidden Capabilities**: Network access (`network`) and process spawning (`process-spawn`) are denied by default under VERIS's offline-first policy. Any plugin requesting dangerous capabilities is rejected during discovery.
+3. **Path Traversal & Symlink Defense**: Plugin discovery strictly verifies canonical physical paths using `fs.realpathSync`, blocking lexical traversals (`..`), null-byte injections, absolute path escapes, and directory escapes via symlinks across Windows, macOS, and Linux.
+4. **Declarative Rule Pack Purity**: Rule packs must consist purely of declarative ASTs with zero executable callbacks or functions. Rule packs are recursively audited against prototype pollution (`__proto__`, `constructor`, `prototype`), accessor properties (getters/setters), circular structures, and malicious or catastrophic regular expressions (max 1000 characters).
+5. **Output Integrity & Memory Bounds**: Extractor plugins are strictly restricted to raw factual observations (`PluginRawFeature`). Attempts to emit findings, risk scores, or CVE IDs directly are rejected. Feature counts are bounded at 5,000 items per extraction, individual values are bounded at 1 MB, and output features are deterministically sorted.
+6. **Error Containment & Auto-Quarantine**: Plugins execute with cooperative timeouts. If a plugin throws 3 consecutive errors during a scan session, it is automatically transitioned to `quarantined` state and disqualified from further execution.

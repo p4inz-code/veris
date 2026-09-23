@@ -22,7 +22,7 @@ import {
   sortPluginsDeterministically,
   validatePluginManifest,
 } from './manifest.js';
-import type { DiscoveredPlugin, PluginDiscoveryOptions } from './types.js';
+import { PERMISSION_GROUPS, type DiscoveredPlugin, type PluginDiscoveryOptions } from './types.js';
 
 export const DEFAULT_HOST_VERSION = '1.0.0';
 
@@ -255,6 +255,20 @@ function inspectAndRegister(
     return;
   }
 
+  // Dangerous capabilities check (offline-first security policy)
+  const hasDangerous = manifest.capabilities.some((c) =>
+    (PERMISSION_GROUPS.dangerous as readonly string[]).includes(c),
+  );
+  if (hasDangerous) {
+    diagnostics?.error(
+      manifest.id,
+      'PLUGIN_DANGEROUS_CAPABILITY_FORBIDDEN',
+      `Plugin "${manifest.id}" requests forbidden dangerous capabilities: ${manifest.capabilities.filter((c) => (PERMISSION_GROUPS.dangerous as readonly string[]).includes(c)).join(', ')} (offline-first policy forbids network and process-spawn)`,
+      { capabilities: manifest.capabilities },
+    );
+    return;
+  }
+
   // Host version compatibility check
   if (!isPluginCompatible(manifest, hostVersion)) {
     diagnostics?.error(
@@ -278,11 +292,43 @@ function inspectAndRegister(
     return;
   }
 
+  const ext = path.extname(manifest.entryPoint).toLowerCase();
+  if (ext !== '.js' && ext !== '.mjs' && ext !== '.cjs') {
+    diagnostics?.error(
+      manifest.id,
+      'PLUGIN_INVALID_ENTRY_POINT_EXTENSION',
+      `Plugin entry point "${manifest.entryPoint}" has invalid extension "${ext}". Only .js, .mjs, and .cjs are permitted`,
+      { entryPoint: manifest.entryPoint },
+    );
+    return;
+  }
+
   if (!fs.existsSync(entryPointFile)) {
     diagnostics?.error(
       manifest.id,
       'PLUGIN_ENTRY_POINT_NOT_FOUND',
       `Plugin entry point file "${entryPointFile}" does not exist`,
+      { entryPoint: manifest.entryPoint, resolved: entryPointFile },
+    );
+    return;
+  }
+
+  try {
+    const stat = fs.statSync(entryPointFile);
+    if (!stat.isFile()) {
+      diagnostics?.error(
+        manifest.id,
+        'PLUGIN_ENTRY_POINT_NOT_FILE',
+        `Plugin entry point "${entryPointFile}" is not a regular file`,
+        { entryPoint: manifest.entryPoint, resolved: entryPointFile },
+      );
+      return;
+    }
+  } catch (err) {
+    diagnostics?.error(
+      manifest.id,
+      'PLUGIN_ENTRY_POINT_STAT_ERROR',
+      `Cannot inspect plugin entry point file "${entryPointFile}": ${err instanceof Error ? err.message : String(err)}`,
       { entryPoint: manifest.entryPoint, resolved: entryPointFile },
     );
     return;
@@ -309,8 +355,45 @@ function inspectAndRegister(
 
 /**
  * Verifies that a target path is strictly contained within an expected ancestor directory.
+ * Prevents lexical traversal, null-byte injection, and symlink escapes.
  */
 function isPathInside(targetPath: string, parentDir: string): boolean {
-  const rel = path.relative(parentDir, targetPath);
-  return !rel.startsWith('..') && !path.isAbsolute(rel);
+  if (targetPath.includes('\0') || parentDir.includes('\0')) {
+    return false;
+  }
+
+  try {
+    const resolvedTarget = path.resolve(targetPath);
+    const resolvedParent = path.resolve(parentDir);
+
+    // Lexical check first
+    const rel = path.relative(resolvedParent, resolvedTarget);
+    if (rel.startsWith('..') || path.isAbsolute(rel)) {
+      return false;
+    }
+
+    // Symlink resolution check: ensure target does not physically resolve outside parent
+    if (fs.existsSync(resolvedTarget) && fs.existsSync(resolvedParent)) {
+      const realTarget = fs.realpathSync(resolvedTarget);
+      const realParent = fs.realpathSync(resolvedParent);
+
+      const normTarget =
+        process.platform === 'win32' || process.platform === 'darwin'
+          ? realTarget.toLowerCase()
+          : realTarget;
+      const normParent =
+        process.platform === 'win32' || process.platform === 'darwin'
+          ? realParent.toLowerCase()
+          : realParent;
+
+      const realRel = path.relative(normParent, normTarget);
+      if (realRel.startsWith('..') || path.isAbsolute(realRel)) {
+        return false;
+      }
+    }
+
+    return true;
+  } catch {
+    return false;
+  }
 }

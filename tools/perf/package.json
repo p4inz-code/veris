@@ -1,6 +1,6 @@
 {
   "name": "@veris/perf",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "VERIS deterministic benchmark suite — measures scan throughput, stage timings, memory, and verifies determinism",
   "license": "UNLICENSED",

@@ -31,6 +31,7 @@ import {
   resetSymbolSet,
   type TerminalCapabilities,
 } from '../../src/ui/index.js';
+import { CLI_VERSION } from '../../src/wirer.js';
 
 // ── Test Helpers ──
 
@@ -252,7 +253,7 @@ describe('logo wipe animation', () => {
   it('completes to the full persistent header (logo + identity) after the intro', () => {
     const steady = renderSessionHeaderLines(caps(), INTRO_FRAME_COUNT, { animated: true });
     const out = steady.join('\n');
-    expect(out).toContain('VERIS v1.0.0');
+    expect(out).toContain(`VERIS v${CLI_VERSION}`);
     // All six logo rows are present (the block rows carry the full-block
     // glyph; the bottom row is pure box-drawing, so assert presence, not
     // block glyphs, on that one).
@@ -269,7 +270,7 @@ describe('logo wipe animation', () => {
     const f0 = renderSessionHeaderLines(caps(), 0, { animated: false });
     const f3 = renderSessionHeaderLines(caps(), 3, { animated: false });
     expect(f0).toEqual(f3);
-    expect(f0.join('\n')).toContain('VERIS v1.0.0');
+    expect(f0.join('\n')).toContain(`VERIS v${CLI_VERSION}`);
   });
 });
 
@@ -415,7 +416,7 @@ describe('SessionHeader lifecycle', () => {
       vi.advanceTimersByTime(HEADER_FRAME_INTERVAL_MS * INTRO_FRAME_COUNT);
       expect(header.frameIndex).toBeGreaterThanOrEqual(INTRO_FRAME_COUNT);
       const out = header.renderLines(header.frameIndex).join('\n');
-      expect(out).toContain('VERIS v1.0.0');
+      expect(out).toContain(`VERIS v${CLI_VERSION}`);
       expect(out).toContain('\u2588');
       // The intro emitted distinct frames on the way (the wipe began with
       // the ghost logo and filled in).
@@ -439,7 +440,7 @@ describe('SessionHeader lifecycle', () => {
       vi.advanceTimersByTime(HEADER_FRAME_INTERVAL_MS);
       header.dispose();
       const final = header.finalLines();
-      expect(final.join('\n')).toContain('VERIS v1.0.0');
+      expect(final.join('\n')).toContain(`VERIS v${CLI_VERSION}`);
       expect(final.join('\n')).toContain('\u2588');
       expect(final.slice(1, 7).every((l) => l.trim() !== '')).toBe(true);
       expect(final.slice(1, 6).every((l) => l.includes('\u2588'))).toBe(true);

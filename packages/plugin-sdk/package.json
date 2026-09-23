@@ -1,6 +1,6 @@
 {
   "name": "@veris/plugin-sdk",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Public developer SDK for authoring VERIS V2 plugins",
   "license": "Apache-2.0",
   "author": "VERIS",

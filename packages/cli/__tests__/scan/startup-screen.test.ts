@@ -7,6 +7,7 @@ import { renderStartupScreen } from '../../src/scan/progress/startup-screen.js';
 import { DashboardRenderer } from '../../src/scan/progress/dashboard-renderer.js';
 import { createScanSession, type ScanConfig } from '../../src/scan/scan-session.js';
 import { setSymbolSet, resetSymbolSet } from '../../src/ui/index.js';
+import { CLI_VERSION } from '../../src/wirer.js';
 
 function createTestConfig(): ScanConfig {
   return Object.freeze({
@@ -52,7 +53,7 @@ describe('renderStartupScreen', () => {
 
   it('defaults the version to CLI_VERSION', () => {
     const out = render(createTestConfig());
-    expect(out).toContain('VERIS v1.0.0');
+    expect(out).toContain(`VERIS v${CLI_VERSION}`);
   });
 
   it('shows platform and Node version when provided', () => {
@@ -159,7 +160,7 @@ describe('DashboardRenderer startup integration', () => {
     renderer.onStart(session, { knowledgePackCount: 6 });
 
     const joined = output.join('');
-    expect(joined).toContain('VERIS v1.0.0');
+    expect(joined).toContain(`VERIS v${CLI_VERSION}`);
     expect(joined).toContain('6 packs');
     expect(joined).toContain('12 loaded');
     expect(joined).toContain('Starting scan');
@@ -170,7 +171,7 @@ describe('DashboardRenderer startup integration', () => {
     renderer.onStart(session);
 
     const joined = output.join('');
-    expect(joined).toContain('VERIS v1.0.0');
+    expect(joined).toContain(`VERIS v${CLI_VERSION}`);
     expect(joined).not.toContain('Knowledge');
   });
 });

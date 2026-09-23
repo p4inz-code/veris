@@ -155,16 +155,29 @@ export async function loadPlugin(
   };
 }
 
+const FORBIDDEN_OBJECT_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+const MAX_PURITY_DEPTH = 50;
+
 /**
  * Recursively verifies that an object contains only JSON-primitive values and data structures,
- * strictly forbidding functions, classes, symbols, or executable callbacks.
+ * strictly forbidding functions, classes, symbols, executable callbacks, accessor properties,
+ * prototype pollution keys, circular structures, and custom prototypes.
  */
 export function checkDeclarativePurity(
   target: unknown,
   currentPath: string = 'rulePack',
+  visited: Set<unknown> = new Set(),
+  depth: number = 0,
 ): { pure: boolean; violation?: string } {
   if (target === null || target === undefined) {
     return { pure: true };
+  }
+
+  if (depth > MAX_PURITY_DEPTH) {
+    return {
+      pure: false,
+      violation: `Maximum nesting depth exceeded (${MAX_PURITY_DEPTH}) at "${currentPath}"`,
+    };
   }
 
   const type = typeof target;
@@ -187,19 +200,51 @@ export function checkDeclarativePurity(
     return { pure: true };
   }
 
-  if (Array.isArray(target)) {
-    for (let i = 0; i < target.length; i++) {
-      const res = checkDeclarativePurity(target[i], `${currentPath}[${i}]`);
-      if (!res.pure) return res;
-    }
-    return { pure: true };
-  }
-
   if (type === 'object') {
-    for (const [key, value] of Object.entries(target as Record<string, unknown>)) {
-      const res = checkDeclarativePurity(value, `${currentPath}.${key}`);
+    if (visited.has(target)) {
+      return {
+        pure: false,
+        violation: `Circular structure detected at "${currentPath}"`,
+      };
+    }
+    visited.add(target);
+
+    if (Array.isArray(target)) {
+      for (let i = 0; i < target.length; i++) {
+        const res = checkDeclarativePurity(target[i], `${currentPath}[${i}]`, visited, depth + 1);
+        if (!res.pure) return res;
+      }
+      return { pure: true };
+    }
+
+    // Verify plain object prototype
+    const proto = Object.getPrototypeOf(target);
+    if (proto !== Object.prototype && proto !== null) {
+      return {
+        pure: false,
+        violation: `Non-plain object with custom prototype at "${currentPath}"`,
+      };
+    }
+
+    // Inspect own property descriptors to prevent getters/setters and prototype poisoning
+    const descriptors = Object.getOwnPropertyDescriptors(target);
+    for (const [key, desc] of Object.entries(descriptors)) {
+      if (FORBIDDEN_OBJECT_KEYS.has(key)) {
+        return {
+          pure: false,
+          violation: `Forbidden prototype poisoning property "${key}" at "${currentPath}"`,
+        };
+      }
+      if (desc.get || desc.set) {
+        return {
+          pure: false,
+          violation: `Accessor property (getter/setter) "${key}" found at "${currentPath}"`,
+        };
+      }
+      const res = checkDeclarativePurity(desc.value, `${currentPath}.${key}`, visited, depth + 1);
       if (!res.pure) return res;
     }
+
     return { pure: true };
   }
 

@@ -36,6 +36,7 @@ import {
 } from '../../src/scan/progress/session-header.js';
 import type { TerminalCapabilities } from '../../src/ui/index.js';
 import { setSymbolSet, resetSymbolSet } from '../../src/ui/index.js';
+import { CLI_VERSION } from '../../src/wirer.js';
 import {
   createScanSession,
   type ScanConfig,
@@ -172,7 +173,8 @@ function hasCursorControl(text: string): boolean {
  * the top after every update) is asserted by the VT-terminal model tests.
  */
 function countHeaderRenders(text: string): number {
-  return (text.match(/VERIS v1\.0\.0/g) ?? []).length;
+  const escaped = CLI_VERSION.replace(/\./g, '\\.');
+  return (text.match(new RegExp(`VERIS v${escaped}`, 'g')) ?? []).length;
 }
 
 /**
@@ -225,7 +227,7 @@ describe('persistent session header (real-TTY)', () => {
       expect(countHeaderRenders(joined)).toBeGreaterThan(0);
       // The summary rendered below the header; the header is still present.
       expect(joined).toContain('Scan Complete');
-      expect(joined.indexOf('VERIS v1.0.0')).toBeLessThan(joined.indexOf('Scan Complete'));
+      expect(joined.indexOf(`VERIS v${CLI_VERSION}`)).toBeLessThan(joined.indexOf('Scan Complete'));
     } finally {
       caps.restore();
       void renderer.dispose();
@@ -301,7 +303,9 @@ describe('persistent session header (real-TTY)', () => {
       expect(countHeaderRenders(joined)).toBeGreaterThan(0);
       expect(joined).toContain('Cannot read file');
       // The header text precedes the error text — nothing was written over it.
-      expect(joined.indexOf('VERIS v1.0.0')).toBeLessThan(joined.indexOf('Cannot read file'));
+      expect(joined.indexOf(`VERIS v${CLI_VERSION}`)).toBeLessThan(
+        joined.indexOf('Cannot read file'),
+      );
     } finally {
       caps.restore();
       void renderer.dispose();
@@ -331,8 +335,8 @@ describe('persistent session header (real-TTY)', () => {
       ].filter((p) => p >= 0);
       expect(bodyPositions.length).toBeGreaterThan(0);
       const firstBody = Math.min(...bodyPositions);
-      expect(joined.indexOf('VERIS v1.0.0')).toBeGreaterThanOrEqual(0);
-      expect(joined.indexOf('VERIS v1.0.0')).toBeLessThan(firstBody);
+      expect(joined.indexOf(`VERIS v${CLI_VERSION}`)).toBeGreaterThanOrEqual(0);
+      expect(joined.indexOf(`VERIS v${CLI_VERSION}`)).toBeLessThan(firstBody);
     } finally {
       caps.restore();
       void renderer.dispose();
@@ -421,13 +425,13 @@ describe('persistent session header (real-TTY)', () => {
       vi.advanceTimersByTime(HEADER_FRAME_INTERVAL_MS * INTRO_FRAME_COUNT + 1);
       const joined = caps.lines.join('');
       // The intro ran to completion: the full identity + logo are present.
-      expect(joined).toContain('VERIS v1.0.0');
+      expect(joined).toContain(`VERIS v${CLI_VERSION}`);
       expect(joined).toContain('\u2588');
       // The intro was visibly progressive: the ghost silhouette (and the
       // real logo) drew in BEFORE the identity line filled in (the wipe
       // runs before the settle).
       expect(joined.indexOf('\u2588')).toBeGreaterThanOrEqual(0);
-      expect(joined.indexOf('\u2588')).toBeLessThan(joined.indexOf('VERIS v1.0.0'));
+      expect(joined.indexOf('\u2588')).toBeLessThan(joined.indexOf(`VERIS v${CLI_VERSION}`));
       // The dashboard body rendered below the header during the burst.
       expect(joined).toContain('STATISTICS');
 

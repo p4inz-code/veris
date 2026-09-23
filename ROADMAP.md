@@ -168,9 +168,30 @@
 - ✅ Strict determinism preservation: identical scan runs with plugins produce identical canonical reports
 - ✅ Complete test suite covering scan integration, CLI commands, error reporting, and determinism
 
+## Phase 9: Plugin Security & Hardening
+
+- ✅ Symlink escape and physical path containment verification via `fs.realpathSync`
+- ✅ Restricted capability gating (offline-first policy denies `network` and `process-spawn`)
+- ✅ Prototype pollution defense across rule packs, property matchers, and raw features
+- ✅ Accessor property (getter/setter) detection and circular reference guards
+- ✅ Extractor execution timeout protection (30s default) against hanging or runaway plugins
+- ✅ Extraction memory bounds (5,000 feature limit per extraction, 1MB string value truncation)
+- ✅ Automated 3-strike quarantine enforcement across `extract` and `canExtract`
+- ✅ ReDoS prevention and pattern length capping (max 1,000 characters) in rule matchers
+- ✅ Locale-independent Unicode code-point sorting for deterministic plugin and feature output
+- ✅ Comprehensive 25-threat adversarial security regression test suite
+
+## Phase 10: V1.1.0 Release Integration & Hardening
+
+- ✅ Version bump verification for post-v1.0.0 release (`v1.1.0`)
+- ✅ Zero-runtime-dependency invariance verified for `@veris/core` and `@veris/plugin-sdk`
+- ✅ Full CI preflight across Node 18, 20, 22 on Windows, macOS, and Linux
+- ✅ Public CLI command and machine-readable output verification
+- ✅ Production tarball and package metadata validation
+- ✅ Clean working tree and repository hygiene
+
 ## V2+ Plans
 
-- CLI plugin management commands (Phase 8+)
 - AI-assisted rule writing
 - CI integration runner
 - Web dashboard

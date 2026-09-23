@@ -1,6 +1,6 @@
 {
   "name": "@veris/explain",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "VERIS AI explanation layer — explains deterministic analysis results via LLM providers",
   "license": "UNLICENSED",

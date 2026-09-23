@@ -37,6 +37,11 @@ export class PluginStateTracker implements IPluginStateTracker {
    */
   transitionTo(to: PluginStatus, reason?: string): void {
     const from = this._status;
+    // Security guard: Quarantined plugins cannot be silently transitioned back to active
+    if (from === 'quarantined' && to === 'active') {
+      return;
+    }
+
     this._status = to;
     this._transitions.push({
       pluginId: this.pluginId,
@@ -67,10 +72,29 @@ export class PluginStateTracker implements IPluginStateTracker {
   }
 
   /**
-   * Reset consecutive error count on successful execution.
+   * Reset consecutive error count on successful execution (no-op if quarantined).
    */
   recordSuccess(): void {
-    this._consecutiveErrors = 0;
+    if (this._status !== 'quarantined') {
+      this._consecutiveErrors = 0;
+    }
+  }
+
+  /**
+   * Explicitly unquarantines the plugin (administrative override).
+   */
+  unquarantine(reason: string = 'Administratively unquarantined'): void {
+    if (this._status === 'quarantined') {
+      this._consecutiveErrors = 0;
+      this._status = 'active';
+      this._transitions.push({
+        pluginId: this.pluginId,
+        from: 'quarantined',
+        to: 'active',
+        reason,
+        timestamp: Date.now(),
+      });
+    }
   }
 
   /**

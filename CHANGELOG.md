@@ -5,10 +5,12 @@ All notable changes to VERIS are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.1.0] - 2026-09-23
 
 ### Added
 
+- **CLI Plugin Integration & Configuration (`veris-cli`, `@veris/config`)** — integrated local plugin discovery and runtime into the CLI scan pipeline (`--plugin-dir`, `--no-plugins`), configuration schema (`plugins` array and plugin-specific options), and added the user-facing `veris plugins [list|info|check]` command suite.
+- **Security Hardening & Adversarial Defenses (`@veris/plugins`)** — symlink traversal prevention, entry point restrictions (`.js`, `.mjs`, `.cjs`), capability enforcement forbidding network and process-spawning, prototype pollution guards, AST declarative purity verification, extraction timeout containment (30s) and cancellation hooks, 3-error auto-quarantine, ReDoS defense with pattern size limits (1,000 chars), feature limits (5,000 max features, 1 MB max value size), and Unicode code-point deterministic sorting.
 - **Internal Plugin Host (`@veris/plugins`)** — implemented the runtime supervisor, local discovery engine, isolated ESM loader, and extension adapters for VERIS V2 plugins. Provides local discovery across `.veris/plugins`, `~/.veris/plugins`, and explicit paths with directory traversal prevention; enforces semver host version compatibility; performs safe ESM dynamic loading using `pathToFileURL` with error containment; validates declarative purity for Rule Packs (blocking executable functions/lambdas); coordinates state transitions with a 3-consecutive-error auto-quarantine supervisor; adapts external plugins to internal `ExtractorRegistry` (with `target-read` capability gating and strict raw-feature sanitation) and `IRuleRegistry`; and provides structured diagnostic logging and deterministic execution ordering.
 - **Public Plugin SDK foundation (`@veris/plugin-sdk`)** — implemented the standalone, zero-runtime-dependency developer SDK for authoring VERIS V2 plugins. Provides type-safe contracts and pure builders (`definePluginManifest`, `defineExtractorPlugin`, `defineRulePackPlugin`), enforces factual `PluginRawFeature[]` extraction boundaries (forbidding plugins from emitting findings or risk scores), guarantees declarative AST representations for Rule Packs (preventing imperative code injection), codifies determinism guidelines, defines granular capability sets, emits 100% self-contained TypeScript declarations, and includes reference authoring examples and contract tests.
 - **V2 plugin architecture specification & extension contract** (ADR-014: `docs/architecture/014-v2-plugin-architecture-contract.md`) — established formal architectural boundaries and contracts for V2 plugins. Defines package topology (`@veris/plugins` internal host vs. `@veris/plugin-sdk` authoring kit), approves Extractor Plugins and Rule Pack Plugins while explicitly deferring exporters/renderers/AI consumers, and codifies strict invariants: zero-dependency core, immutable v1.0.0, deterministic sorting/execution, and offline-first zero-telemetry. Implemented manifest validation, lifecycle error containment (3-error auto-quarantine), and automated architectural guardrail tests in `@veris/plugins`.
@@ -86,6 +88,7 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Programmatic API
 - Plugin system architecture (V2+)
 
+[1.1.0]: https://github.com/p4inz-code/veris/releases/tag/v1.1.0
 [1.0.0]: https://github.com/p4inz-code/veris/releases/tag/v1.0.0
 [0.1.3]: https://github.com/p4inz-code/veris/releases/tag/v0.1.3
 [0.1.2]: https://github.com/p4inz-code/veris/releases/tag/v0.1.2

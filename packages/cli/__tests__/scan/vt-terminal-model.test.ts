@@ -27,6 +27,7 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { resetSymbolSet, setSymbolSet, type TerminalCapabilities } from '../../src/ui/index.js';
+import { CLI_VERSION } from '../../src/wirer.js';
 import { DashboardRenderer } from '../../src/scan/progress/dashboard-renderer.js';
 import {
   createScanSession,
@@ -408,7 +409,7 @@ describe('persistent header against a REAL finite-height terminal (VT model)', (
     const { vt } = runInTerminal(50, 80, (renderer, session) => fullLifecycle(renderer, session));
 
     // The header must still be on screen at the TOP rows (identity row 7).
-    const headerHits = vt.rowsContaining('VERIS v1.0.0');
+    const headerHits = vt.rowsContaining(`VERIS v${CLI_VERSION}`);
     expect(headerHits.length).toBeGreaterThan(0);
     expect(headerHits[0]).toBe(IDENTITY_ROW);
     // The logo must still occupy the first rows (not scrolled away).
@@ -427,7 +428,7 @@ describe('persistent header against a REAL finite-height terminal (VT model)', (
       fullLifecycle(renderer, session, 200),
     );
 
-    const identity = vt.rowsContaining('VERIS v1.0.0');
+    const identity = vt.rowsContaining(`VERIS v${CLI_VERSION}`);
     // The final screen shows exactly one header instance: every frame
     // overwrites the previous one, so the header is always re-anchored at
     // the top rows (0..H-1) — it never accumulates or scrolls away.
@@ -450,7 +451,7 @@ describe('persistent header against a REAL finite-height terminal (VT model)', (
       const { vt, bytes } = runInTerminal(height, 80, (renderer, session) =>
         fullLifecycle(renderer, session, 120),
       );
-      const identity = vt.rowsContaining('VERIS v1.0.0');
+      const identity = vt.rowsContaining(`VERIS v${CLI_VERSION}`);
       expect(identity.length, `height ${height}`).toBe(1);
       expect(identity[0], `height ${height}`).toBe(IDENTITY_ROW);
       expect(vt.line(1).includes('\u2588'), `height ${height}`).toBe(true);
@@ -470,7 +471,7 @@ describe('persistent header against a REAL finite-height terminal (VT model)', (
       renderer.onCancel(session);
     });
 
-    expect(vt.rowsContaining('VERIS v1.0.0').length).toBe(1);
+    expect(vt.rowsContaining(`VERIS v${CLI_VERSION}`).length).toBe(1);
     expect(vt.line(1).includes('\u2588')).toBe(true);
     expect(vt.visibleContains('Cannot read file')).toBe(true);
     expect(vt.visibleContains('Scan Cancelled')).toBe(true);
@@ -482,7 +483,7 @@ describe('persistent header against a REAL finite-height terminal (VT model)', (
       renderer.onComplete(session, buildTestSummary());
     });
 
-    expect(vt.rowsContaining('VERIS v1.0.0').length).toBe(1);
+    expect(vt.rowsContaining(`VERIS v${CLI_VERSION}`).length).toBe(1);
     expect(vt.line(1).includes('\u2588')).toBe(true);
     // The summary head is visible below the pinned header on a tall screen.
     const summaryRow = vt.rowsContaining('Scan Complete')[0] ?? -1;
@@ -537,7 +538,7 @@ describe('persistent header against a REAL finite-height terminal (VT model)', (
     // After leaving the alternate screen, the final frame (header + summary)
     // is printed on the PRIMARY screen so the result persists after exit.
     const tail = joined.slice(joined.lastIndexOf('\x1b[?1049l'));
-    expect(tail).toContain('VERIS v1.0.0');
+    expect(tail).toContain(`VERIS v${CLI_VERSION}`);
     expect(tail).toContain('Scan Complete');
   });
 });

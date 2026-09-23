@@ -1,6 +1,6 @@
 {
   "name": "@veris/extractors",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "VERIS artifact extraction framework — extractors, registry, and built-in extractors",
   "license": "UNLICENSED",

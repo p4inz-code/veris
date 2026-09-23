@@ -28,6 +28,10 @@ import type {
 } from '../types.js';
 
 export const DEFAULT_PLUGIN_EXTRACTOR_PRIORITY = 600;
+export const DEFAULT_PLUGIN_EXTRACTION_TIMEOUT_MS = 30000;
+export const MAX_PLUGIN_FEATURES_PER_EXTRACTION = 5000;
+export const MAX_PLUGIN_FEATURE_VALUE_BYTES = 1024 * 1024; // 1 MB
+export const MAX_PLUGIN_METADATA_KEYS = 100;
 
 /**
  * Creates an internal Extractor instance from a loaded ExtractorPlugin.
@@ -38,6 +42,7 @@ export function createExtractorAdapter(
     priority?: number;
     diagnostics?: PluginDiagnosticsCollector;
     pluginConfig?: Record<string, unknown>;
+    timeoutMs?: number;
   },
 ): Extractor {
   return new PluginExtractorAdapter(loaded, options);
@@ -54,6 +59,7 @@ export class PluginExtractorAdapter implements Extractor {
   private readonly _plugin: ExtractorPlugin;
   private readonly _diagnostics?: PluginDiagnosticsCollector;
   private readonly _pluginConfig: Readonly<Record<string, unknown>>;
+  private readonly _timeoutMs: number;
 
   constructor(
     loaded: LoadedPlugin,
@@ -61,12 +67,14 @@ export class PluginExtractorAdapter implements Extractor {
       priority?: number;
       diagnostics?: PluginDiagnosticsCollector;
       pluginConfig?: Record<string, unknown>;
+      timeoutMs?: number;
     },
   ) {
     this._loaded = loaded;
     this._plugin = loaded.instance as ExtractorPlugin;
     this._diagnostics = options?.diagnostics;
     this._pluginConfig = Object.freeze({ ...(options?.pluginConfig ?? {}) });
+    this._timeoutMs = options?.timeoutMs ?? DEFAULT_PLUGIN_EXTRACTION_TIMEOUT_MS;
 
     this.id = loaded.manifest.id;
     this.name = loaded.manifest.name;
@@ -97,6 +105,8 @@ export class PluginExtractorAdapter implements Extractor {
         const pluginContext = this._buildPluginContext(context);
         return Boolean(this._plugin.canExtract(pluginContext));
       } catch (err) {
+        // Record error on state tracker for canExtract failures to prevent unquarantined error loops
+        this._loaded.stateTracker.recordError(err instanceof Error ? err : new Error(String(err)));
         this._diagnostics?.warn(
           this.id,
           'PLUGIN_CAN_EXTRACT_ERROR',
@@ -112,7 +122,25 @@ export class PluginExtractorAdapter implements Extractor {
   async extract(context: ExtractionContext): Promise<ExtractionResult> {
     const startTime = Date.now();
 
-    // Guard: Check if plugin is permitted to execute
+    // Guard 1: Cancellation check before invocation
+    if (context.cancellationToken?.isCancelled) {
+      return Object.freeze({
+        features: Object.freeze([]),
+        diagnostics: Object.freeze({
+          extractorId: this.id,
+          skipped: true,
+          skipReason: 'Cancellation requested',
+          startTime,
+          endTime: Date.now(),
+          durationMs: 0,
+          bytesProcessed: 0,
+          featuresEmitted: 0,
+          issues: Object.freeze([]),
+        }),
+      });
+    }
+
+    // Guard 2: Check if plugin is permitted to execute
     if (!this._loaded.stateTracker.canExecute()) {
       return Object.freeze({
         features: Object.freeze([]),
@@ -134,7 +162,40 @@ export class PluginExtractorAdapter implements Extractor {
     const bytesToProcess = context.content?.byteLength ?? context.artifact.size ?? 0;
 
     try {
-      const rawPluginFeatures = await this._plugin.extract(pluginContext);
+      // Execute with timeout race to prevent runaway/hanging plugins
+      let timer: NodeJS.Timeout | undefined;
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        timer = setTimeout(() => {
+          reject(new Error(`Plugin extraction timed out after ${this._timeoutMs}ms`));
+        }, this._timeoutMs);
+        timer.unref?.();
+      });
+
+      const rawPluginFeatures = await Promise.race([
+        this._plugin.extract(pluginContext),
+        timeoutPromise,
+      ]).finally(() => {
+        if (timer) clearTimeout(timer);
+      });
+
+      // Cancellation check after execution
+      if (context.cancellationToken?.isCancelled) {
+        return Object.freeze({
+          features: Object.freeze([]),
+          diagnostics: Object.freeze({
+            extractorId: this.id,
+            skipped: true,
+            skipReason: 'Cancellation requested',
+            startTime,
+            endTime: Date.now(),
+            durationMs: Date.now() - startTime,
+            bytesProcessed: 0,
+            featuresEmitted: 0,
+            issues: Object.freeze([]),
+          }),
+        });
+      }
+
       const endTime = Date.now();
 
       // Successful execution resets consecutive failure counter
@@ -150,9 +211,26 @@ export class PluginExtractorAdapter implements Extractor {
       }> = [];
 
       if (Array.isArray(rawPluginFeatures)) {
+        let featureCount = 0;
         for (const raw of rawPluginFeatures) {
           if (!raw || typeof raw !== 'object') {
             continue;
+          }
+
+          // Enforce maximum features per extraction to prevent memory exhaustion
+          if (++featureCount > MAX_PLUGIN_FEATURES_PER_EXTRACTION) {
+            this._diagnostics?.warn(
+              this.id,
+              'PLUGIN_FEATURE_LIMIT_EXCEEDED',
+              `Extractor "${this.id}" exceeded maximum feature limit (${MAX_PLUGIN_FEATURES_PER_EXTRACTION}); remaining discarded`,
+            );
+            issues.push({
+              extractorId: this.id,
+              code: 'FEATURE_LIMIT_EXCEEDED',
+              message: `Extractor exceeded feature limit (${MAX_PLUGIN_FEATURES_PER_EXTRACTION})`,
+              isError: false,
+            });
+            break;
           }
 
           // Security Guardrail: Reject any attempts by extractors to emit findings or risk scores
@@ -183,21 +261,34 @@ export class PluginExtractorAdapter implements Extractor {
               ? Math.max(0, Math.min(1, rawFeature.confidence))
               : 1.0;
 
-          sanitizedFeatures.push(
-            Object.freeze({
-              extractorId: this.id,
-              type: String(rawFeature.type ?? 'custom-feature'),
-              value: rawFeature.value,
-              confidence,
-              location: rawFeature.location,
-              metadata: rawFeature.metadata ? Object.freeze({ ...rawFeature.metadata }) : undefined,
-            }),
-          );
+          // Sanitize type string
+          const safeType = String(rawFeature.type ?? 'custom-feature')
+            .replace(/[\x00-\x1F\x7F]/g, '')
+            .trim()
+            .slice(0, 100);
+
+          // Deep sanitize feature value and metadata against prototype pollution and circular references
+          const safeVal = sanitizePluginValue(rawFeature.value);
+          const safeMeta = rawFeature.metadata
+            ? (sanitizePluginValue(rawFeature.metadata) as Record<string, unknown>)
+            : undefined;
+
+          sanitizedFeatures.push({
+            extractorId: this.id,
+            type: safeType || 'custom-feature',
+            value: safeVal,
+            confidence,
+            location: rawFeature.location,
+            metadata: safeMeta ? Object.freeze({ ...safeMeta }) : undefined,
+          });
         }
       }
 
+      // Deterministic feature sorting
+      sortFeaturesDeterministically(sanitizedFeatures);
+
       return Object.freeze({
-        features: Object.freeze(sanitizedFeatures),
+        features: Object.freeze(sanitizedFeatures.map((f) => Object.freeze(f))),
         diagnostics: Object.freeze({
           extractorId: this.id,
           skipped: false,
@@ -288,4 +379,75 @@ export class PluginExtractorAdapter implements Extractor {
       cancellationToken: context.cancellationToken ?? new CancellationToken(),
     });
   }
+}
+
+function isSafeKey(key: string): boolean {
+  return key !== '__proto__' && key !== 'constructor' && key !== 'prototype';
+}
+
+function sanitizePluginValue(
+  val: unknown,
+  depth: number = 0,
+  visited: Set<unknown> = new Set(),
+): unknown {
+  if (val === null || val === undefined) return val;
+  if (depth > 20) return undefined;
+  const type = typeof val;
+  if (type === 'string' || type === 'number' || type === 'boolean') {
+    if (type === 'string' && (val as string).length > MAX_PLUGIN_FEATURE_VALUE_BYTES) {
+      return (val as string).slice(0, MAX_PLUGIN_FEATURE_VALUE_BYTES);
+    }
+    return val;
+  }
+  if (type === 'function' || type === 'symbol') {
+    return undefined;
+  }
+  if (type === 'object') {
+    if (visited.has(val)) return undefined; // Break circular references
+    visited.add(val);
+
+    if (Array.isArray(val)) {
+      const arr: unknown[] = [];
+      for (const item of val) {
+        const s = sanitizePluginValue(item, depth + 1, visited);
+        if (s !== undefined) arr.push(s);
+      }
+      return arr;
+    }
+
+    const proto = Object.getPrototypeOf(val);
+    if (proto !== Object.prototype && proto !== null) {
+      return undefined; // Reject non-plain objects
+    }
+
+    const clean: Record<string, unknown> = Object.create(null);
+    let count = 0;
+    for (const [k, v] of Object.entries(val as Record<string, unknown>)) {
+      if (++count > MAX_PLUGIN_METADATA_KEYS) break;
+      if (isSafeKey(k)) {
+        const s = sanitizePluginValue(v, depth + 1, visited);
+        if (s !== undefined) clean[k] = s;
+      }
+    }
+    return clean;
+  }
+  return undefined;
+}
+
+function sortFeaturesDeterministically(features: RawFeature[]): void {
+  features.sort((a, b) => {
+    if (a.type !== b.type) return a.type < b.type ? -1 : 1;
+    const locA = a.location
+      ? `${a.location.offset ?? 0}:${a.location.startLine ?? 0}:${a.location.startColumn ?? 0}`
+      : '';
+    const locB = b.location
+      ? `${b.location.offset ?? 0}:${b.location.startLine ?? 0}:${b.location.startColumn ?? 0}`
+      : '';
+    if (locA !== locB) return locA < locB ? -1 : 1;
+    if (a.confidence !== b.confidence) return b.confidence - a.confidence;
+    const valA = typeof a.value === 'string' ? a.value : JSON.stringify(a.value ?? '');
+    const valB = typeof b.value === 'string' ? b.value : JSON.stringify(b.value ?? '');
+    if (valA !== valB) return valA < valB ? -1 : 1;
+    return 0;
+  });
 }

@@ -59,10 +59,16 @@ export function validatePluginManifest(input: unknown): ManifestValidationResult
   // id
   if (typeof raw.id !== 'string' || raw.id.trim() === '') {
     errors.push({ field: 'id', message: 'Plugin ID must be a non-empty string' });
-  } else if (!/^(@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/.test(raw.id)) {
+  } else if (
+    !/^(@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/.test(raw.id) ||
+    raw.id.includes('..') ||
+    raw.id.includes('\\') ||
+    raw.id.startsWith('.') ||
+    raw.id.endsWith('.')
+  ) {
     errors.push({
       field: 'id',
-      message: `Plugin ID "${raw.id}" must follow npm package naming conventions`,
+      message: `Plugin ID "${raw.id}" must follow npm package naming conventions without path traversal characters`,
     });
   }
 
@@ -118,6 +124,11 @@ export function validatePluginManifest(input: unknown): ManifestValidationResult
   // entryPoint
   if (typeof raw.entryPoint !== 'string' || raw.entryPoint.trim() === '') {
     errors.push({ field: 'entryPoint', message: 'Plugin entryPoint must be a valid path string' });
+  } else if (raw.entryPoint.includes('\0')) {
+    errors.push({
+      field: 'entryPoint',
+      message: 'Plugin entryPoint cannot contain null bytes',
+    });
   }
 
   // capabilities
@@ -163,6 +174,8 @@ export function sortPluginsDeterministically<
   return [...items].sort((a, b) => {
     const idA = a.id ?? a.manifest?.id ?? '';
     const idB = b.id ?? b.manifest?.id ?? '';
-    return idA.localeCompare(idB);
+    if (idA < idB) return -1;
+    if (idA > idB) return 1;
+    return 0;
   });
 }

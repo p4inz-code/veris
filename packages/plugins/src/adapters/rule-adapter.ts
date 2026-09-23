@@ -233,8 +233,20 @@ function adaptPropertyMatcher(matcher: PropertyMatcher): RuleCondition {
       return { type: 'contains', field: matcher.path, value: matcher.value };
 
     case 'regex':
-    case 'matches':
-      return { type: 'regex', field: matcher.path, pattern: String(matcher.value) };
+    case 'matches': {
+      const pattern = String(matcher.value);
+      if (pattern.length > 1000) {
+        throw new Error('Rule matcher regex pattern exceeds 1000 character maximum limit');
+      }
+      try {
+        new RegExp(pattern);
+      } catch (err) {
+        throw new Error(
+          `Invalid regex pattern in rule matcher "${pattern}": ${err instanceof Error ? err.message : String(err)}`,
+        );
+      }
+      return { type: 'regex', field: matcher.path, pattern };
+    }
 
     case 'exists':
       return { type: 'exists', field: matcher.path };

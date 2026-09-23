@@ -1,6 +1,6 @@
 {
   "name": "@veris/report",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "VERIS canonical report construction, diffing, and aggregation",
   "license": "UNLICENSED",
