@@ -54,6 +54,14 @@ describe('V2 Plugin Contracts', () => {
       expect(res2.valid).toBe(true);
       expect(res2.manifest).toEqual(validRuleManifest);
       expect(res2.errors).toHaveLength(0);
+
+      const res3 = validatePluginManifest({
+        ...validExtractorManifest,
+        id: '@corp/custom-feature-plugin',
+        capabilities: ['core-types-read', 'target-read', 'custom-feature', 'metadata-extract'],
+      });
+      expect(res3.valid).toBe(true);
+      expect(res3.errors).toHaveLength(0);
     });
 
     it('rejects manifest with non-object input', () => {

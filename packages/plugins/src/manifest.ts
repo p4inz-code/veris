@@ -16,6 +16,8 @@ const VALID_CAPABILITIES = new Set<PluginCapability>([
   'diagnostics-read',
   'target-read',
   'fs-write-output',
+  'custom-feature',
+  'metadata-extract',
   'network',
   'process-spawn',
 ]);

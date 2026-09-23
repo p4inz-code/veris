@@ -131,13 +131,23 @@
 - ✅ Inviolable invariants codified (0-dependency `@veris/core`, immutable `v1.0.0`, deterministic scanning, offline-first)
 - ✅ Internal plugin host types, manifest schema validation, and lifecycle state tracker (`@veris/plugins`)
 - ✅ Automated architecture guardrails and contract verification suite
-- 🔜 `@veris/plugin-sdk` authoring utilities implementation (Phase 6+)
-- 🔜 Dynamic plugin discovery and CLI loader integration (Phase 6+)
+
+## Phase 6: Public Plugin SDK Foundation
+
+- ✅ Public developer kit package (`@veris/plugin-sdk`) with ZERO runtime dependencies
+- ✅ Self-contained TypeScript definitions (emits 0 external runtime/type imports in `.d.ts`)
+- ✅ Pure authoring builders: `definePluginManifest()`, `defineExtractorPlugin()`, `defineRulePackPlugin()`
+- ✅ Formal determinism invariants codified in SDK constants and types
+- ✅ Capability groupings and documentation (`core-types-read`, `target-read`, `custom-feature`, etc.)
+- ✅ Reference authoring examples for both Extractor and Rule Pack plugins
+- ✅ Full SDK contract test suite (manifest, extractor boundary, declarative rules, determinism, compatibility)
+- 🔜 Plugin Host runtime loader and discovery integration (NOT STARTED — Phase 7+)
+- 🔜 CLI plugin management commands (NOT STARTED — Phase 7+)
 
 ## V2+ Plans
 
+- Plugin Host / Loading & Discovery (Not Started)
 - AI-assisted rule writing
-- Plugin system SDK
 - CI integration runner
 - Web dashboard
 - Additional rule packs

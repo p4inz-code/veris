@@ -54,6 +54,8 @@ export type PluginCapability =
   | 'diagnostics-read' // Emit and read diagnostic logs
   | 'target-read' // Read scanned artifact content buffer
   | 'fs-write-output' // Write output to designated export directory
+  | 'custom-feature' // Register custom raw feature types
+  | 'metadata-extract' // Extract structured metadata
   | 'network' // RESTRICTED: Network access (requires explicit user consent, off by default)
   | 'process-spawn'; // DANGEROUS: Spawn child processes (forbidden by default)
 

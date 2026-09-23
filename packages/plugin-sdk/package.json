@@ -1,0 +1,61 @@
+{
+  "name": "@veris/plugin-sdk",
+  "version": "0.1.0",
+  "description": "Public developer SDK for authoring VERIS V2 plugins",
+  "license": "Apache-2.0",
+  "author": "VERIS",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "build:watch": "tsup --watch",
+    "clean": "node -e \"fs.rmSync('dist',{recursive:true,force:true})\"",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@veris/core": "workspace:*",
+    "tsup": "^8.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  },
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/p4inz-code/veris.git"
+  },
+  "homepage": "https://github.com/p4inz-code/veris",
+  "bugs": {
+    "url": "https://github.com/p4inz-code/veris/issues"
+  },
+  "keywords": [
+    "security",
+    "malware",
+    "forensics",
+    "analysis",
+    "deterministic",
+    "scanner",
+    "typescript",
+    "plugin",
+    "extension",
+    "sdk"
+  ]
+}
