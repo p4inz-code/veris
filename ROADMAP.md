@@ -141,12 +141,24 @@
 - ✅ Capability groupings and documentation (`core-types-read`, `target-read`, `custom-feature`, etc.)
 - ✅ Reference authoring examples for both Extractor and Rule Pack plugins
 - ✅ Full SDK contract test suite (manifest, extractor boundary, declarative rules, determinism, compatibility)
-- 🔜 Plugin Host runtime loader and discovery integration (NOT STARTED — Phase 7+)
-- 🔜 CLI plugin management commands (NOT STARTED — Phase 7+)
+
+## Phase 7: Internal Plugin Host (Discovery, Validation, Loading & Registration)
+
+- ✅ Local filesystem plugin discovery (`.veris/plugins`, `~/.veris/plugins`, explicit `pluginsDir`)
+- ✅ Strict manifest schema validation and semver host compatibility gating
+- ✅ Path traversal security guards against directory and entry point escapes
+- ✅ Safe ESM dynamic loading via `pathToFileURL` with error containment
+- ✅ Declarative purity validation for rule packs (zero executable functions or lambdas)
+- ✅ Lifecycle state machine supervisor (`discovered` -> `validated` -> `initialized` -> `active` -> `deactivated`)
+- ✅ Automated quarantine after 3 consecutive failures to protect engine stability
+- ✅ `PluginExtractorAdapter` bridging `ExtractorPlugin` to `ExtractorRegistry` with capability gating (`target-read`)
+- ✅ `PluginRuleAdapter` bridging declarative rule packs into `IRuleRegistry`
+- ✅ Central `PluginHost` orchestrator with comprehensive diagnostics tracking
+- ✅ Full unit and integration test coverage across discovery, loader, adapters, and host orchestration
 
 ## V2+ Plans
 
-- Plugin Host / Loading & Discovery (Not Started)
+- CLI plugin management commands (Phase 8+)
 - AI-assisted rule writing
 - CI integration runner
 - Web dashboard

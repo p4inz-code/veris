@@ -38,6 +38,25 @@ export type PluginStatus =
   | 'failed' // Threw non-recoverable error
   | 'quarantined'; // Disabled due to crash loop or security violation
 
+export interface StateTransitionEvent {
+  readonly pluginId: string;
+  readonly from: PluginStatus;
+  readonly to: PluginStatus;
+  readonly reason?: string;
+  readonly timestamp: number;
+}
+
+export interface IPluginStateTracker {
+  readonly pluginId: string;
+  readonly status: PluginStatus;
+  readonly consecutiveErrors: number;
+  readonly transitions: readonly StateTransitionEvent[];
+  transitionTo(to: PluginStatus, reason?: string): void;
+  recordError(error: Error | string): boolean;
+  recordSuccess(): void;
+  canExecute(): boolean;
+}
+
 // ── Permission & Capability Model ──
 
 /**
@@ -246,13 +265,13 @@ export interface ExtractorPlugin extends Plugin {
   readonly type: 'extractor';
 
   /** Declared artifact types this extractor supports. */
-  readonly supportedArtifactTypes: readonly ArtifactType[];
+  readonly supportedArtifactTypes?: readonly ArtifactType[] | readonly string[];
 
   /**
    * Fast, synchronous heuristic check whether this extractor applies to the artifact.
    * MUST NOT perform I/O.
    */
-  canExtract(context: PluginExtractionContext): boolean;
+  canExtract?(context: PluginExtractionContext): boolean;
 
   /**
    * Execute extraction and return raw unnormalized features.
@@ -274,4 +293,80 @@ export interface RulePlugin extends Plugin {
 
   /** The declarative rule pack provided by this plugin. */
   readonly rulePack: Readonly<RulePack>;
+}
+
+// ── Diagnostics & Discovery Types ──
+
+export type PluginDiagnosticSeverity = 'info' | 'warning' | 'error';
+
+/**
+ * Structured diagnostic record emitted during plugin discovery, loading, and runtime.
+ */
+export interface PluginDiagnostic {
+  readonly code: string;
+  readonly severity: PluginDiagnosticSeverity;
+  readonly pluginId: string;
+  readonly message: string;
+  readonly timestamp: number;
+  readonly details?: Readonly<Record<string, unknown>>;
+}
+
+/**
+ * A plugin discovered on the local filesystem.
+ */
+export interface DiscoveredPlugin {
+  /** Unique plugin identifier (from manifest.id). */
+  readonly id: string;
+  /** Validated plugin manifest. */
+  readonly manifest: PluginManifest;
+  /** Absolute path to the manifest file (veris-plugin.json or package.json). */
+  readonly manifestPath: string;
+  /** Absolute path to the plugin root directory. */
+  readonly directory: string;
+  /** Absolute path to the resolved entry point script. */
+  readonly entryPointFile: string;
+}
+
+/**
+ * A plugin loaded and initialized in memory.
+ */
+export interface LoadedPlugin {
+  /** Unique plugin identifier (from manifest.id). */
+  readonly id: string;
+  /** The plugin's manifest. */
+  readonly manifest: PluginManifest;
+  /** Root directory of the plugin on disk. */
+  readonly directory: string;
+  /** Resolved entry point file. */
+  readonly entryPointFile: string;
+  /** Instantiated plugin object. */
+  readonly instance: ExtractorPlugin | RulePlugin;
+  /** Runtime state machine and quarantine tracker. */
+  readonly stateTracker: IPluginStateTracker;
+}
+
+/**
+ * Configuration options for plugin discovery.
+ */
+export interface PluginDiscoveryOptions {
+  /** Optional workspace root directory for resolving .veris/plugins. */
+  readonly workspaceDir?: string;
+  /** Explicit plugins directory to discover from. */
+  readonly pluginsDir?: string;
+  /** User home directory override (for testing or custom installations). */
+  readonly userHomeDir?: string;
+  /** Host VERIS engine version for compatibility checking (default: '1.0.0'). */
+  readonly hostVersion?: string;
+  /** Plugin IDs to exclude or ignore during discovery. */
+  readonly disabledPluginIds?: readonly string[];
+}
+
+/**
+ * Options for configuring the PluginHost.
+ */
+export interface PluginHostOptions extends PluginDiscoveryOptions {
+  /** Scoped logger for host operations. */
+  readonly logger?: ScopedPluginLogger;
+  /** Per-plugin configurations keyed by plugin ID. */
+  readonly pluginConfigs?: Readonly<Record<string, Readonly<Record<string, unknown>>>>;
 }

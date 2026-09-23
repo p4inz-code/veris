@@ -157,8 +157,12 @@ export function isPluginCompatible(manifest: PluginManifest, hostVersion: string
  * Sort any collection of plugins deterministically by ID.
  * Eliminates filesystem discovery non-determinism.
  */
-export function sortPluginsDeterministically<T extends { readonly id: string }>(
-  items: readonly T[],
-): T[] {
-  return [...items].sort((a, b) => a.id.localeCompare(b.id));
+export function sortPluginsDeterministically<
+  T extends { readonly id?: string; readonly manifest?: { readonly id: string } },
+>(items: readonly T[]): T[] {
+  return [...items].sort((a, b) => {
+    const idA = a.id ?? a.manifest?.id ?? '';
+    const idB = b.id ?? b.manifest?.id ?? '';
+    return idA.localeCompare(idB);
+  });
 }

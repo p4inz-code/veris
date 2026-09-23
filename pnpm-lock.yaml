@@ -504,6 +504,21 @@ importers:
         specifier: ^2.0.0
         version: 2.1.9(@types/node@22.20.0)
 
+  packages/plugin-sdk:
+    devDependencies:
+      '@veris/core':
+        specifier: workspace:*
+        version: link:../core
+      tsup:
+        specifier: ^8.0.0
+        version: 8.5.1(postcss@8.5.16)(tsx@4.22.4)(typescript@5.9.3)(yaml@2.9.0)
+      typescript:
+        specifier: ^5.5.0
+        version: 5.9.3
+      vitest:
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@22.20.0)
+
   packages/plugins:
     dependencies:
       '@veris/config':
@@ -512,9 +527,18 @@ importers:
       '@veris/core':
         specifier: workspace:*
         version: link:../core
+      '@veris/extractors':
+        specifier: workspace:*
+        version: link:../extractors
       '@veris/logger':
         specifier: workspace:*
         version: link:../logger
+      '@veris/plugin-sdk':
+        specifier: workspace:*
+        version: link:../plugin-sdk
+      '@veris/rules':
+        specifier: workspace:*
+        version: link:../rules
       '@veris/shared':
         specifier: workspace:*
         version: link:../shared
@@ -813,6 +837,9 @@ importers:
       typescript:
         specifier: ^5.5.0
         version: 5.9.3
+      vitest:
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@22.20.0)
 
   tools/scripts:
     devDependencies:

@@ -34,7 +34,10 @@
     "@veris/core": "workspace:*",
     "@veris/shared": "workspace:*",
     "@veris/logger": "workspace:*",
-    "@veris/config": "workspace:*"
+    "@veris/config": "workspace:*",
+    "@veris/extractors": "workspace:*",
+    "@veris/rules": "workspace:*",
+    "@veris/plugin-sdk": "workspace:*"
   },
   "devDependencies": {
     "tsup": "^8.0.0",

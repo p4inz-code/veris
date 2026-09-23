@@ -4,22 +4,16 @@
  * @module @veris/plugins/lifecycle
  */
 
-import type { PluginStatus } from './types.js';
+import type { IPluginStateTracker, PluginStatus, StateTransitionEvent } from './types.js';
 
 export const MAX_CONSECUTIVE_ERRORS_BEFORE_QUARANTINE = 3;
 
-export interface StateTransitionEvent {
-  readonly pluginId: string;
-  readonly from: PluginStatus;
-  readonly to: PluginStatus;
-  readonly reason?: string;
-  readonly timestamp: number;
-}
+export type { StateTransitionEvent, IPluginStateTracker };
 
 /**
  * Manages runtime lifecycle transitions and error-containment tracking for a plugin.
  */
-export class PluginStateTracker {
+export class PluginStateTracker implements IPluginStateTracker {
   private _status: PluginStatus = 'discovered';
   private _consecutiveErrors: number = 0;
   private readonly _transitions: StateTransitionEvent[] = [];
