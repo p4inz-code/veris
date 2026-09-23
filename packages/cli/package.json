@@ -58,6 +58,8 @@
     "@veris/correlation": "workspace:*",
     "@veris/risk": "workspace:*",
     "@veris/recommendations": "workspace:*",
+    "@veris/plugins": "workspace:*",
+    "@veris/plugin-sdk": "workspace:*",
     "tsup": "^8.0.0",
     "typescript": "^5.5.0",
     "vitest": "^2.0.0"

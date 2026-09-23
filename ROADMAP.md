@@ -156,6 +156,18 @@
 - ✅ Central `PluginHost` orchestrator with comprehensive diagnostics tracking
 - ✅ Full unit and integration test coverage across discovery, loader, adapters, and host orchestration
 
+## Phase 8: CLI Plugin Integration, Configuration & Runtime UX
+
+- ✅ CLI scan flags: `--plugin-dir <path>`, `--disable-plugin <id>` (repeatable), `--no-plugins`
+- ✅ Config layer integration: `pluginDir` and `disabledPlugins` in `PluginConfig` and `VERIS_PLUGIN_DIR` / `VERIS_DISABLED_PLUGINS` env vars
+- ✅ Dedicated plugin inventory CLI commands: `veris plugins [list]`, `veris plugins info <id>`, `veris plugins validate [path]`, with alias `veris plugin`
+- ✅ Machine-readable output mode: `veris plugins list --json` and `veris plugins info <id> --json` with zero ANSI pollution
+- ✅ Scan runtime integration: deterministic discovery, validation, loading, and registration of extractor and rule-pack plugins
+- ✅ Truthful startup & summary reporting: `Plugins: <n> loaded` on startup screen and `plugins: <n>` in analysis summary
+- ✅ Safe error containment: broken plugins surface diagnostics calmly without aborting scans
+- ✅ Strict determinism preservation: identical scan runs with plugins produce identical canonical reports
+- ✅ Complete test suite covering scan integration, CLI commands, error reporting, and determinism
+
 ## V2+ Plans
 
 - CLI plugin management commands (Phase 8+)

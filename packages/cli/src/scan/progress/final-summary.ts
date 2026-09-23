@@ -153,6 +153,9 @@ export function renderFinalSummary(
   if (summary.knowledgePacksLoaded !== undefined && summary.knowledgePacksLoaded > 0) {
     analysisRows.push({ label: 'packs', value: formatNumber(summary.knowledgePacksLoaded) });
   }
+  if (summary.pluginsLoaded !== undefined && summary.pluginsLoaded > 0) {
+    analysisRows.push({ label: 'plugins', value: formatNumber(summary.pluginsLoaded) });
+  }
   if (analysisRows.length > 0) {
     lines.push(` ${theme.ui.accent}ANALYSIS${R}`);
     lines.push(...renderAlignedRows(analysisRows, theme, symbols, width, R));

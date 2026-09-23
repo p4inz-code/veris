@@ -52,6 +52,8 @@ export interface ErrorInfo {
 export interface StartContext {
   /** Number of knowledge packs loaded before the scan began. */
   readonly knowledgePackCount?: number;
+  /** Number of plugins loaded before the scan began. */
+  readonly pluginCount?: number;
 }
 
 /**

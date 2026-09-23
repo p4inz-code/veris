@@ -52,6 +52,8 @@ export interface StartupScreenOptions {
   readonly version?: string;
   /** Number of knowledge packs loaded before the scan (shown under Engines). */
   readonly knowledgePackCount?: number;
+  /** Number of plugins loaded before the scan (shown under Engines). */
+  readonly pluginCount?: number;
 }
 
 /** Maximum startup screen width in characters. */
@@ -140,6 +142,12 @@ export function renderStartupBody(
     engineRows.push({
       label: 'Knowledge',
       value: `${formatNumber(options.knowledgePackCount)} ${pluralize('pack', options.knowledgePackCount)}`,
+    });
+  }
+  if (options.pluginCount !== undefined && options.pluginCount > 0) {
+    engineRows.push({
+      label: 'Plugins',
+      value: `${formatNumber(options.pluginCount)} ${pluralize('plugin', options.pluginCount)} loaded`,
     });
   }
   lines.push(...renderKeyValueRows(engineRows, theme, width - 2));

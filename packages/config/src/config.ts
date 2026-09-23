@@ -61,6 +61,8 @@ export interface LimitsConfig {
 export interface PluginConfig {
   readonly enabled: boolean;
   readonly paths?: readonly string[];
+  readonly pluginDir?: string;
+  readonly disabledPlugins?: readonly string[];
   readonly config?: Readonly<Record<string, unknown>>;
 }
 
@@ -130,6 +132,8 @@ interface MutableLimitsConfig {
 interface MutablePluginConfig {
   enabled: boolean;
   paths?: string[];
+  pluginDir?: string;
+  disabledPlugins?: string[];
   config?: Record<string, unknown>;
 }
 
@@ -185,6 +189,7 @@ export const DEFAULT_CONFIG: Readonly<VerisConfig> = Object.freeze({
   plugins: Object.freeze({
     enabled: true,
     paths: Object.freeze([]),
+    disabledPlugins: Object.freeze([]),
   }),
   theme: Object.freeze({
     mode: 'dark',
@@ -329,6 +334,8 @@ export function loadFromEnv(): Partial<VerisConfig> {
     VERIS_TARGET: 'scan.target',
     VERIS_OUTPUT: 'scan.output.format',
     VERIS_PLUGINS_ENABLED: 'plugins.enabled',
+    VERIS_PLUGIN_DIR: 'plugins.pluginDir',
+    VERIS_DISABLED_PLUGINS: 'plugins.disabledPlugins',
     VERIS_DIAGNOSTICS: 'diagnostics.enabled',
     VERIS_THEME: 'theme.mode',
   };
@@ -362,6 +369,25 @@ export function loadFromEnv(): Partial<VerisConfig> {
         (config as MutableConfig).plugins = {
           ...(config as MutableConfig).plugins,
           enabled: value === 'true',
+        } as MutablePluginConfig;
+        break;
+      }
+      case 'VERIS_PLUGIN_DIR': {
+        (config as MutableConfig).plugins = {
+          ...(config as MutableConfig).plugins,
+          enabled: (config as MutableConfig).plugins?.enabled ?? true,
+          pluginDir: value,
+        } as MutablePluginConfig;
+        break;
+      }
+      case 'VERIS_DISABLED_PLUGINS': {
+        (config as MutableConfig).plugins = {
+          ...(config as MutableConfig).plugins,
+          enabled: (config as MutableConfig).plugins?.enabled ?? true,
+          disabledPlugins: value
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean),
         } as MutablePluginConfig;
         break;
       }

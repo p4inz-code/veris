@@ -26,6 +26,7 @@ import { runExplain, parseExplainArgs, EXPLAIN_HELP } from './commands/explain.j
 import { registerCommand, dispatchCommand, type CliCommand } from './commands/index.js';
 import { runInit, parseInitArgs, INIT_HELP } from './commands/init.js';
 import { runPack, PACK_HELP } from './commands/pack.js';
+import { runPlugins, PLUGINS_HELP } from './commands/plugins.js';
 import { runReport, parseReportArgs, REPORT_HELP } from './commands/report.js';
 import { isScanActive, runScan, parseScanArgs, SCAN_HELP } from './commands/scan.js';
 import { runSummarize, parseSummarizeArgs, SUMMARIZE_HELP } from './commands/summarize.js';
@@ -190,12 +191,45 @@ function registerAllCommands(): void {
     },
   };
 
+  // Plugins command
+  const pluginsCommand: CliCommand = {
+    name: 'plugins',
+    description: 'Manage and inspect local plugins',
+    usage:
+      'veris plugins [list] || veris plugins info <plugin-id> || veris plugins validate [path]',
+    async run(args: readonly string[]): Promise<number> {
+      if (args[0] === '--help' || args[0] === '-h') {
+        process.stdout.write(PLUGINS_HELP);
+        return ExitCode.SUCCESS;
+      }
+      const { exitCode } = await runPlugins(args);
+      return exitCode;
+    },
+  };
+
+  // Plugin alias command
+  const pluginAliasCommand: CliCommand = {
+    name: 'plugin',
+    description: 'Manage and inspect local plugins (alias for plugins)',
+    usage: 'veris plugin <subcommand>',
+    async run(args: readonly string[]): Promise<number> {
+      if (args[0] === '--help' || args[0] === '-h') {
+        process.stdout.write(PLUGINS_HELP);
+        return ExitCode.SUCCESS;
+      }
+      const { exitCode } = await runPlugins(args);
+      return exitCode;
+    },
+  };
+
   // Register all commands
   registerCommand(explainCommand);
   registerCommand(summarizeCommand);
   registerCommand(scanCommand);
   registerCommand(reportCommand);
   registerCommand(packCommand);
+  registerCommand(pluginsCommand);
+  registerCommand(pluginAliasCommand);
   registerCommand(validateCommand);
   registerCommand(initCommand);
   registerCommand(versionCommand);

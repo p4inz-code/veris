@@ -146,6 +146,8 @@ export interface ScanSummary {
   readonly knowledgePacksLoaded?: number;
   /** Number of knowledge enrichments applied to evidence (when reported). */
   readonly knowledgeEnrichments?: number;
+  /** Number of plugins loaded before the scan (when reported). */
+  readonly pluginsLoaded?: number;
 }
 
 // ── Scan Session ──

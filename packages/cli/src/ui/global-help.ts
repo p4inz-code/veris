@@ -64,6 +64,7 @@ const COMMAND_GROUPS: ReadonlyArray<{
       { name: 'init', description: 'Initialize VERIS configuration' },
       { name: 'validate', description: 'Validate configuration or rules' },
       { name: 'pack', description: 'Manage knowledge packs' },
+      { name: 'plugins', description: 'Manage and inspect local plugins' },
     ]),
   },
   {

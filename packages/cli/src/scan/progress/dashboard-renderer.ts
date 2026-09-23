@@ -132,6 +132,7 @@ export class DashboardRenderer implements ProgressRenderer {
   private finalSummaryText: string = '';
   private needsRedraw: boolean = false;
   private knowledgePackCount: number | undefined = undefined;
+  private pluginCount: number | undefined = undefined;
   private readonly printedPhases: Set<string> = new Set();
   /** Errors raised during the session; rendered below the header. */
   private pendingErrors: string[] = [];
@@ -187,6 +188,7 @@ export class DashboardRenderer implements ProgressRenderer {
       this.caps = detectTerminal();
     }
     this.knowledgePackCount = context?.knowledgePackCount;
+    this.pluginCount = context?.pluginCount;
     this.printedPhases.clear();
     this.pendingErrors = [];
     this.bodyPhase = 'config';
@@ -209,6 +211,7 @@ export class DashboardRenderer implements ProgressRenderer {
       this.configBodyLines = renderStartupBody(session.config, {
         version: CLI_VERSION,
         knowledgePackCount: this.knowledgePackCount,
+        pluginCount: this.pluginCount,
       });
       this.renderBody(this.configBodyLines);
 
@@ -225,6 +228,7 @@ export class DashboardRenderer implements ProgressRenderer {
       const startupLines = renderStartupScreen(session.config, {
         version: CLI_VERSION,
         knowledgePackCount: this.knowledgePackCount,
+        pluginCount: this.pluginCount,
       });
       for (const line of startupLines) {
         process.stdout.write(line + '\n');

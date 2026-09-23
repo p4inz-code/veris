@@ -6,6 +6,8 @@
 
 import { ExitCode, CliError } from '../wirer.js';
 
+export { runPlugins, parsePluginsArgs, PLUGINS_HELP } from './plugins.js';
+
 // ── Command Interface ──
 
 /** A registered CLI command. */

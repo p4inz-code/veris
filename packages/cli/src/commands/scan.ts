@@ -34,8 +34,15 @@ import {
 } from '@veris/analysis';
 import type { FeatureReference, Evidence as AnalysisEvidence } from '@veris/analysis';
 import { ClassificationEngine } from '@veris/classification';
+import { loadFromEnv } from '@veris/config';
 import { createArtifact, severityLevelFromScore } from '@veris/core';
 import type { Artifact, ArtifactType, ContentHash } from '@veris/core';
+import {
+  CorrelationRegistry,
+  CorrelationEngine,
+  BUILT_IN_PATTERNS,
+  type ICorrelationRegistry,
+} from '@veris/correlation';
 import { DiscoveryEngine } from '@veris/discovery';
 import { exportReport } from '@veris/exporters';
 import type { ExportOptions } from '@veris/exporters';
@@ -64,13 +71,20 @@ import {
   EvidenceEnricher,
 } from '@veris/knowledge';
 import type { PackEnrichment, EvidenceForEnrichment } from '@veris/knowledge';
-import { createDefaultPipeline } from '@veris/pipeline';
+import {
+  createPipelineWithFactory,
+  type EngineFactory,
+  type PipelineConfig,
+} from '@veris/pipeline';
+import { PluginHost } from '@veris/plugins';
 import {
   BUILT_IN_RECOMMENDATIONS,
   createRecommendationEngine,
   createRecommendationRegistry,
 } from '@veris/recommendations';
 import { buildReport } from '@veris/report';
+import { RiskEvaluator, DecisionEngine } from '@veris/risk';
+import { RuleRegistry, RuleEngine, BUILT_IN_RULES, type IRuleRegistry } from '@veris/rules';
 import { deterministicId } from '@veris/shared';
 
 // ── Import M2 Progress System ──
@@ -96,7 +110,7 @@ import {
   type HealthIssue,
   type StageState,
 } from '../scan/scan-session.js';
-import { CliError, ExitCode } from '../wirer.js';
+import { CliError, ExitCode, CLI_VERSION } from '../wirer.js';
 
 // ── Scan Command Options ──
 
@@ -115,6 +129,12 @@ export interface ScanOptions {
   readonly silent?: boolean;
   /** Progress rendering mode. */
   readonly progress?: 'dashboard' | 'json' | 'silent' | 'auto';
+  /** Explicit directory to search for plugins. */
+  readonly pluginDir?: string;
+  /** Plugin IDs to disable (repeatable). */
+  readonly disabledPlugins?: readonly string[];
+  /** Whether plugins are enabled (default: true). */
+  readonly enablePlugins?: boolean;
   /**
    * Injected timestamp for deterministic output (ISO 8601).
    * Required for determinism — must be provided by the caller.
@@ -143,6 +163,9 @@ OPTIONS
   --progress <mode>         Progress display: dashboard (default), json, silent
   --silent                  Alias for --progress silent
   --verbose                 Enable verbose debug output
+  --plugin-dir <dir>        Explicit directory to load plugins from
+  --disable-plugin <id>     Disable specific plugin by ID (repeatable)
+  --no-plugins              Disable plugin discovery and loading
   --help                    Show this help message
 
 EXAMPLES
@@ -153,6 +176,8 @@ EXAMPLES
   veris scan --format json,markdown     JSON and Markdown output
   veris scan --progress json            Machine-readable JSON progress
   veris scan --progress silent          Silent mode
+  veris scan --plugin-dir ./my-plugins  Scan with plugins from directory
+  veris scan --no-plugins               Scan with all plugins disabled
 
 EXIT CODES
   0  Success
@@ -313,6 +338,8 @@ export async function runScan(options: ScanOptions): Promise<{ exitCode: number 
   };
   process.on('SIGINT', sigintHandler);
 
+  let pluginHost: PluginHost | undefined;
+
   try {
     // ── Load Knowledge Packs (before start, so the startup screen can
     //    report the loaded pack count) ──
@@ -346,8 +373,53 @@ export async function runScan(options: ScanOptions): Promise<{ exitCode: number 
       }
     }
 
+    // ── Load Local Plugins ──
+    const envConfig = loadFromEnv();
+    const pluginsEnabled = options.enablePlugins ?? envConfig.plugins?.enabled ?? true;
+    const pluginsDir = options.pluginDir ?? envConfig.plugins?.pluginDir;
+    const disabledPluginIds = [
+      ...(envConfig.plugins?.disabledPlugins ?? []),
+      ...(options.disabledPlugins ?? []),
+    ];
+
+    let pluginCount = 0;
+
+    if (pluginsEnabled) {
+      pluginHost = new PluginHost({
+        workspaceDir: path.resolve(process.cwd()),
+        pluginsDir: pluginsDir ? path.resolve(process.cwd(), pluginsDir) : undefined,
+        disabledPluginIds,
+        hostVersion: CLI_VERSION,
+      });
+
+      try {
+        await pluginHost.loadAll();
+        pluginCount = pluginHost.getActivePlugins().length;
+        if (options.verbose) {
+          process.stderr.write(`Loaded ${pluginCount} local plugin(s)\n`);
+        }
+      } catch (pluginErr) {
+        if (options.verbose) {
+          process.stderr.write(
+            `Warning: Failed to load plugins: ${pluginErr instanceof Error ? pluginErr.message : String(pluginErr)}\n`,
+          );
+        }
+      }
+
+      for (const diag of pluginHost.getDiagnostics()) {
+        if (diag.severity === 'error' || diag.severity === 'warning') {
+          addDiagnostic({
+            artifactPath: diag.pluginId,
+            stage: 'extraction',
+            code: diag.code,
+            message: `[plugin:${diag.pluginId}] ${diag.message}`,
+          });
+        }
+      }
+    }
+
     // ── Start ──
-    renderer.onStart(session, { knowledgePackCount: packCount });
+    renderer.onStart(session, { knowledgePackCount: packCount, pluginCount });
 
     // ── Stage 1: Discovery ──
     profiler.start('discovery');
@@ -544,6 +616,10 @@ export async function runScan(options: ScanOptions): Promise<{ exitCode: number 
       new ELFExtractor(),
       new MachOExtractor(),
     ]);
+
+    if (pluginHost) {
+      pluginHost.registerExtractors(extractorRegistry);
+    }
 
     const sessionId = deterministicId('scan', computedAt);
     const pipelineArtifacts: Artifact[] = [];
@@ -865,7 +941,39 @@ export async function runScan(options: ScanOptions): Promise<{ exitCode: number 
     renderer.onStageChange('correlation', 'running');
     renderer.onStageChange('risk', 'running');
 
-    const pipeline = createDefaultPipeline({ riskEvaluator: { computedAt } });
+    const ruleRegistry: IRuleRegistry = new RuleRegistry();
+    for (const rule of BUILT_IN_RULES) {
+      ruleRegistry.register(rule);
+    }
+    if (pluginHost) {
+      pluginHost.registerRulePacks(ruleRegistry);
+    }
+
+    class ScanEngineFactory implements EngineFactory {
+      createRuleEngine() {
+        return new RuleEngine(ruleRegistry);
+      }
+      createCorrelationEngine() {
+        const correlationRegistry: ICorrelationRegistry = new CorrelationRegistry();
+        for (const pattern of BUILT_IN_PATTERNS) {
+          correlationRegistry.register(pattern);
+        }
+        return new CorrelationEngine(correlationRegistry);
+      }
+      createRiskEvaluator(cfg?: PipelineConfig) {
+        const evaluatorConfig = cfg?.riskEvaluator
+          ? { engineOptions: { maxContributions: cfg.riskEvaluator.maxContributions } }
+          : undefined;
+        return new RiskEvaluator(evaluatorConfig);
+      }
+      createDecisionEngine() {
+        return new DecisionEngine();
+      }
+    }
+
+    const pipeline = createPipelineWithFactory(new ScanEngineFactory(), {
+      riskEvaluator: { computedAt },
+    });
     const pipelineInput = {
       artifacts: pipelineArtifacts,
       evidence: allEvidence,
@@ -1088,6 +1196,7 @@ export async function runScan(options: ScanOptions): Promise<{ exitCode: number 
       cancelled: false,
       knowledgePacksLoaded: packCount,
       knowledgeEnrichments: knowledgeEnrichments.length,
+      pluginsLoaded: pluginCount,
     });
 
     session = updateSession(session, {
@@ -1127,6 +1236,13 @@ export async function runScan(options: ScanOptions): Promise<{ exitCode: number 
     // CLI's global shutdown handler instead of being swallowed.
     scanActive = false;
     process.removeListener('SIGINT', sigintHandler);
+    if (pluginHost) {
+      try {
+        await pluginHost.dispose();
+      } catch {
+        // Safe disposal
+      }
+    }
     // dispose() may finish a deferred final transition (startup presentation
     // window); await it so the process does not exit before the screen is
     // complete on interactive terminals.
@@ -1237,6 +1353,9 @@ export function parseScanArgs(args: readonly string[]): Omit<ScanOptions, 'compu
   let verbose = false;
   let silent = false;
   let progress: 'dashboard' | 'json' | 'silent' | 'auto' | undefined;
+  let pluginDir: string | undefined;
+  let disabledPlugins: string[] | undefined;
+  let enablePlugins: boolean | undefined;
 
   let i = 0;
 
@@ -1291,6 +1410,27 @@ export function parseScanArgs(args: readonly string[]): Omit<ScanOptions, 'compu
         break;
       }
 
+      case '--plugin-dir': {
+        i++;
+        if (i >= args.length)
+          throw new CliError('Missing value for --plugin-dir', ExitCode.USAGE_ERROR);
+        pluginDir = args[i];
+        break;
+      }
+
+      case '--disable-plugin': {
+        i++;
+        if (i >= args.length)
+          throw new CliError('Missing value for --disable-plugin', ExitCode.USAGE_ERROR);
+        if (!disabledPlugins) disabledPlugins = [];
+        disabledPlugins.push(args[i]);
+        break;
+      }
+
+      case '--no-plugins':
+        enablePlugins = false;
+        break;
+
       case '--silent':
         silent = true;
         break;
@@ -1322,5 +1462,8 @@ export function parseScanArgs(args: readonly string[]): Omit<ScanOptions, 'compu
     verbose,
     silent,
     progress,
+    pluginDir,
+    disabledPlugins,
+    enablePlugins,
   };
 }
