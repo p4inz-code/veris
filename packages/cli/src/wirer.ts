@@ -55,6 +55,11 @@ export const ExitCode = {
   NOT_FOUND: 3,
   PROVIDER_UNAVAILABLE: 4,
   CACHE_ERROR: 5,
+  GATE_VIOLATION: 10,
+  INVALID_BASELINE: 11,
+  INVALID_CONFIG: 12,
+  PLUGIN_ERROR: 13,
+  CANCELLED: 130,
 } as const;
 
 /** Exit code type. */

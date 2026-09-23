@@ -55,6 +55,7 @@ const COMMAND_GROUPS: ReadonlyArray<{
     title: 'Analysis',
     commands: Object.freeze([
       { name: 'scan', description: 'Run analysis on artifacts' },
+      { name: 'ci', description: 'Run deterministic security gates and CI policy enforcement' },
       { name: 'report', description: 'Generate and export reports' },
     ]),
   },
@@ -106,6 +107,7 @@ function globalOptions(): HelpOptionRow[] {
 /** Usage examples — existing commands only. */
 const EXAMPLES: readonly HelpExampleRow[] = Object.freeze([
   { command: 'veris scan', description: 'Run a scan on the current directory' },
+  { command: 'veris ci --fail-on high', description: 'Run security gates with failure threshold' },
   { command: 'veris scan --format html', description: 'Scan and export an HTML report' },
   { command: 'veris explain fin_abc123', description: 'Explain a finding using AI' },
   { command: 'veris summarize', description: 'Summarize the latest scan' },

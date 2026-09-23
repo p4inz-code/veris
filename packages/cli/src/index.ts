@@ -35,7 +35,10 @@ export { runSummarize, parseSummarizeArgs, SUMMARIZE_HELP } from './commands/sum
 export type { SummarizeOptions } from './commands/summarize.js';
 
 export { runScan, parseScanArgs, SCAN_HELP } from './commands/scan.js';
-export type { ScanOptions } from './commands/scan.js';
+export type { ScanOptions, RunScanResult } from './commands/scan.js';
+
+export { runCi, parseCiArgs, CI_HELP } from './commands/ci.js';
+export * from './ci/index.js';
 
 export { runReport, parseReportArgs, REPORT_HELP } from './commands/report.js';
 export type { ReportOptions } from './commands/report.js';
@@ -56,6 +59,7 @@ export type { CliCommand } from './commands/index.js';
 
 // ── UI Framework ──
 
+export type { SeverityLevel } from './ui/index.js';
 export * from './ui/index.js';
 export {
   renderHelpPage,

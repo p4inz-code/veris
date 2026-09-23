@@ -20,6 +20,7 @@ export interface VerisConfig {
   readonly theme?: ThemeConfig;
   readonly diagnostics?: DiagnosticsConfig;
   readonly telemetry?: TelemetryConfig;
+  readonly ci?: CiRunnerConfig;
 }
 
 export interface ScanConfig {
@@ -82,6 +83,24 @@ export interface TelemetryConfig {
   readonly endpoint?: string;
 }
 
+export interface CiPolicyConfig {
+  readonly failOn?: 'critical' | 'high' | 'medium' | 'low' | 'info';
+  readonly failOnNew?: boolean;
+  readonly failOnRegressions?: boolean;
+  readonly maxRisk?: number;
+  readonly maxNew?: number;
+  readonly failOnPluginQuarantine?: boolean;
+}
+
+export interface CiRunnerConfig {
+  readonly baseline?: string;
+  readonly policy?: CiPolicyConfig;
+  readonly outputDir?: string;
+  readonly format?: readonly string[];
+  readonly summaryFile?: string;
+  readonly githubStepSummary?: boolean;
+}
+
 // ─── Mutable Internal Types (for construction) ──────────────────
 
 /** Mutable version of VerisConfig for internal construction. */
@@ -91,6 +110,25 @@ interface MutableConfig {
   theme?: MutableThemeConfig;
   diagnostics?: MutableDiagnosticsConfig;
   telemetry?: MutableTelemetryConfig;
+  ci?: MutableCiRunnerConfig;
+}
+
+interface MutableCiRunnerConfig {
+  baseline?: string;
+  policy?: MutableCiPolicyConfig;
+  outputDir?: string;
+  format?: string[];
+  summaryFile?: string;
+  githubStepSummary?: boolean;
+}
+
+interface MutableCiPolicyConfig {
+  failOn?: 'critical' | 'high' | 'medium' | 'low' | 'info';
+  failOnNew?: boolean;
+  failOnRegressions?: boolean;
+  maxRisk?: number;
+  maxNew?: number;
+  failOnPluginQuarantine?: boolean;
 }
 
 interface MutableScanConfig {

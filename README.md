@@ -142,17 +142,19 @@ Example output:
 
 ## CLI Commands
 
-| Command            | Description                           |
-| ------------------ | ------------------------------------- |
-| `veris scan`       | Run analysis on files and directories |
-| `veris report`     | Export reports from an existing scan  |
-| `veris pack`       | Manage knowledge packs                |
-| `veris init`       | Create a configuration file           |
-| `veris validate`   | Validate configuration or rules       |
-| `veris explain`    | Explain findings using AI             |
-| `veris summarize`  | Summarize a scan report using AI      |
-| `veris version`    | Show version information              |
-| `veris completion` | Generate shell completion scripts     |
+| Command            | Description                                           |
+| ------------------ | ----------------------------------------------------- |
+| `veris scan`       | Run analysis on files and directories                 |
+| `veris ci`         | Run deterministic security gates and CI policy runner |
+| `veris plugins`    | Manage and inspect local plugins                      |
+| `veris report`     | Export reports from an existing scan                  |
+| `veris pack`       | Manage knowledge packs                                |
+| `veris init`       | Create a configuration file                           |
+| `veris validate`   | Validate configuration or rules                       |
+| `veris explain`    | Explain findings using AI                             |
+| `veris summarize`  | Summarize a scan report using AI                      |
+| `veris version`    | Show version information                              |
+| `veris completion` | Generate shell completion scripts                     |
 
 Run any command with `--help` for detailed options:
 

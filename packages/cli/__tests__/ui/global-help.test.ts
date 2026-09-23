@@ -45,6 +45,7 @@ describe('renderGlobalHelp', () => {
     const text = renderGlobalHelp(100).map(stripAnsi).join('\n');
     for (const cmd of [
       'scan',
+      'ci',
       'report',
       'init',
       'validate',

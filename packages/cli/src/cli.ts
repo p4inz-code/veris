@@ -21,6 +21,7 @@
  * @module @veris/cli
  */
 
+import { runCi, parseCiArgs, CI_HELP } from './commands/ci.js';
 import { runCompletion, parseCompletionArgs, COMPLETION_HELP } from './commands/completion.js';
 import { runExplain, parseExplainArgs, EXPLAIN_HELP } from './commands/explain.js';
 import { registerCommand, dispatchCommand, type CliCommand } from './commands/index.js';
@@ -93,6 +94,25 @@ function registerAllCommands(): void {
       }
       const options = parseScanArgs(args);
       const { exitCode } = await runScan({
+        ...options,
+        computedAt: new Date().toISOString(),
+      });
+      return exitCode;
+    },
+  };
+
+  // CI command
+  const ciCommand: CliCommand = {
+    name: 'ci',
+    description: 'Run deterministic security gates and CI policy enforcement',
+    usage: 'veris ci [target] [options]',
+    async run(args: readonly string[]): Promise<number> {
+      if (args[0] === '--help' || args[0] === '-h') {
+        process.stdout.write(CI_HELP);
+        return ExitCode.SUCCESS;
+      }
+      const options = parseCiArgs(args);
+      const { exitCode } = await runCi({
         ...options,
         computedAt: new Date().toISOString(),
       });
@@ -226,6 +246,7 @@ function registerAllCommands(): void {
   registerCommand(explainCommand);
   registerCommand(summarizeCommand);
   registerCommand(scanCommand);
+  registerCommand(ciCommand);
   registerCommand(reportCommand);
   registerCommand(packCommand);
   registerCommand(pluginsCommand);

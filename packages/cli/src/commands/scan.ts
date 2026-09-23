@@ -36,7 +36,7 @@ import type { FeatureReference, Evidence as AnalysisEvidence } from '@veris/anal
 import { ClassificationEngine } from '@veris/classification';
 import { loadFromEnv } from '@veris/config';
 import { createArtifact, severityLevelFromScore } from '@veris/core';
-import type { Artifact, ArtifactType, ContentHash } from '@veris/core';
+import type { Artifact, ArtifactType, CanonicalReport, ContentHash } from '@veris/core';
 import {
   CorrelationRegistry,
   CorrelationEngine,
@@ -298,7 +298,16 @@ function buildScanConfig(options: ScanOptions): ScanConfig {
 
 // ── Command Handler ──
 
-export async function runScan(options: ScanOptions): Promise<{ exitCode: number }> {
+/** Result of executing a scan. */
+export interface RunScanResult {
+  readonly exitCode: number;
+  readonly report?: CanonicalReport;
+  readonly savedOutputFiles?: readonly string[];
+  readonly session?: ScanSession;
+  readonly quarantinedPlugins?: readonly string[];
+}
+
+export async function runScan(options: ScanOptions): Promise<RunScanResult> {
   const { computedAt } = options;
   const MAX_DIAGNOSTICS = 1000;
   const diagnostics: ScanDiagnostic[] = [];
@@ -1211,7 +1220,22 @@ export async function runScan(options: ScanOptions): Promise<{ exitCode: number 
 
     renderer.onComplete(session, summary);
 
-    return { exitCode: ExitCode.SUCCESS };
+    const quarantinedPlugins = pluginHost
+      ? pluginHost
+          .getLoadedPlugins()
+          .filter(
+            (p) => p.stateTracker.status === 'quarantined' || p.stateTracker.status === 'failed',
+          )
+          .map((p) => p.manifest.id)
+      : [];
+
+    return {
+      exitCode: ExitCode.SUCCESS,
+      report,
+      savedOutputFiles: Object.freeze([...savedOutputFiles]),
+      session,
+      quarantinedPlugins: Object.freeze(quarantinedPlugins),
+    };
   } catch (error) {
     // Fatal error
     const message = error instanceof Error ? error.message : String(error);
@@ -1229,7 +1253,7 @@ export async function runScan(options: ScanOptions): Promise<{ exitCode: number 
     renderer.onComplete(session, summary);
 
     process.stderr.write(`\nError: ${message}\n`);
-    return { exitCode: ExitCode.ERROR };
+    return { exitCode: ExitCode.ERROR, session };
   } finally {
     // The active flag is cleared before the deferred finalize (below) so a
     // Ctrl+C during the startup presentation window is still handled by the
@@ -1257,7 +1281,7 @@ async function handleCancellation(
   renderer: ProgressRenderer,
   profiler: Profiler,
   outputFiles: string[],
-): Promise<{ exitCode: number }> {
+): Promise<RunScanResult> {
   profiler.complete();
   const profilerSnapshot = profiler.snapshot();
   renderer.onProfilerSnapshot(profilerSnapshot);
@@ -1288,7 +1312,7 @@ async function handleCancellation(
 
   renderer.onCancel(finalSession);
 
-  return { exitCode: ExitCode.SUCCESS };
+  return { exitCode: ExitCode.SUCCESS, session: finalSession };
 }
 
 // ── Build Minimal Summary ──

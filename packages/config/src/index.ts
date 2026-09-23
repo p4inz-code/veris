@@ -26,6 +26,8 @@ export type {
   ThemeConfig,
   DiagnosticsConfig,
   TelemetryConfig,
+  CiPolicyConfig,
+  CiRunnerConfig,
   ConfigLayer,
   ConfigEntry,
   ConfigTrace,

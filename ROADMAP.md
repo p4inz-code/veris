@@ -190,10 +190,22 @@
 - ✅ Production tarball and package metadata validation
 - ✅ Clean working tree and repository hygiene
 
+## Phase 11: CI Integration Runner & Automated Security Gates
+
+- ✅ ADR-015: CI Integration Runner Architecture Contract (`docs/architecture/015-ci-integration-runner-contract.md`)
+- ✅ `veris ci [target] [options]` runner command with standalone and baseline-relative modes
+- ✅ Location-aware finding fingerprinting with deterministic cross-platform path normalization
+- ✅ Hardened baseline ingestion supporting CanonicalReport (`report.json`) and CiSummary (`ci-summary.json`) with prototype pollution defense and 50MB ceiling
+- ✅ 5-way differential comparison engine (`unchanged`, `new`, `regressed`, `evidence_changed`, `resolved`)
+- ✅ Configurable security policy gate evaluator (`failOn`, `failOnNew`, `maxNew`, `failOnRegressions`, `maxRisk`, `failOnPluginQuarantine`)
+- ✅ Deterministic CI exit codes (`0`, `1`, `2`, `10`, `11`, `12`, `13`, `130`)
+- ✅ Dual CI artifact emission: machine-readable `ci-summary.json` and `$GITHUB_STEP_SUMMARY` Markdown
+- ✅ Full CI runner test suite (fingerprint, baseline, comparator, policy, summary, CLI command)
+- ✅ Zero-dependency invariant preserved across `@veris/core` and `@veris/plugin-sdk`
+
 ## V2+ Plans
 
 - AI-assisted rule writing
-- CI integration runner
 - Web dashboard
 - Additional rule packs
 - Extension marketplace

@@ -41,6 +41,14 @@ function hintForExitCode(exitCode: number, command?: string): string | undefined
       return 'Check your AI provider configuration, or use --offline for local mode';
     case ExitCode.CACHE_ERROR:
       return 'Clear the explanation cache and retry';
+    case ExitCode.GATE_VIOLATION:
+      return 'Inspect failing findings and resolve security policy violations';
+    case ExitCode.INVALID_BASELINE:
+      return 'Ensure baseline report exists and is a valid JSON scan report';
+    case ExitCode.INVALID_CONFIG:
+      return 'Check CI configuration syntax and policy parameters';
+    case ExitCode.PLUGIN_ERROR:
+      return 'Review plugin diagnostic logs or disable failing plugins';
     default:
       return 'Run with --verbose for more details';
   }
