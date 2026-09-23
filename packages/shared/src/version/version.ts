@@ -111,13 +111,13 @@ export function satisfies(version: string, range: string): boolean {
   // Greater than or equal (>=x.y.z)
   const gteMatch = range.match(/^>=(\d+)\.(\d+)\.(\d+)$/);
   if (gteMatch) {
-    return compareSemver(version, gteMatch[0].slice(1)) >= 0;
+    return compareSemver(version, gteMatch[0].slice(2)) >= 0;
   }
 
   // Less than or equal (<=x.y.z)
   const lteMatch = range.match(/^<=(\d+)\.(\d+)\.(\d+)$/);
   if (lteMatch) {
-    return compareSemver(version, lteMatch[0].slice(1)) <= 0;
+    return compareSemver(version, lteMatch[0].slice(2)) <= 0;
   }
 
   // Unknown range format

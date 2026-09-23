@@ -9,6 +9,8 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **V2 plugin architecture specification & extension contract** (ADR-014: `docs/architecture/014-v2-plugin-architecture-contract.md`) — established formal architectural boundaries and contracts for V2 plugins. Defines package topology (`@veris/plugins` internal host vs. `@veris/plugin-sdk` authoring kit), approves Extractor Plugins and Rule Pack Plugins while explicitly deferring exporters/renderers/AI consumers, and codifies strict invariants: zero-dependency core, immutable v1.0.0, deterministic sorting/execution, and offline-first zero-telemetry. Implemented manifest validation, lifecycle error containment (3-error auto-quarantine), and automated architectural guardrail tests in `@veris/plugins`.
+- **Fixed `>=` semver range parsing** in `@veris/shared` version comparator.
 - **Deterministic benchmark foundation** (`tools/perf`) — automated benchmark harness measuring scan throughput, startup overhead, individual pipeline stage timings (discovery, classification, extraction, analysis, rules/risk, reporting, export), and memory usage. Validates determinism across repeated iterations with canonical payload hash comparison. Produces versioned JSON (`benchmark-results.json`) and human-readable reports. Added `pnpm bench` and `pnpm bench:quick` root scripts and comprehensive documentation in `docs/BENCHMARKS.md`.
 
 ### Changed

@@ -124,6 +124,16 @@
 - 🔜 CI benchmark regression tracking
 - 🔜 Targeted performance optimizations (deferred until baseline analysis is complete)
 
+## Phase 5: V2 Plugin Architecture Review & Extension Contract
+
+- ✅ V2 Plugin Architecture Decision Record (ADR-014: `docs/architecture/014-v2-plugin-architecture-contract.md`)
+- ✅ Strict extension boundaries established (Extractor Plugins & Rule Pack Plugins only; exporters/renderers/AI deferred)
+- ✅ Inviolable invariants codified (0-dependency `@veris/core`, immutable `v1.0.0`, deterministic scanning, offline-first)
+- ✅ Internal plugin host types, manifest schema validation, and lifecycle state tracker (`@veris/plugins`)
+- ✅ Automated architecture guardrails and contract verification suite
+- 🔜 `@veris/plugin-sdk` authoring utilities implementation (Phase 6+)
+- 🔜 Dynamic plugin discovery and CLI loader integration (Phase 6+)
+
 ## V2+ Plans
 
 - AI-assisted rule writing

@@ -39,7 +39,7 @@ work).
 
 ### Deferred work
 
-See `ROADMAP.md` (V2+): plugin SDK, AI-assisted rule writing, CI integration
+See `ROADMAP.md` (V2+): plugin SDK authoring implementation (architecture contract established in ADR-014), dynamic plugin loader, AI-assisted rule writing, CI integration
 runner, web dashboard, additional rule packs, extension marketplace.
 
 ## Versioning

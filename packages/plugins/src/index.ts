@@ -1,21 +1,20 @@
 /**
- * @veris/plugins — VERIS plugin host, SDK, and manifest system.
+ * @veris/plugins — VERIS V2 Plugin Host, Contracts, and Architecture Guardrails.
  *
- * ## Architecture (V2+)
- * - host/ — PluginHost manages plugin lifecycle
- * - sdk/ — PluginSDK contracts for third-party authors
- * - manifest/ — PluginManifest parser and validator
+ * ## Architecture
+ * - types.ts — Stable extension contracts for Extractor and Rule plugins
+ * - manifest.ts — Manifest schema validation and deterministic sorting
+ * - lifecycle.ts — Lifecycle state machine and quarantine error containment
  *
- * ## Plugin types (V2+)
- * - RulePlugin — New rule packs
- * - ExtractorPlugin — New extractors
- * - ExporterPlugin — New export formats
- * - RendererPlugin — New renderers
- * - HookPlugin — Pipeline lifecycle hooks
+ * ## Invariants (from SPEC-007 and SPEC-010):
+ * - Extractor plugins produce raw features only (never Findings or Risk scores)
+ * - Rule plugins provide declarative rule packs only (no arbitrary code execution)
+ * - Plugins are offline-first and zero-telemetry
+ * - Plugin ordering and output payloads are strictly deterministic
  *
- * ## Invariants
- * - Plugins run in a sandboxed environment
- * - Plugin crashes never crash the host
- * - Plugins have no FS/network access without explicit grants
+ * @module @veris/plugins
  */
-export {};
+
+export * from './types.js';
+export * from './manifest.js';
+export * from './lifecycle.js';

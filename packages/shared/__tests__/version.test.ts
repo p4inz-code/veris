@@ -40,5 +40,15 @@ describe('Version (semver)', () => {
     it('satisfies caret range', () => expect(satisfies('1.5.0', '^1.0.0')).toBe(true));
     it('rejects out-of-range caret', () => expect(satisfies('2.0.0', '^1.0.0')).toBe(false));
     it('matches tilde range', () => expect(satisfies('1.2.1', '~1.2.0')).toBe(true));
+    it('matches greater than or equal range', () => {
+      expect(satisfies('1.0.0', '>=1.0.0')).toBe(true);
+      expect(satisfies('1.2.0', '>=1.0.0')).toBe(true);
+      expect(satisfies('0.9.9', '>=1.0.0')).toBe(false);
+    });
+    it('matches less than or equal range', () => {
+      expect(satisfies('1.0.0', '<=1.0.0')).toBe(true);
+      expect(satisfies('0.9.0', '<=1.0.0')).toBe(true);
+      expect(satisfies('1.0.1', '<=1.0.0')).toBe(false);
+    });
   });
 });
