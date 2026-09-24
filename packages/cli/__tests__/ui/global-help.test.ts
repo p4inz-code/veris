@@ -51,6 +51,7 @@ describe('renderGlobalHelp', () => {
       'init',
       'validate',
       'pack',
+      'plugins',
       'explain',
       'summarize',
       'rule',

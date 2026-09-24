@@ -50,7 +50,7 @@ const VERSION_TEXT = `veris v${CLI_VERSION}`;
 // ── Register Commands ──
 
 /** Register all CLI commands. */
-function registerAllCommands(): void {
+export function registerAllCommands(): void {
   // Explain command
   const explainCommand: CliCommand = {
     name: 'explain',
@@ -408,12 +408,15 @@ function handleShutdown(signal: string): void {
   runCleanup();
 }
 
-// Register signal handlers
-process.on('SIGINT', () => handleShutdown('SIGINT'));
-process.on('SIGTERM', () => handleShutdown('SIGTERM'));
+// Register signal handlers and bootstrap when running as CLI binary (not under test)
+if (!process.env.VITEST) {
+  process.on('SIGINT', () => handleShutdown('SIGINT'));
+  process.on('SIGTERM', () => handleShutdown('SIGTERM'));
 
-// Bootstrap
-main(process.argv).catch((error) => {
-  process.stderr.write(`Fatal error: ${error instanceof Error ? error.message : String(error)}\n`);
-  process.exit(ExitCode.ERROR);
-});
+  main(process.argv).catch((error) => {
+    process.stderr.write(
+      `Fatal error: ${error instanceof Error ? error.message : String(error)}\n`,
+    );
+    process.exit(ExitCode.ERROR);
+  });
+}

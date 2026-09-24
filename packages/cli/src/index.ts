@@ -22,7 +22,7 @@
 
 // ── CLI Entry Point ──
 
-export { main as runCli } from './cli.js';
+export { main as runCli, registerAllCommands } from './cli.js';
 
 // ── Command Handlers ──
 

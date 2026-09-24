@@ -232,3 +232,33 @@
 - ✅ Declarative purity and path traversal enforcement (blocking symlink escapes and executable binary entry points)
 - ✅ 4-stage lifecycle: Discovery -> Verification -> Installation -> Execution
 - ✅ Safe installation and uninstallation commands (`veris plugins install`, `veris plugins remove`) with immutable `.veris-installed.json` receipts
+
+## Phase 15: Product UX/UI Consistency + CLI Experience
+
+- ✅ Global design system alignment across all 13 CLI commands and aliases
+- ✅ Terminal width adaptation verified across narrow and wide viewports (40, 60, 80, 120, 160, 180 cols)
+- ✅ Accessibility degradation verified: 100% pure ASCII symbols when unicode is disabled and 0 ANSI codes when color is disabled
+- ✅ Standardized `--help` and error UX with color-blind resilient textual indicators and predictable exit codes
+- ✅ Persistent session header, wipe intro animation, and terminal cleanup verified across alternate buffer lifecycles
+
+## Phase 16: Cross-Platform, Runtime & Installation Hardening
+
+- ✅ Multi-platform path normalization handling Windows drive letters, backslashes, POSIX paths, and symlinks
+- ✅ Zero-dependency invariant verified for `@veris/core` (0 deps) and `@veris/plugin-sdk` (0 runtime deps)
+- ✅ Circular dependency audit passed across 472 workspace files via cross-platform madge configuration
+- ✅ Production tarball packaging verified (`npm pack` output clean: zero tests, zero credentials, zero temp files)
+- ✅ Clean disposable installation validated in isolated environment outside monorepo source tree
+
+## Phase 17: Full End-to-End Product Acceptance
+
+- ✅ 14-step end-to-end user journey executed from CLI entry to report export, dashboard generation, AI rule authoring, plugin promotion, and CI gate enforcement
+- ✅ Security corpus validation on mixed targets (clean, suspicious scripts, binary dat, configuration secrets)
+- ✅ Deterministic analysis verified: identical inputs yield identical canonical hashes across repeated runs
+- ✅ Clean process exit and error containment: invalid arguments, missing reports, and unknown commands yield strictly defined exit codes
+
+## Phase 18: Final Quality & Release-Candidate Hardening
+
+- ✅ Complete monorepo build, typecheck, and test suite execution (43 test files, 479 CLI tests, 189 suites monorepo-wide)
+- ✅ Performance benchmark certified: 16.3ms median execution time with canonical hash determinism
+- ✅ Architecture contracts and documentation verified against live implementations
+- ✅ Remote GitHub Actions CI verified across 9 matrix jobs (Ubuntu, macOS, Windows on Node 18, 20, 22)
