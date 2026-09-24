@@ -203,9 +203,32 @@
 - ✅ Full CI runner test suite (fingerprint, baseline, comparator, policy, summary, CLI command)
 - ✅ Zero-dependency invariant preserved across `@veris/core` and `@veris/plugin-sdk`
 
-## V2+ Plans
+## Phase 12: AI-Assisted Rule Authoring
 
-- AI-assisted rule writing
-- Web dashboard
-- Additional rule packs
-- Extension marketplace
+- ✅ ADR-016: AI-Assisted Rule Authoring Contract (`docs/architecture/016-ai-assisted-rule-authoring-contract.md`)
+- ✅ `veris rule author [options]` command for intent-driven declarative detection rule generation
+- ✅ Provider integration with `@veris/ai` supporting LLMs and deterministic offline template fallbacks
+- ✅ Deterministic validation gate enforcing AST purity (zero executable code), regex ReDoS bounds (<= 1,000 chars), and engine compatibility
+- ✅ Synthetic test fixture generator and automated test runner executing positive/negative validation through real RuleEngine
+- ✅ Candidate artifact assembly with explicit human review warnings and active plugin promotion (`--promote`)
+- ✅ Support for disjunctive version ranges (`||`) in `@veris/shared` semver matcher
+
+## Phase 13: Web / Visual Investigation Dashboard
+
+- ✅ ADR-017: Visual Investigation Dashboard Contract (`docs/architecture/017-visual-investigation-dashboard-contract.md`)
+- ✅ `veris dashboard [report-path] [options]` command for interactive investigation and report export
+- ✅ Zero-dependency, self-contained standalone HTML report generator with embedded dark-slate design system
+- ✅ Strict Content Security Policy (`default-src 'none'`) and anti-framing security headers (`X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`)
+- ✅ Zero-network local loopback HTTP viewer server bound strictly to `127.0.0.1`
+- ✅ Interactive finding search, severity breakdown, and expandable evidence traces
+
+## Phase 14: Plugin Ecosystem & Marketplace Foundation
+
+- ✅ ADR-018: Plugin Ecosystem, Catalog, and Marketplace Foundation Contract (`docs/architecture/018-plugin-ecosystem-marketplace-contract.md`)
+- ✅ Local-first plugin catalog schema (`PluginCatalog`, `PluginPackageRecord`) and built-in standard ecosystem index
+- ✅ Content-addressed Merkle-style SHA-256 package checksum verification over sorted POSIX relative paths
+- ✅ Comprehensive verification pipeline (`veris plugins verify`) checking manifest authenticity, integrity, engine compatibility, and capability auditing
+- ✅ Security capability breakdown: `safe`, `targetAccess`, `storage`, and `dangerous` with high-visibility warnings for `network` and `process-spawn`
+- ✅ Declarative purity and path traversal enforcement (blocking symlink escapes and executable binary entry points)
+- ✅ 4-stage lifecycle: Discovery -> Verification -> Installation -> Execution
+- ✅ Safe installation and uninstallation commands (`veris plugins install`, `veris plugins remove`) with immutable `.veris-installed.json` receipts

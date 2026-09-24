@@ -66,6 +66,11 @@ export function compareSemver(a: string, b: string): number {
  * Currently supports: ^x.y.z, >=x.y.z, <=x.y.z, and simple x.y.z.
  */
 export function satisfies(version: string, range: string): boolean {
+  const trimmed = range.trim();
+  if (trimmed.includes('||')) {
+    return trimmed.split('||').some((subRange) => satisfies(version, subRange.trim()));
+  }
+
   const parsed = parseSemver(version);
   if (!parsed) return false;
 

@@ -57,6 +57,7 @@ const COMMAND_GROUPS: ReadonlyArray<{
       { name: 'scan', description: 'Run analysis on artifacts' },
       { name: 'ci', description: 'Run deterministic security gates and CI policy enforcement' },
       { name: 'report', description: 'Generate and export reports' },
+      { name: 'dashboard', description: 'Launch visual investigation dashboard' },
     ]),
   },
   {
@@ -73,6 +74,7 @@ const COMMAND_GROUPS: ReadonlyArray<{
     commands: Object.freeze([
       { name: 'explain', description: 'Explain findings using AI' },
       { name: 'summarize', description: 'Summarize scan report using AI' },
+      { name: 'rule', description: 'Author declarative detection rules with AI assistance' },
     ]),
   },
   {
@@ -108,6 +110,8 @@ function globalOptions(): HelpOptionRow[] {
 const EXAMPLES: readonly HelpExampleRow[] = Object.freeze([
   { command: 'veris scan', description: 'Run a scan on the current directory' },
   { command: 'veris ci --fail-on high', description: 'Run security gates with failure threshold' },
+  { command: 'veris dashboard', description: 'Launch visual investigation dashboard' },
+  { command: 'veris rule author', description: 'Author a declarative rule candidate' },
   { command: 'veris scan --format html', description: 'Scan and export an HTML report' },
   { command: 'veris explain fin_abc123', description: 'Explain a finding using AI' },
   { command: 'veris summarize', description: 'Summarize the latest scan' },

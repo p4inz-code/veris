@@ -159,6 +159,7 @@ export async function discoverPlugins(
 function hasManifest(dir: string): boolean {
   return (
     fs.existsSync(path.join(dir, 'veris-plugin.json')) ||
+    fs.existsSync(path.join(dir, 'plugin.json')) ||
     fs.existsSync(path.join(dir, 'package.json'))
   );
 }
@@ -176,6 +177,7 @@ function inspectAndRegister(
   diagnostics?: PluginDiagnosticsCollector,
 ): void {
   const verisPluginJson = path.join(candidateDir, 'veris-plugin.json');
+  const genericPluginJson = path.join(candidateDir, 'plugin.json');
   const packageJson = path.join(candidateDir, 'package.json');
 
   let manifestData: unknown = null;
@@ -191,6 +193,19 @@ function inspectAndRegister(
         path.basename(candidateDir),
         'PLUGIN_MANIFEST_SYNTAX_ERROR',
         `Failed to parse ${verisPluginJson}: ${err instanceof Error ? err.message : String(err)}`,
+      );
+      return;
+    }
+  } else if (fs.existsSync(genericPluginJson)) {
+    manifestPath = genericPluginJson;
+    try {
+      const content = fs.readFileSync(genericPluginJson, 'utf-8');
+      manifestData = JSON.parse(content);
+    } catch (err) {
+      diagnostics?.error(
+        path.basename(candidateDir),
+        'PLUGIN_MANIFEST_SYNTAX_ERROR',
+        `Failed to parse ${genericPluginJson}: ${err instanceof Error ? err.message : String(err)}`,
       );
       return;
     }

@@ -16,7 +16,16 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 import { loadFromEnv } from '@veris/config';
-import { PluginHost, validatePluginManifest } from '@veris/plugins';
+import {
+  PluginHost,
+  validatePluginManifest,
+  loadCatalog,
+  filterCatalog,
+  verifyPluginPackage,
+  installPluginPackage,
+  removePluginPackage,
+  type PluginType,
+} from '@veris/plugins';
 
 import { getSymbolSet } from '../ui/renderer/index.js';
 import { horizontalDivider } from '../ui/styles/index.js';
@@ -26,7 +35,7 @@ import { CLI_VERSION, ExitCode, CliError } from '../wirer.js';
 // ── Help Text ──
 
 export const PLUGINS_HELP = `
-Manage and inspect local VERIS plugins.
+Manage, inspect, verify, and install VERIS plugins.
 
 VERIS plugins extend analysis capabilities with local, deterministic
 extractors and declarative rule packs.
@@ -36,20 +45,31 @@ USAGE
   veris plugins list [options]              List discovered plugins
   veris plugins info <plugin-id> [options]  Show detailed plugin information
   veris plugins validate [path] [options]   Validate a plugin manifest
+  veris plugins catalog [path] [options]    Browse verified plugin catalog
+  veris plugins verify <path> [options]     Verify integrity, capabilities, and compatibility
+  veris plugins install <path> [options]    Verify and install a plugin package
+  veris plugins remove <id> [options]       Uninstall a plugin package
 
 OPTIONS
   --help, -h               Show help for any command
   --plugin-dir, -d <dir>   Directory to search for plugins
+  --target, -t <dir>       Target plugins directory for install/remove
+  --type <type>            Filter catalog by type (extractor, rule-pack)
+  --search, -s <query>     Search catalog packages by keyword
+  --tag <tag>              Filter catalog packages by tag
+  --expected-sha256 <hash> Expected SHA-256 checksum for verification
+  --force                  Overwrite existing plugin on installation
   --disable-plugin <id>    Disable specific plugin ID (repeatable)
   --json                   Output in machine-readable JSON format
   --verbose                Show detailed capabilities and diagnostics
 
 EXAMPLES
   veris plugins                             List all local plugins
-  veris plugins list --plugin-dir ./plugins Search custom plugin directory
-  veris plugins info custom-pe-extractor    View details for a plugin
-  veris plugins validate ./my-plugin        Validate plugin manifest
-  veris plugins list --json                 Output plugin inventory as JSON
+  veris plugins catalog                     Browse standard ecosystem catalog
+  veris plugins catalog --search credentials Find credential rule packs
+  veris plugins verify ./my-plugin          Verify package integrity and capabilities
+  veris plugins install ./my-plugin         Install verified plugin into ./.veris/plugins
+  veris plugins remove custom-rule-pack     Remove an installed plugin
 
 EXIT CODES
   0  Success
@@ -60,9 +80,15 @@ EXIT CODES
 // ── Command Options ──
 
 interface PluginsCommandOptions {
-  readonly subcommand: 'list' | 'info' | 'validate';
+  readonly subcommand: 'list' | 'info' | 'validate' | 'catalog' | 'verify' | 'install' | 'remove';
   readonly targetArg?: string;
   readonly pluginDir?: string;
+  readonly targetDir?: string;
+  readonly type?: string;
+  readonly search?: string;
+  readonly tag?: string;
+  readonly expectedSha256?: string;
+  readonly force?: boolean;
   readonly disabledPlugins: readonly string[];
   readonly json: boolean;
   readonly verbose: boolean;
@@ -71,9 +97,16 @@ interface PluginsCommandOptions {
 // ── Parse Args ──
 
 export function parsePluginsArgs(args: readonly string[]): PluginsCommandOptions {
-  let subcommand: 'list' | 'info' | 'validate' = 'list';
+  let subcommand: 'list' | 'info' | 'validate' | 'catalog' | 'verify' | 'install' | 'remove' =
+    'list';
   let targetArg: string | undefined;
   let pluginDir: string | undefined;
+  let targetDir: string | undefined;
+  let type: string | undefined;
+  let search: string | undefined;
+  let tag: string | undefined;
+  let expectedSha256: string | undefined;
+  let force = false;
   const disabledPlugins: string[] = [];
   let json = false;
   let verbose = false;
@@ -100,6 +133,58 @@ export function parsePluginsArgs(args: readonly string[]): PluginsCommandOptions
         break;
       }
 
+      case '--target':
+      case '-t': {
+        i++;
+        if (i >= args.length) {
+          throw new CliError('Missing value for --target', ExitCode.USAGE_ERROR);
+        }
+        targetDir = args[i];
+        break;
+      }
+
+      case '--type': {
+        i++;
+        if (i >= args.length) {
+          throw new CliError('Missing value for --type', ExitCode.USAGE_ERROR);
+        }
+        type = args[i];
+        break;
+      }
+
+      case '--search':
+      case '-s': {
+        i++;
+        if (i >= args.length) {
+          throw new CliError('Missing value for --search', ExitCode.USAGE_ERROR);
+        }
+        search = args[i];
+        break;
+      }
+
+      case '--tag': {
+        i++;
+        if (i >= args.length) {
+          throw new CliError('Missing value for --tag', ExitCode.USAGE_ERROR);
+        }
+        tag = args[i];
+        break;
+      }
+
+      case '--expected-sha256': {
+        i++;
+        if (i >= args.length) {
+          throw new CliError('Missing value for --expected-sha256', ExitCode.USAGE_ERROR);
+        }
+        expectedSha256 = args[i];
+        break;
+      }
+
+      case '--force': {
+        force = true;
+        break;
+      }
+
       case '--disable-plugin': {
         i++;
         if (i >= args.length) {
@@ -118,10 +203,18 @@ export function parsePluginsArgs(args: readonly string[]): PluginsCommandOptions
         break;
 
       default:
-        if (!arg.startsWith('--')) {
+        if (!arg.startsWith('-')) {
           if (firstPositional) {
             firstPositional = false;
-            if (arg === 'list' || arg === 'info' || arg === 'validate') {
+            if (
+              arg === 'list' ||
+              arg === 'info' ||
+              arg === 'validate' ||
+              arg === 'catalog' ||
+              arg === 'verify' ||
+              arg === 'install' ||
+              arg === 'remove'
+            ) {
               subcommand = arg;
             } else {
               targetArg = arg;
@@ -143,6 +236,12 @@ export function parsePluginsArgs(args: readonly string[]): PluginsCommandOptions
     subcommand,
     targetArg,
     pluginDir,
+    targetDir,
+    type,
+    search,
+    tag,
+    expectedSha256,
+    force,
     disabledPlugins,
     json,
     verbose,
@@ -166,6 +265,14 @@ export async function runPlugins(args: readonly string[]): Promise<{ exitCode: n
       return cmdInfo(options);
     case 'validate':
       return cmdValidate(options);
+    case 'catalog':
+      return cmdCatalog(options);
+    case 'verify':
+      return cmdVerify(options);
+    case 'install':
+      return cmdInstall(options);
+    case 'remove':
+      return cmdRemove(options);
   }
 }
 
@@ -526,4 +633,244 @@ async function cmdValidate(options: PluginsCommandOptions): Promise<{ exitCode: 
     `  ${theme.status.success}${symbols.success}${R} Entry point exists: ${manifest.entryPoint}\n\n`,
   );
   return { exitCode: ExitCode.SUCCESS };
+}
+
+// ── Subcommand: catalog ──
+
+async function cmdCatalog(options: PluginsCommandOptions): Promise<{ exitCode: number }> {
+  try {
+    const catalog = loadCatalog(options.targetArg);
+    const filtered = filterCatalog(catalog, {
+      type: options.type as PluginType | undefined,
+      search: options.search,
+      tag: options.tag,
+    });
+
+    if (options.json) {
+      process.stdout.write(
+        JSON.stringify(
+          {
+            catalog: catalog.name,
+            version: catalog.schemaVersion,
+            updatedAt: catalog.updatedAt,
+            totalPackages: catalog.packages.length,
+            matchingPackages: filtered.length,
+            packages: filtered,
+          },
+          null,
+          2,
+        ) + '\n',
+      );
+      return { exitCode: ExitCode.SUCCESS };
+    }
+
+    const theme = getResolvedTheme();
+    const R = ansiReset();
+    const divider = horizontalDivider(64);
+
+    process.stdout.write(`\n  ${theme.ui.brand}VERIS Plugin Catalog${R} — ${catalog.name}\n`);
+    process.stdout.write(`  ${divider}\n`);
+    process.stdout.write(
+      `  Showing ${filtered.length} of ${catalog.packages.length} package(s)\n\n`,
+    );
+
+    if (filtered.length === 0) {
+      process.stdout.write(`  No packages matched the query criteria.\n\n`);
+      return { exitCode: ExitCode.SUCCESS };
+    }
+
+    for (const pkg of filtered) {
+      process.stdout.write(`  ${theme.ui.accent}${pkg.name}${R} (${pkg.id} v${pkg.version})\n`);
+      process.stdout.write(`    Type:         ${pkg.type}\n`);
+      process.stdout.write(`    Author:       ${pkg.author}\n`);
+      process.stdout.write(`    License:      ${pkg.license}\n`);
+      process.stdout.write(`    Engines:      VERIS ${pkg.engines.veris}\n`);
+      process.stdout.write(`    Capabilities: ${pkg.capabilities.join(', ') || 'none'}\n`);
+      if (pkg.tags && pkg.tags.length > 0) {
+        process.stdout.write(`    Tags:         ${pkg.tags.join(', ')}\n`);
+      }
+      process.stdout.write(`    Description:  ${pkg.description}\n\n`);
+    }
+
+    return { exitCode: ExitCode.SUCCESS };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    process.stderr.write(`Error: ${message}\n`);
+    return { exitCode: ExitCode.ERROR };
+  }
+}
+
+// ── Subcommand: verify ──
+
+async function cmdVerify(options: PluginsCommandOptions): Promise<{ exitCode: number }> {
+  if (!options.targetArg) {
+    process.stderr.write(
+      'Error: Missing required package path. Usage: veris plugins verify <path>\n',
+    );
+    return { exitCode: ExitCode.USAGE_ERROR };
+  }
+
+  try {
+    const report = await verifyPluginPackage(options.targetArg, {
+      expectedSha256: options.expectedSha256,
+    });
+
+    if (options.json) {
+      process.stdout.write(JSON.stringify(report, null, 2) + '\n');
+      return { exitCode: report.valid ? ExitCode.SUCCESS : ExitCode.ERROR };
+    }
+
+    const theme = getResolvedTheme();
+    const symbols = getSymbolSet();
+    const R = ansiReset();
+    const divider = horizontalDivider(64);
+
+    process.stdout.write(`\n  ${theme.ui.brand}VERIS Plugin Verification${R}\n`);
+    process.stdout.write(`  ${divider}\n`);
+    process.stdout.write(`  Target Path:   ${report.packagePath}\n`);
+    process.stdout.write(`  SHA-256 Hash:  ${report.computedSha256 || 'N/A'}\n`);
+
+    if (report.manifest) {
+      process.stdout.write(`  Plugin ID:     ${report.manifest.id}\n`);
+      process.stdout.write(`  Name:          ${report.manifest.name}\n`);
+      process.stdout.write(`  Version:       ${report.manifest.version}\n`);
+      process.stdout.write(`  Type:          ${report.manifest.type}\n`);
+      process.stdout.write(
+        `  Compatibility: ${report.compatibility.compatible ? 'Compatible' : 'Incompatible'} (requires ${report.compatibility.requiredRange}, host is ${report.compatibility.hostVersion})\n`,
+      );
+      process.stdout.write(`  Safe Caps:     ${report.capabilities.safe.join(', ') || 'none'}\n`);
+      if (report.capabilities.targetAccess.length > 0) {
+        process.stdout.write(`  Target Access: ${report.capabilities.targetAccess.join(', ')}\n`);
+      }
+      if (report.capabilities.dangerous.length > 0) {
+        process.stdout.write(
+          `  ${theme.status.error}Dangerous Caps:${R} ${report.capabilities.dangerous.join(', ')}\n`,
+        );
+      }
+    }
+
+    if (report.warnings.length > 0) {
+      process.stdout.write(`\n  Warnings (${report.warnings.length}):\n`);
+      for (const w of report.warnings) {
+        process.stdout.write(`    ${theme.status.warning}${symbols.bullet}${R} ${w}\n`);
+      }
+    }
+
+    if (report.errors.length > 0) {
+      process.stdout.write(`\n  Errors (${report.errors.length}):\n`);
+      for (const e of report.errors) {
+        process.stdout.write(`    ${theme.status.error}${symbols.bullet}${R} ${e}\n`);
+      }
+    }
+
+    process.stdout.write('\n');
+    if (report.valid) {
+      process.stdout.write(
+        `  ${theme.status.success}${symbols.success}${R} Verification PASSED: Package is valid and safe for installation.\n\n`,
+      );
+      return { exitCode: ExitCode.SUCCESS };
+    } else {
+      process.stdout.write(
+        `  ${theme.status.error}${symbols.error}${R} Verification FAILED: Resolve issues before installing.\n\n`,
+      );
+      return { exitCode: ExitCode.ERROR };
+    }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    process.stderr.write(`Error: ${message}\n`);
+    return { exitCode: ExitCode.ERROR };
+  }
+}
+
+// ── Subcommand: install ──
+
+async function cmdInstall(options: PluginsCommandOptions): Promise<{ exitCode: number }> {
+  if (!options.targetArg) {
+    process.stderr.write(
+      'Error: Missing required package path. Usage: veris plugins install <path> [--target <dir>]\n',
+    );
+    return { exitCode: ExitCode.USAGE_ERROR };
+  }
+
+  const targetDir = options.targetDir ?? options.pluginDir ?? './.veris/plugins';
+
+  try {
+    const result = await installPluginPackage(options.targetArg, targetDir, {
+      force: options.force,
+      expectedSha256: options.expectedSha256,
+    });
+
+    if (options.json) {
+      process.stdout.write(JSON.stringify(result, null, 2) + '\n');
+      return { exitCode: result.success ? ExitCode.SUCCESS : ExitCode.ERROR };
+    }
+
+    const theme = getResolvedTheme();
+    const symbols = getSymbolSet();
+    const R = ansiReset();
+
+    if (result.success) {
+      process.stdout.write(
+        `\n  ${theme.status.success}${symbols.success}${R} Installed plugin ${theme.ui.accent}${result.pluginId}${R} successfully!\n`,
+      );
+      process.stdout.write(`  Destination: ${result.targetDir}\n`);
+      if (result.receipt) {
+        process.stdout.write(`  Checksum:    ${result.receipt.verifiedSha256}\n`);
+        process.stdout.write(`  Installed:   ${result.receipt.installedAt}\n`);
+      }
+      process.stdout.write('\n');
+      return { exitCode: ExitCode.SUCCESS };
+    } else {
+      process.stderr.write(
+        `\n  ${theme.status.error}${symbols.error}${R} Installation failed: ${result.error}\n\n`,
+      );
+      return { exitCode: ExitCode.ERROR };
+    }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    process.stderr.write(`Error: ${message}\n`);
+    return { exitCode: ExitCode.ERROR };
+  }
+}
+
+// ── Subcommand: remove ──
+
+async function cmdRemove(options: PluginsCommandOptions): Promise<{ exitCode: number }> {
+  if (!options.targetArg) {
+    process.stderr.write(
+      'Error: Missing required plugin ID. Usage: veris plugins remove <plugin-id> [--target <dir>]\n',
+    );
+    return { exitCode: ExitCode.USAGE_ERROR };
+  }
+
+  const targetDir = options.targetDir ?? options.pluginDir ?? './.veris/plugins';
+
+  try {
+    const result = await removePluginPackage(options.targetArg, targetDir);
+
+    if (options.json) {
+      process.stdout.write(JSON.stringify(result, null, 2) + '\n');
+      return { exitCode: result.success ? ExitCode.SUCCESS : ExitCode.ERROR };
+    }
+
+    const theme = getResolvedTheme();
+    const symbols = getSymbolSet();
+    const R = ansiReset();
+
+    if (result.success) {
+      process.stdout.write(
+        `\n  ${theme.status.success}${symbols.success}${R} Removed plugin ${theme.ui.accent}${result.pluginId}${R} (${result.removedFilesCount} files deleted).\n\n`,
+      );
+      return { exitCode: ExitCode.SUCCESS };
+    } else {
+      process.stderr.write(
+        `\n  ${theme.status.error}${symbols.error}${R} Removal failed: ${result.error}\n\n`,
+      );
+      return { exitCode: ExitCode.ERROR };
+    }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    process.stderr.write(`Error: ${message}\n`);
+    return { exitCode: ExitCode.ERROR };
+  }
 }

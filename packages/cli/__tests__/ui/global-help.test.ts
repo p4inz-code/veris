@@ -47,11 +47,13 @@ describe('renderGlobalHelp', () => {
       'scan',
       'ci',
       'report',
+      'dashboard',
       'init',
       'validate',
       'pack',
       'explain',
       'summarize',
+      'rule',
       'version',
       'completion',
     ]) {

@@ -23,12 +23,14 @@
 
 import { runCi, parseCiArgs, CI_HELP } from './commands/ci.js';
 import { runCompletion, parseCompletionArgs, COMPLETION_HELP } from './commands/completion.js';
+import { runDashboard, parseDashboardArgs, DASHBOARD_HELP } from './commands/dashboard.js';
 import { runExplain, parseExplainArgs, EXPLAIN_HELP } from './commands/explain.js';
 import { registerCommand, dispatchCommand, type CliCommand } from './commands/index.js';
 import { runInit, parseInitArgs, INIT_HELP } from './commands/init.js';
 import { runPack, PACK_HELP } from './commands/pack.js';
 import { runPlugins, PLUGINS_HELP } from './commands/plugins.js';
 import { runReport, parseReportArgs, REPORT_HELP } from './commands/report.js';
+import { runRule, RULE_HELP } from './commands/rule.js';
 import { isScanActive, runScan, parseScanArgs, SCAN_HELP } from './commands/scan.js';
 import { runSummarize, parseSummarizeArgs, SUMMARIZE_HELP } from './commands/summarize.js';
 import { runValidate, parseValidateArgs, VALIDATE_HELP } from './commands/validate.js';
@@ -242,11 +244,60 @@ function registerAllCommands(): void {
     },
   };
 
+  // Rule command
+  const ruleCommand: CliCommand = {
+    name: 'rule',
+    description: 'AI-assisted rule authoring and declarative rule pack management',
+    usage: 'veris rule author [options]',
+    async run(args: readonly string[]): Promise<number> {
+      if (args[0] === '--help' || args[0] === '-h') {
+        process.stdout.write(RULE_HELP);
+        return ExitCode.SUCCESS;
+      }
+      const { exitCode } = await runRule(args);
+      return exitCode;
+    },
+  };
+
+  // Rules alias command
+  const rulesAliasCommand: CliCommand = {
+    name: 'rules',
+    description: 'AI-assisted rule authoring and declarative rule pack management (alias for rule)',
+    usage: 'veris rules <subcommand>',
+    async run(args: readonly string[]): Promise<number> {
+      if (args[0] === '--help' || args[0] === '-h') {
+        process.stdout.write(RULE_HELP);
+        return ExitCode.SUCCESS;
+      }
+      const { exitCode } = await runRule(args);
+      return exitCode;
+    },
+  };
+
+  // Dashboard command
+  const dashboardCommand: CliCommand = {
+    name: 'dashboard',
+    description: 'Launch or export the visual investigation dashboard',
+    usage: 'veris dashboard [report-path] [options]',
+    async run(args: readonly string[]): Promise<number> {
+      if (args[0] === '--help' || args[0] === '-h') {
+        process.stdout.write(DASHBOARD_HELP);
+        return ExitCode.SUCCESS;
+      }
+      const options = parseDashboardArgs(args);
+      const { exitCode } = await runDashboard(options);
+      return exitCode;
+    },
+  };
+
   // Register all commands
   registerCommand(explainCommand);
   registerCommand(summarizeCommand);
   registerCommand(scanCommand);
   registerCommand(ciCommand);
+  registerCommand(ruleCommand);
+  registerCommand(rulesAliasCommand);
+  registerCommand(dashboardCommand);
   registerCommand(reportCommand);
   registerCommand(packCommand);
   registerCommand(pluginsCommand);

@@ -8,6 +8,8 @@ import { ExitCode, CliError } from '../wirer.js';
 
 export { runPlugins, parsePluginsArgs, PLUGINS_HELP } from './plugins.js';
 export { runCi, parseCiArgs, CI_HELP } from './ci.js';
+export { runRule, parseRuleArgs, RULE_HELP } from './rule.js';
+export { runDashboard, parseDashboardArgs, DASHBOARD_HELP } from './dashboard.js';
 
 // ── Command Interface ──
 

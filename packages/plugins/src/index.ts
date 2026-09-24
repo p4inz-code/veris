@@ -29,3 +29,4 @@ export * from './loader.js';
 export * from './adapters/extractor-adapter.js';
 export * from './adapters/rule-adapter.js';
 export * from './host.js';
+export * from './ecosystem/index.js';

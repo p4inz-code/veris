@@ -40,6 +40,13 @@ export type { ScanOptions, RunScanResult } from './commands/scan.js';
 export { runCi, parseCiArgs, CI_HELP } from './commands/ci.js';
 export * from './ci/index.js';
 
+export { runRule, parseRuleArgs, RULE_HELP } from './commands/rule.js';
+export * from './authoring/index.js';
+
+export { runDashboard, parseDashboardArgs, DASHBOARD_HELP } from './commands/dashboard.js';
+export type { DashboardCommandOptions } from './commands/dashboard.js';
+export * from './dashboard/index.js';
+
 export { runReport, parseReportArgs, REPORT_HELP } from './commands/report.js';
 export type { ReportOptions } from './commands/report.js';
 
