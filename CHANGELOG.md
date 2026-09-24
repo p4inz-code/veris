@@ -5,6 +5,21 @@ All notable changes to VERIS are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **CI Integration Runner & Automated Security Gates (`veris ci`)** — standalone and baseline-relative CI scanning with fingerprinting, differential comparisons (`new`, `regressed`, `resolved`), configurable policy gates (`--fail-on`, `--max-risk`, `--max-new`), dual artifact generation (`ci-summary.json` and `$GITHUB_STEP_SUMMARY`), and deterministic CI exit codes (`10`, `11`, `12`).
+- **AI-Assisted Rule Authoring (`veris rule author`)** — intent-driven declarative rule generation with validation gate, AST purity verification, regex bounds, automated test fixture execution, and plugin promotion (`--promote`).
+- **Visual Investigation Dashboard (`veris dashboard`)** — interactive browser-based viewer and standalone zero-dependency HTML report export with CSP (`default-src 'none'`) and anti-framing security headers on local loopback.
+- **Plugin Ecosystem & Marketplace Foundation (`veris plugins`)** — ecosystem catalog index, Merkle SHA-256 integrity verification, safe installation/removal with receipt tracking, and capability auditing.
+- **Windows UNC Path Support** — enhanced `isAbsolute` path detection for Windows UNC paths (`\\server\share`).
+
+### Fixed
+
+- **Sibling Directory Prefix Traversal in `safeResolve`** — fixed path traversal vulnerability where sibling paths sharing a base prefix (e.g. `/base/dir` vs `/base/dir-other`) escaped containment checks.
+- **Windows Case-Insensitive Path Resolution in `safeResolve`** — ensured drive letters and folder paths match case-insensitively on Windows.
+
 ## [1.1.0] - 2026-09-23
 
 ### Added

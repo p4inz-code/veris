@@ -146,6 +146,8 @@ Example output:
 | ------------------ | ----------------------------------------------------- |
 | `veris scan`       | Run analysis on files and directories                 |
 | `veris ci`         | Run deterministic security gates and CI policy runner |
+| `veris dashboard`  | Launch visual investigation dashboard                 |
+| `veris rule`       | Author declarative detection rules with AI assistance |
 | `veris plugins`    | Manage and inspect local plugins                      |
 | `veris report`     | Export reports from an existing scan                  |
 | `veris pack`       | Manage knowledge packs                                |

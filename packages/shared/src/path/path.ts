@@ -67,6 +67,8 @@ export function extname(path: string): string {
 export function isAbsolute(path: string): boolean {
   // Unix absolute paths start with /
   if (path.startsWith('/')) return true;
+  // Windows UNC paths start with \\ or //
+  if (path.startsWith('\\\\') || path.startsWith('//')) return true;
   // Windows absolute paths start with a drive letter (e.g., C:\)
   if (/^[a-zA-Z]:[/\\]/.test(path)) return true;
   return false;
@@ -95,9 +97,19 @@ export function safeResolve(base: string, target: string): string | null {
   const resolved = resolve(base, target);
   const normalizedBase = normalizePath(resolve(base, '.'));
 
-  // The resolved path must start with the base directory
-  if (!resolved.startsWith(normalizedBase)) {
-    return null;
+  // The resolved path must equal the base directory or be a child of it
+  if (process.platform === 'win32') {
+    const r = resolved.toLowerCase();
+    const b = normalizedBase.toLowerCase();
+    const bWithSlash = b.endsWith('/') ? b : b + '/';
+    if (r !== b && !r.startsWith(bWithSlash)) {
+      return null;
+    }
+  } else {
+    const bWithSlash = normalizedBase.endsWith('/') ? normalizedBase : normalizedBase + '/';
+    if (resolved !== normalizedBase && !resolved.startsWith(bWithSlash)) {
+      return null;
+    }
   }
 
   return resolved;

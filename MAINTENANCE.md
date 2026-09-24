@@ -1,9 +1,9 @@
 # VERIS Maintenance Guide
 
-## Current Status — v1.0.0 Frozen (maintenance freeze)
+## Current Status — v1.1.0 Frozen (maintenance freeze)
 
-**v1.0.0 is the current stable release** (tag `v1.0.0`, published as `veris-cli` on
-npm). The tag and the npm release are **immutable**: no tag movement, no republish,
+**v1.1.0 is the current stable release** (tag `v1.1.0`, published as `veris-cli` on
+npm). Tags `v1.0.0` and `v1.1.0` and the npm release are **immutable**: no tag movement, no republish,
 no new version without an explicit decision to end the freeze. `main` is in
 maintenance mode — bug fixes only, no new features (see `ROADMAP.md` for deferred
 work).

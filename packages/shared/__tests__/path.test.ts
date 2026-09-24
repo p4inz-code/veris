@@ -23,6 +23,10 @@ describe('Path utilities', () => {
   describe('isAbsolute', () => {
     it('detects Unix absolute paths', () => expect(isAbsolute('/usr/bin')).toBe(true));
     it('detects Windows absolute paths', () => expect(isAbsolute('C:\\Users')).toBe(true));
+    it('detects Windows UNC paths', () => {
+      expect(isAbsolute('\\\\server\\share')).toBe(true);
+      expect(isAbsolute('//server/share')).toBe(true);
+    });
     it('detects relative paths', () => expect(isAbsolute('relative/path')).toBe(false));
   });
 
@@ -50,8 +54,18 @@ describe('Path utilities', () => {
       expect(result).toContain('/base/sub/file.ts');
     });
 
+    it('resolves same directory', () => {
+      const result = safeResolve('/base', '.');
+      expect(result).toBeTruthy();
+    });
+
     it('rejects path traversal outside base', () => {
       const result = safeResolve('/base', '../outside');
+      expect(result).toBeNull();
+    });
+
+    it('rejects sibling directory prefix traversal', () => {
+      const result = safeResolve('/base/dir', '../dir-other/secret.txt');
       expect(result).toBeNull();
     });
   });

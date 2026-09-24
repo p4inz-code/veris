@@ -32,6 +32,56 @@ veris scan --max-findings 500           Limit findings
 
 Output formats: `json`, `markdown`, `html`, `sarif`, `csv`, `junit`
 
+### ci
+
+Run deterministic security gates and CI policy enforcement.
+
+```
+veris ci                                Run CI scan on current directory
+veris ci ./project                      Run CI scan on specific directory
+veris ci --baseline report.json         Compare against previous baseline
+veris ci --fail-on high                 Fail on high or critical findings
+veris ci --max-risk 7.5                 Fail if aggregate risk exceeds threshold
+veris ci --max-new 0                    Fail on any newly introduced findings
+veris ci --summary                      Output GitHub step summary
+```
+
+### dashboard
+
+Launch visual investigation dashboard or export static HTML report.
+
+```
+veris dashboard                         Launch interactive viewer for latest report
+veris dashboard ./veris-output/report.json  View specific report
+veris dashboard --export report.html    Export self-contained HTML report
+veris dashboard --port 3000             Specify viewer server port
+veris dashboard --open                  Open browser automatically
+```
+
+### rule
+
+Author declarative detection rules with AI assistance.
+
+```
+veris rule author                       Start interactive rule authoring
+veris rule author "detect eval usage"   Generate candidate from description
+veris rule author --promote             Promote candidate directly to plugin
+veris rule author --output ./my-rule    Custom output directory
+```
+
+### plugins
+
+Manage and inspect local plugins.
+
+```
+veris plugins list                      List installed plugins
+veris plugins info <id>                 Show detailed plugin information
+veris plugins validate [path]           Validate plugin manifest and integrity
+veris plugins verify <id>               Verify plugin against ecosystem catalog
+veris plugins install <name>            Install plugin from catalog
+veris plugins remove <id>               Uninstall a local plugin
+```
+
 ### pack
 
 Manage knowledge packs.
@@ -152,14 +202,19 @@ veris completion fish > ~/.config/fish/completions/veris.fish
 
 ## Exit codes
 
-| Code | Meaning              |
-| ---- | -------------------- |
-| 0    | Success              |
-| 1    | General error        |
-| 2    | Usage error          |
-| 3    | Not found            |
-| 4    | Provider unavailable |
-| 5    | Cache error          |
+| Code | Meaning                  |
+| ---- | ------------------------ |
+| 0    | Success                  |
+| 1    | General error            |
+| 2    | Usage error              |
+| 3    | Not found                |
+| 4    | Provider unavailable     |
+| 5    | Cache error              |
+| 10   | Gate violation (CI fail) |
+| 11   | Invalid baseline         |
+| 12   | Invalid configuration    |
+| 13   | Plugin error             |
+| 130  | Cancelled (SIGINT)       |
 
 ## Examples
 
