@@ -22,7 +22,7 @@ VERIS is a **deterministic security analysis platform** that scans files and dir
 
 The entire analysis pipeline runs **100% offline**. No network calls, no telemetry, no cloud dependency. Identical inputs always produce identical analysis results — findings, evidence, ordering, and risk scores are byte-for-byte reproducible. Report files also record a run ID and timestamps as part of the report contract.
 
-> **Status**: v1.2.0 release candidate. Offline-first, 100% deterministic analysis engine with
+> **Status**: **PRODUCTION HOLD / MAINTENANCE ONLY** (v1.2.0 released). Offline-first, 100% deterministic analysis engine with
 > interactive alternate-screen terminal session, visual investigation dashboard, CI security gates, and sandboxed plugin SDK.
 
 ```bash

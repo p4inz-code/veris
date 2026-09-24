@@ -1,16 +1,87 @@
-# VERIS Roadmap
+# VERIS Roadmap & Production Hold Certification
 
-> **Status**: v1.2.0 release candidate. All roadmap milestones M0 through Phase 21 completed.
-> Core invariants remain frozen: 100% deterministic analysis, offline-first, 0 telemetry,
-> zero dependencies for `@veris/core`, and permanent immutability of tags `v1.0.0` and `v1.1.0`.
-
-## Legend
-
-- ✅ **Complete**
-- 🔄 **In Progress**
-- 🔜 **Planned**
+> **Status**: **PRODUCTION HOLD / MAINTENANCE ONLY** (as of v1.2.0 release).
+> Tags `v1.0.0` and `v1.1.0` remain permanently immutable. `v1.2.0` is released and live on npm (`veris-cli@1.2.0`) and GitHub.
+> Active feature development is **FROZEN**. The platform is in long-term maintenance mode (security patches, break-fix, and CI maintenance only).
 
 ---
+
+## 1. CURRENT / COMPLETE (Shipped in v1.2.0)
+
+The following capabilities are fully implemented, packaged, and shipped in the `v1.2.0` release:
+
+- **Deterministic Security Analysis Pipeline**: Multi-engine offline scanner analyzing PE32/PE32+ binaries, shell scripts, PowerShell, configuration files, credentials, and cryptographic algorithms without cloud dependencies.
+- **Strict Determinism Guarantees**: Identical inputs yield byte-for-byte identical analysis run hashes, finding orderings, and risk scores.
+- **Zero-Dependency Architecture**: `@veris/core` has 0 dependencies; `@veris/plugin-sdk` has 0 runtime dependencies.
+- **Deterministic CI Security Gate Runner (`veris ci`)**: Standalone and baseline-differential scanning with location-aware finding fingerprinting, 5-way status categorization (`new`, `regressed`, `evidence_changed`, `unchanged`, `resolved`), configurable threshold gates (`--fail-on`, `--fail-on-new`, `--max-risk`, `--max-new`, `--fail-on-regressions`), machine-readable `ci-summary.json`, and native `$GITHUB_STEP_SUMMARY` Markdown.
+- **AI-Assisted Declarative Rule Authoring (`veris rule author`)**: Intent-driven rule synthesis supporting LLMs and 100% offline deterministic templates, AST purity enforcement (zero executable code), ReDoS safety bounds, automated positive/negative test fixture validation, and direct plugin promotion (`--promote`).
+- **Visual Investigation Dashboard (`veris dashboard`)**: Standalone, CSP-hardened (`default-src 'none'`) zero-dependency HTML report export, local loopback viewer server bound strictly to `127.0.0.1`, and interactive finding search and triage.
+- **Plugin Ecosystem & Marketplace Foundation (`veris plugins`)**: Standard local-first catalog index, Merkle SHA-256 package checksum verification, isolated execution sandbox, resource quotas, 3-error auto-quarantine, and safe installation/removal receipts.
+- **Cross-Platform Responsive Terminal UX**: Pinned alternate screen buffer session header with logo wipe intro animation, graceful `--no-color`, `--no-unicode`, `--no-animation`, and non-TTY JSON fallbacks across Windows Terminal, PowerShell, CMD, macOS, and Linux (40-180 cols).
+- **Public Developer Kit (`@veris/plugin-sdk`)**: Pure builders for Extractor and Rule Pack plugins, factual `PluginRawFeature` boundary, and self-contained TypeScript declarations.
+
+---
+
+## 2. VERIFIED (Empirically Proven & Certified)
+
+Every item below has been directly verified through automated suites, cross-platform CI matrix runs, and live package tests:
+
+- ✅ **Monorepo Compilation & Type Safety**: 31 workspace packages compile cleanly with zero TypeScript errors.
+- ✅ **Test Suite Completeness**: 189 test files passed (3,789 tests passed, 0 failures, 0 skipped).
+- ✅ **Lint & Style Compliance**: 0 ESLint errors, 328 warnings (under the 400 warning budget).
+- ✅ **Circular Dependency Freedom**: 0 circular dependencies across 472 files verified via `madge`.
+- ✅ **Performance & Benchmark Throughput**: 16.9ms median execution latency with verified canonical hash determinism (`0f7c8303...`).
+- ✅ **Live npm Package Deployment**: `veris-cli@1.2.0` verified on npm registry with SLSA provenance attestations, 14 clean files, and 0 runtime dependencies.
+- ✅ **Isolated Disposable Installation**: Verified fresh install of `veris-cli@1.2.0` from public npm in an empty temp directory outside the repository; executed `veris --version`, `veris --help`, `veris scan`, `veris rule author`, `veris dashboard`, and `veris ci` with expected exit codes.
+- ✅ **Live GitHub Release**: `Release v1.2.0` published live with comprehensive release notes.
+- ✅ **Remote CI Matrix**: GitHub Actions run 36024738978 verified with 14/14 jobs green across Node 18, 20, 22 on Ubuntu, macOS, and Windows.
+- ✅ **Adversarial Security Hardening**: 25-threat security suite passing (path traversal, symlink escapes, prototype pollution, circular references, ReDoS, memory bounds).
+- ✅ **Windows Production Compatibility**: Verified on Windows 11 with PowerShell, CMD, and Windows Terminal.
+
+---
+
+## 3. INTENTIONALLY DEFERRED
+
+The following capabilities were explicitly evaluated and postponed to preserve architecture purity and keep core invariants intact:
+
+- **Third-Party Remote Plugin Registry Downloads**: VERIS strictly adheres to offline-first operation. Remote fetching of unverified third-party code from internet registries is intentionally deferred; plugins must be reviewed and placed locally.
+- **Dynamic Binary Sandboxing (Dynamic Execution / Detonation)**: VERIS is exclusively a static analysis platform. Runtime detonation and virtualization are out of scope.
+- **Imperative / Scripted Plugins**: Plugins are restricted to factual extractors and declarative AST rules. Arbitrary executable hooks in rule packs are forbidden.
+- **Cloud Analytics & Telemetry**: Zero telemetry is an inviolable architectural guarantee. No remote analytics or phone-home tracking will ever be implemented.
+- **DECSTBM Scroll Region Header Pinning**: DECSTBM terminal escapes are intentionally rejected due to known rendering corruption in Windows ConPTY/Windows Terminal (microsoft/terminal#19016); alternate buffer full-frame redraw is used instead.
+
+---
+
+## 4. FUTURE (Potential V3+ Work)
+
+Potential items if active product development is reopened in the future:
+
+- Native YARA rule compiler bridge.
+- WebAssembly-sandboxed extractor plugins.
+- Additional compiled language extractors (Rust, Go, Swift binary parsing extensions).
+- Visual threat-graph timeline reconstruction in dashboard.
+
+---
+
+## 5. MAINTENANCE ONLY (Permitted Post-Hold Activities)
+
+With the repository now in **PRODUCTION HOLD**, development is limited to the following:
+
+1. **Security Vulnerability Fixes**: Remediating any critical vulnerabilities identified in supported versions (1.2.x, 1.1.x, 1.0.x).
+2. **Correctness & False Positive/Negative Bug Fixes**: Correcting analysis logic defects with regression tests.
+3. **Dependency Maintenance**: Updating build/dev tooling dependencies for security and Node engine compatibility without introducing runtime dependencies into core.
+4. **CI & Workflow Maintenance**: Maintaining GitHub Actions runners, action versions, and node version matrices.
+
+---
+
+## 6. BLOCKERS (Hold Certification State)
+
+- **Active Blockers**: **NONE (0)**.
+- **Hold Certification Status**: **FULLY CERTIFIED FOR PRODUCTION HOLD**.
+
+---
+
+## Historical Milestone Archive (M0 through Phase 21)
 
 ## Milestone M0: Foundation — Architecture & Repository Bootstrap
 

@@ -1,133 +1,140 @@
-# VERIS Maintenance Guide
+# VERIS Maintenance Guide & Production Hold Manual
 
-## Current Status — v1.2.0 Release
+## Current Status — v1.2.0 PRODUCTION HOLD
 
-**v1.2.0 is the current release candidate** (tags `v1.0.0` and `v1.1.0` remain permanently
-**immutable**: no tag movement, no republish). v1.2.0 delivers the complete V2 roadmap:
-AI-assisted rule authoring, web investigation dashboard, plugin ecosystem SDK, deterministic
-CI security gates, and visual terminal UX.
+**VERIS v1.2.0 is officially released and placed in long-term PRODUCTION HOLD / MAINTENANCE ONLY.**
 
-### Shipped interactive terminal UX (post-1.0.0 hardening)
+- **Release Version**: `v1.2.0`
+- **Verified Release Commit**: `b9a50f4f07c1a0347c5e00e3906b14edcf8244cb`
+- **Published npm Artifact**: `veris-cli@1.2.0` (with SLSA provenance attestations)
+- **Supported Node Runtimes**: Node.js 18, 20, 22 (LTS)
+- **Package Manager**: `pnpm@9.15.9`
+- **Supported Platforms**: Windows (x64/ARM64), macOS (Apple Silicon/Intel), Linux (x64)
 
-- **Persistent animated session header** — `packages/cli/src/scan/progress/session-header.ts`.
-  The VERIS logo + identity are SESSION-scoped: created once at startup, never
-  re-created or wiped by scan lifecycle events (dashboard, errors, cancellation,
-  summary), and only released at `dispose()`.
-- **Rendering model** — the interactive session runs on the terminal's ALTERNATE
-  SCREEN BUFFER (`\x1b[?1049h` / `\x1b[?1049l`) with FULL-FRAME REDRAW: every
-  repaint is home + header lines + body + erase-below, so the header is
-  re-anchored at the top of every frame and can never scroll away. DECSTBM
-  scroll-region pinning is deliberately NOT used (unreliable on Windows
-  Terminal/ConPTY: microsoft/terminal#19016, #3673).
-- **Logo intro animation** — a deterministic left-to-right ghost-fill wipe
-  (6 frames) plus one settle frame at ~150ms/frame, driven by a single timer in
-  the header. Character-based, so it works with `--no-color` and `--no-unicode`;
-  disabled on non-TTY, reduced-motion, or `--no-animation` (static header).
-- **Regression tests** — `packages/cli/__tests__/scan/session-header.test.ts`,
-  `real-tty-lifecycle.test.ts`, and `vt-terminal-model.test.ts` cover the header
-  lifecycle, the animation frames, and finite-height terminal behavior.
+Tags `v1.0.0`, `v1.1.0`, and `v1.2.0` are **permanently immutable**: no tag movement, no force-push, and no republished versions. Active feature development is **FROZEN**.
 
-### Known limitations
+---
 
-- The logo intro takes ~1.05s; a scan that finishes faster closes the alternate
-  screen mid-wipe and prints the completed header + summary on the primary screen.
-- Deterministic benchmark suite established in `tools/perf` (see `docs/BENCHMARKS.md`); automated CI regression tracking is planned.
-- AI features (`explain`/`summarize`) require API keys and are consumer-only.
-- Only the CLI package (`veris-cli`) is published; the other workspace packages are
-  internal.
+## Maintenance-Only Policy
 
-### Deferred work
+Under Production Hold, changes to the repository are strictly constrained:
 
-See `ROADMAP.md` (V2+): plugin SDK authoring implementation (architecture contract established in ADR-014), dynamic plugin loader, AI-assisted rule writing, CI integration
-runner, web dashboard, additional rule packs, extension marketplace.
+1. **Security Fixes**: Remediating high or critical vulnerabilities identified in supported versions (1.2.x, 1.1.x, 1.0.x).
+2. **Break-Fix & Correctness**: Correcting false positives, false negatives, or crashes in static analysis engines with regression tests.
+3. **CI & Tooling Maintenance**: Keeping GitHub Actions workflows, runner images, and dependencies compatible with current Node.js LTS releases.
+4. **No Feature Creep**: No new product features, architectural overhauls, or unsolicited refactors without an explicit decision to reopen active development.
 
-## Versioning
+### When NOT to Reopen Development
 
-All VERIS packages use independent versioning managed by [Changesets](https://github.com/changesets/changesets).
+- Do NOT reopen development for speculative features, theoretical analyzers, or subjective UI tweaks.
+- Do NOT add external runtime dependencies to `@veris/core` (must remain 0 dependencies).
+- Do NOT add external runtime dependencies to `@veris/plugin-sdk` (must remain 0 runtime dependencies).
+- Do NOT add network egress, analytics, or telemetry to the scanning pipeline (must remain 100% offline-first).
 
-- Foundation components — Stable, changes rarely
-- All other components — Pre-v1 (0.x) until stabilized
+---
 
-## Release Process
+## Security Bug Handling
 
-1. Create a changeset: `pnpm changeset`
-2. Commit the changeset file
-3. Create a PR with the changeset
-4. Merge to `main`
-5. Tag the release commit as `v<version>` (e.g. `git tag v1.0.0`)
-6. Push the tag — the Release GitHub Action publishes the CLI package to npm
-   and creates the GitHub Release
+Report security vulnerabilities directly by email to:
+**atharva.patil.cg@gmail.com**
 
-## Development Setup
+Do NOT open public GitHub issues for security vulnerabilities.
+Include:
+
+- Vulnerability description
+- Reproduction steps or proof of concept
+- Affected versions
+- Suggested remediation
+
+We will acknowledge receipt within 48 hours and provide a patch timeline.
+
+---
+
+## How to Rebuild, Test, and Verify
+
+### 1. Clean Rebuild from Clone
 
 ```bash
-pnpm install
+# Clone and enter workspace
+git clone https://github.com/p4inz-code/veris.git
+cd veris
+
+# Install exact dependencies
+pnpm install --frozen-lockfile
+
+# Compile monorepo (core first, then dependent layers)
 pnpm build
-pnpm test
 ```
 
-## Available Scripts
+### 2. Comprehensive Quality Verification Suite
 
-| Script               | Description                                            |
-| -------------------- | ------------------------------------------------------ |
-| `pnpm build`         | Build all packages (core first, then layers)           |
-| `pnpm build:all`     | Build all packages in parallel                         |
-| `pnpm typecheck`     | Type-check all packages                                |
-| `pnpm lint`          | Lint all source files                                  |
-| `pnpm format`        | Check formatting                                       |
-| `pnpm test`          | Run all tests                                          |
-| `pnpm test:coverage` | Run tests with coverage                                |
-| `pnpm bench`         | Run deterministic benchmark suite (`tools/perf`)       |
-| `pnpm bench:quick`   | Run quick single-workload benchmark check              |
-| `pnpm ci:all`        | Complete CI pipeline (build + typecheck + lint + test) |
-| `pnpm circular`      | Check for circular dependencies                        |
+```bash
+# Run TypeScript typecheck across all 31 packages
+pnpm typecheck
 
-## Dependency Management
+# Run full unit and integration test suite (189 suites, 3780+ tests)
+pnpm test
 
-- Use `pnpm up --latest` for updating dependencies
-- Run `pnpm dedupe` after major updates to deduplicate the lockfile
-- Check `pnpm outdated` regularly for available updates
-- All dependencies are listed in the root `package.json` as devDependencies
+# Run ESLint compliance check (must be under 400 warnings, 0 errors)
+pnpm lint
 
-## Testing
+# Check circular dependencies across all packages (must find 0)
+pnpm circular
 
-- **Unit tests**: `pnpm test` — full suite across all packages (3,500+)
-- **Determinism tests**: Verifies same input → same output across repeated runs
-- **Coverage**: Minimum 80% threshold across all packages
+# Run deterministic benchmark throughput and hash check
+pnpm bench:quick
+```
 
-## Code Quality
+### 3. Verify Published Release Artifacts
 
-- **TypeScript strict mode** enabled across all packages
-- **ESLint** with strict rules (no `any`, no `console.log`, no unused vars)
-- **Prettier** for consistent formatting
-- **Husky** pre-commit hooks for lint-staged
-- **No circular dependencies** — enforced by madge in CI
+```bash
+# Inspect registry metadata for published CLI
+npm view veris-cli --json
 
-## Documentation
+# Run package tarball dry-run in CLI package
+cd packages/cli
+npm pack --dry-run
+```
 
-- Architecture docs in `docs/architecture/` (SPEC-001 through SPEC-011)
-- Root README with quick start, CLI usage, API examples
-- Package-level READMEs in each package directory
-- GitHub community health files in `.github/`
+### 4. Windows Acceptance Verification
 
-## CI/CD
+Run in PowerShell on Windows 11/10:
 
-- **CI**: Build, lint, test on push/PR to main/next (Node 18, 20, 22 on Ubuntu, Windows, macOS)
-- **Release**: Automated npm publishing via Changesets on main
-- **Nightly**: Daily validation job (install + build + test) — see `.github/workflows/nightly.yml`
-- **Documentation**: Auto-build on docs/source changes
+```powershell
+# Verify CLI identity and version
+node packages/cli/dist/cli.js --version
 
-## Performance Monitoring
+# Verify global help and command list
+node packages/cli/dist/cli.js --help
 
-- Deterministic benchmark suite in `tools/perf` (`pnpm bench`, `pnpm bench:quick`)
-- Stage timings, throughput, memory, and determinism verification recorded to `benchmark-results/` (see `docs/BENCHMARKS.md`)
-- Monitor memory usage in CI
-- Track test execution times across runs
+# Verify accessibility modes
+node packages/cli/dist/cli.js --help --no-color --no-unicode --no-animation
 
-## Architecture Compliance
+# Verify responsive widths
+$env:COLUMNS = "80"; node packages/cli/dist/cli.js --help; $env:COLUMNS = $null
 
-All changes must comply with the architecture specifications in `docs/architecture/`:
+# Verify scan execution
+node packages/cli/dist/cli.js scan ./fixtures/samples --format json --output ./results
+```
 
-- SPEC-001 through SPEC-011
-- No circular dependencies
-- No breaking API changes without major version bump
+---
+
+## Known Limitations
+
+- **Logo Intro Animation**: The logo intro takes ~1.05s; a scan that finishes faster closes the alternate screen mid-wipe and prints the completed header + summary on the primary screen.
+- **AI Features (`explain` / `summarize`)**: Consumer-only; require user-supplied API keys or local Ollama instances. AI never participates in core detection or scoring.
+- **Published Artifacts**: Only `veris-cli` is published to npm; monorepo domain packages (`@veris/*`) are internal workspace packages bundled into the CLI executable.
+- **Offline-First Plugin Host**: Plugin packages must be reviewed and placed locally; remote internet registry downloading of untrusted code is intentionally omitted.
+
+---
+
+## Release Architecture
+
+All VERIS packages use independent versioning managed by [Changesets](https://github.com/changesets/changesets).
+Future maintenance patch releases follow:
+
+1. `pnpm changeset` (declare patch bugfix)
+2. Commit changeset file
+3. `pnpm changeset version`
+4. Commit version bumps and tag `v1.2.x`
+5. Push tag to trigger `.github/workflows/release.yml`

@@ -43,7 +43,7 @@ veris ci --baseline report.json         Compare against previous baseline
 veris ci --fail-on high                 Fail on high or critical findings
 veris ci --max-risk 7.5                 Fail if aggregate risk exceeds threshold
 veris ci --max-new 0                    Fail on any newly introduced findings
-veris ci --summary                      Output GitHub step summary
+veris ci --github-step-summary          Output GitHub Actions step summary
 ```
 
 ### dashboard
@@ -51,11 +51,11 @@ veris ci --summary                      Output GitHub step summary
 Launch visual investigation dashboard or export static HTML report.
 
 ```
-veris dashboard                         Launch interactive viewer for latest report
+veris dashboard                             Launch interactive viewer for latest report
 veris dashboard ./veris-output/report.json  View specific report
-veris dashboard --export report.html    Export self-contained HTML report
-veris dashboard --port 3000             Specify viewer server port
-veris dashboard --open                  Open browser automatically
+veris dashboard --output report.html        Export self-contained HTML report
+veris dashboard --port 3000                 Specify viewer server port
+veris dashboard --no-open                   Disable automatic browser launching
 ```
 
 ### rule
@@ -63,10 +63,11 @@ veris dashboard --open                  Open browser automatically
 Author declarative detection rules with AI assistance.
 
 ```
-veris rule author                       Start interactive rule authoring
-veris rule author "detect eval usage"   Generate candidate from description
-veris rule author --promote             Promote candidate directly to plugin
-veris rule author --output ./my-rule    Custom output directory
+veris rule author --intent "detect eval usage"                      Generate candidate from intent
+veris rule author --intent "detect eval" --severity high --offline   Generate with offline engine
+veris rule author --intent "detect debug" --dry-run                  Test without writing to disk
+veris rule author --promote candidate.json --target-dir ./.veris/plugins  Promote candidate to plugin
+veris rule author --intent "detect token" --output ./my-rule.json   Custom output candidate file
 ```
 
 ### plugins
