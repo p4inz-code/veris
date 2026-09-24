@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 320" width="880" height="320">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b0f14" />
+      <stop offset="100%" stop-color="#161b22" />
+    </linearGradient>
+    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#58a6ff" />
+      <stop offset="100%" stop-color="#79c0ff" />
+    </linearGradient>
+    <style>
+      .mono { font-family: 'Consolas', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace; }
+      @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+      @keyframes typeCommand {
+        0% { width: 0; }
+        30% { width: 260px; }
+        100% { width: 260px; }
+      }
+      @keyframes fadeIn {
+        0% { opacity: 0; }
+        40% { opacity: 0; }
+        55% { opacity: 1; }
+        100% { opacity: 1; }
+      }
+      @keyframes scanProgress {
+        0% { width: 0; }
+        50% { width: 0; }
+        75% { width: 340px; }
+        100% { width: 340px; }
+      }
+      .cursor { animation: blink 0.9s infinite; }
+      .typed-cmd {
+        display: inline-block;
+        overflow: hidden;
+        white-space: nowrap;
+        animation: typeCommand 6s infinite;
+      }
+      .fade-output { animation: fadeIn 6s infinite; }
+      .bar-fill { animation: scanProgress 6s infinite; }
+    </style>
+  </defs>
+
+  <!-- Window Frame -->
+  <rect x="0" y="0" width="880" height="320" rx="10" fill="#0d1117" stroke="#30363d" stroke-width="1.5" />
+  
+  <!-- Header -->
+  <rect x="0" y="0" width="880" height="36" rx="10" fill="#161b22" />
+  <rect x="0" y="26" width="880" height="10" fill="#161b22" />
+  <line x1="0" y1="36" x2="880" y2="36" stroke="#21262d" stroke-width="1" />
+  
+  <!-- Window Dots -->
+  <circle cx="20" cy="18" r="6" fill="#ff5f56" />
+  <circle cx="40" cy="18" r="6" fill="#ffbd2e" />
+  <circle cx="60" cy="18" r="6" fill="#27c93f" />
+  <text x="440" y="22" fill="#8b949e" font-size="12" font-weight="500" text-anchor="middle" class="mono">veris — deterministic security analysis</text>
+
+  <!-- Terminal Content -->
+  <g transform="translate(24, 64)" class="mono" font-size="13">
+    <!-- Prompt -->
+    <text x="0" y="0" fill="#58a6ff" font-weight="bold">veris<tspan fill="#8b949e">@</tspan><tspan fill="#7ee787">local</tspan><tspan fill="#c9d1d9">:$</tspan></text>
+    <text x="110" y="0" fill="#f0f6fc" font-weight="600">veris scan ./bin --ci</text>
+    <rect x="275" y="-12" width="8" height="15" fill="#58a6ff" class="cursor" />
+
+    <!-- Output Group -->
+    <g class="fade-output">
+      <text x="0" y="30" fill="#58a6ff" font-weight="bold">[+] VERIS Engine v1.2.0 initialized (0 telemetry, offline-first)</text>
+      <text x="0" y="52" fill="#8b949e">Discovery: 42 target artifacts discovered in 2.1ms</text>
+      <text x="0" y="74" fill="#8b949e">Executing AST, PE, and heuristic detection pipelines...</text>
+
+      <!-- Progress Bar Track -->
+      <rect x="0" y="90" width="340" height="8" rx="4" fill="#21262d" />
+      <rect x="0" y="90" height="8" rx="4" fill="#56d364" class="bar-fill" />
+      <text x="355" y="98" fill="#56d364" font-size="11" font-weight="bold">100% COMPLETE (16.4ms)</text>
+
+      <line x1="0" y1="120" x2="832" y2="120" stroke="#21262d" stroke-width="1" />
+
+      <!-- Result Banner -->
+      <text x="0" y="146" fill="#7ee787" font-weight="bold">✔ ZERO FALSE POSITIVES</text>
+      <text x="210" y="146" fill="#58a6ff" font-weight="bold">✔ 100% DETERMINISTIC</text>
+      <text x="430" y="146" fill="#bc8cff" font-weight="bold">✔ 0 RUNTIME DEPENDENCIES</text>
+      <text x="690" y="146" fill="#e3b341" font-weight="bold">✔ SARIF EXPORTED</text>
+
+      <text x="0" y="174" fill="#8b949e">Deterministic Run Hash: <tspan fill="#c9d1d9">sha256:7f9a2b8e3c1d406a9e45f1b2c3d4e5f67a8b9c0d1e2f3a4b</tspan></text>
+      <text x="0" y="196" fill="#7ee787">Audit completed with 0 errors. Gate passed cleanly.</text>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none';">
+  <title>VERIS Investigation Dashboard — Target Workspace</title>
+  <style>
+    :root {
+      --bg-main: #0b0f19;
+      --bg-surface: #111827;
+      --bg-card: #1f2937;
+      --bg-card-hover: #283548;
+      --border-color: #374151;
+      --text-main: #f9fafb;
+      --text-muted: #9ca3af;
+      --text-dim: #6b7280;
+      --accent: #38bdf8;
+      --accent-dim: #0284c7;
+      
+      --sev-critical: #ef4444;
+      --sev-high: #f97316;
+      --sev-medium: #eab308;
+      --sev-low: #3b82f6;
+      --sev-info: #64748b;
+      --status-success: #10b981;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      line-height: 1.5;
+      padding: 1.5rem;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .brand-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .brand-title span { color: var(--accent); }
+
+    .header-meta {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .metric-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.25rem;
+    }
+    .metric-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+    .metric-val {
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .metric-sub {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+    }
+
+    /* Severity Breakdown Bar */
+    .sev-bar-container {
+      display: flex;
+      height: 10px;
+      border-radius: 9999px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+      background: var(--bg-card);
+    }
+    .sev-seg { height: 100%; transition: width 0.3s; }
+    .bg-crit { background: var(--sev-critical); }
+    .bg-high { background: var(--sev-high); }
+    .bg-med  { background: var(--sev-medium); }
+    .bg-low  { background: var(--sev-low); }
+    .bg-info { background: var(--sev-info); }
+
+    /* Controls: Search & Filters */
+    .controls {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+      background: var(--bg-surface);
+      padding: 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      align-items: center;
+    }
+    .search-input {
+      flex: 1;
+      min-width: 240px;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-main);
+      font-size: 0.9rem;
+    }
+    .search-input:focus {
+      outline: 2px solid var(--accent);
+      border-color: transparent;
+    }
+    .filter-btn {
+      padding: 0.4rem 0.75rem;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .filter-btn:hover { background: var(--bg-card-hover); color: var(--text-main); }
+    .filter-btn.active {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* Section layout */
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Findings List */
+    .findings-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+    .finding-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+      transition: border-color 0.15s;
+    }
+    .finding-card:hover { border-color: #4b5563; }
+    .finding-header {
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .finding-title-row {
+      flex: 1;
+    }
+    .finding-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    .finding-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge-critical { background: rgba(239, 68, 68, 0.2); color: var(--sev-critical); border: 1px solid var(--sev-critical); }
+    .badge-high     { background: rgba(249, 115, 22, 0.2); color: var(--sev-high); border: 1px solid var(--sev-high); }
+    .badge-medium   { background: rgba(234, 179, 8, 0.2); color: var(--sev-medium); border: 1px solid var(--sev-medium); }
+    .badge-low      { background: rgba(59, 130, 246, 0.2); color: var(--sev-low); border: 1px solid var(--sev-low); }
+    .badge-info     { background: rgba(100, 116, 139, 0.2); color: var(--sev-info); border: 1px solid var(--sev-info); }
+
+    .expand-toggle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      transition: transform 0.2s;
+    }
+    .finding-card.open .expand-toggle {
+      transform: rotate(90deg);
+    }
+
+    .finding-body {
+      display: none;
+      padding: 1rem;
+      border-top: 1px solid var(--border-color);
+      background: var(--bg-card);
+      font-size: 0.875rem;
+    }
+    .finding-card.open .finding-body {
+      display: block;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-top: 0.75rem;
+    }
+    .detail-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0.75rem;
+    }
+    .detail-box h4 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .evidence-item {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.8rem;
+      background: #090d16;
+      border: 1px solid #1f2937;
+      padding: 0.5rem;
+      border-radius: 4px;
+      margin-top: 0.35rem;
+      overflow-x: auto;
+    }
+
+    /* Inventory Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+    th {
+      background: #162032;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+    }
+    tr:last-child td { border-bottom: none; }
+    .mono { font-family: ui-monospace, SFMono-Regular, monospace; }
+
+    footer {
+      margin-top: 3rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-color);
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 0.8rem;
+    }
+
+    @media print {
+      body { background: #fff; color: #000; padding: 0; }
+      .controls { display: none; }
+      .finding-body { display: block !important; }
+      .metric-card, .finding-card, table { border-color: #ddd; background: #fff; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <div class="brand-title">
+        <span>VERIS</span> Investigation Dashboard
+      </div>
+      <div class="header-meta" style="margin-top: 0.35rem;">
+        <div>Target: <strong>Target Workspace</strong></div>
+        <div>Session: <code>scan_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef</code></div>
+        <div>Timestamp: 2026-09-24T15:52:55.194Z</div>
+      </div>
+    </div>
+    <div class="header-meta">
+      <div>Engine: <strong>v1.2.0</strong></div>
+      <div>Duration: <strong>1.42s</strong></div>
+      <div>Format: <strong>Canonical v1.0.0</strong></div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Top Level Metrics -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-title">Risk Assessment</div>
+        <div class="metric-val" style="color: var(--sev-high);">
+          7.8 <span style="font-size: 1rem; color: var(--text-muted);">/ 10.0</span>
+        </div>
+        <div class="metric-sub">
+          Level: <strong>HIGH</strong> (Confidence: 100%)
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-title">Security Findings</div>
+        <div class="metric-val">4</div>
+        <div class="sev-bar-container">
+          <div class="sev-seg bg-crit" style="width: 25%;"></div>
+          <div class="sev-seg bg-high" style="width: 50%;"></div>
+          <div class="sev-seg bg-med" style="width: 25%;"></div>
+          <div class="sev-seg bg-low" style="width: 0%;"></div>
+          <div class="sev-seg bg-info" style="width: 0%;"></div>
+        </div>
+        <div class="metric-sub" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem; font-size: 0.75rem;">
+          <span style="color: var(--sev-critical);">Crit: 1</span>
+          <span style="color: var(--sev-high);">High: 2</span>
+          <span style="color: var(--sev-medium);">Med: 1</span>
+          <span style="color: var(--sev-low);">Low: 0</span>
+          <span style="color: var(--sev-info);">Info: 0</span>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-title">Artifacts & Evidence</div>
+        <div class="metric-val">4</div>
+        <div class="metric-sub">
+          Evidence Items: <strong>5</strong>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-title">Trust & Baseline</div>
+        <div class="metric-val" style="color: var(--accent);">
+          22 <span style="font-size: 1rem; color: var(--text-muted);">/ 100</span>
+        </div>
+        <div class="metric-sub">
+          Offline Analysis: <strong>VERIFIED</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Findings Explorer Section -->
+    <div class="section-title">
+      <span>Findings Explorer (4)</span>
+    </div>
+
+    <div class="controls">
+      <input type="text" id="searchInput" class="search-input" placeholder="Search findings by title, rule ID, or description..." aria-label="Search findings">
+      <div style="display: flex; gap: 0.35rem; flex-wrap: wrap;">
+        <button class="filter-btn active" data-filter="all">All (4)</button>
+        <button class="filter-btn" data-filter="critical">Critical (1)</button>
+        <button class="filter-btn" data-filter="high">High (2)</button>
+        <button class="filter-btn" data-filter="medium">Medium (1)</button>
+        <button class="filter-btn" data-filter="low">Low (0)</button>
+        <button class="filter-btn" data-filter="info">Info (0)</button>
+      </div>
+    </div>
+
+    <div class="findings-list" id="findingsList">
+      
+        <div class="finding-card" id="card_fin-win-inject-01" data-severity="critical" data-category="injection">
+          <div class="finding-header" onclick="toggleCard('card_fin-win-inject-01')" tabindex="0" role="button" aria-expanded="false">
+            <span class="badge badge-critical">critical</span>
+            <div class="finding-title-row">
+              <div class="finding-title">Windows Process Injection via Remote Thread Memory Allocation</div>
+              <div class="finding-subtitle">
+                <span>Rule: <code>RULE-WIN-INJECTION-001</code></span>
+                <span>Artifact: <code>Unknown Target</code></span>
+                <span>Category: <strong>injection</strong></span>
+                <span>Confidence: <strong>95%</strong></span>
+              </div>
+            </div>
+            <div class="expand-toggle">▶</div>
+          </div>
+          <div class="finding-body">
+            <p>Process injection indicators were observed in native-helper.exe. The binary imports memory manipulation APIs commonly used for cross-process payload staging.</p>
+            
+            <div class="detail-grid">
+              <div class="detail-box">
+                <h4>Remediation Guidance</h4>
+                <p>Audit binary compilation provenance. Ensure third-party binary artifacts are signed with a validated code-signing certificate and do not allocate executable writable memory.</p>
+              </div>
+              <div class="detail-box">
+                <h4>Compliance & Citations</h4>
+                <p>CWE: <code>CWE-119</code> <code>CWE-78</code></p>
+                <p style="margin-top: 0.25rem;">MITRE ATT&CK: <em>None cited</em></p>
+              </div>
+            </div>
+
+            <div style="margin-top: 0.75rem;">
+                     <h4 style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.25rem;">Associated Evidence Traces (2)</h4>
+                     <div class="evidence-item">
+                           <div><strong>[pe-import]</strong> </div>
+                           
+                           
+                         </div><div class="evidence-item">
+                           <div><strong>[pe-rwx-section]</strong> </div>
+                           
+                           
+                         </div>
+                   </div>
+          </div>
+        </div>
+
+        <div class="finding-card" id="card_fin-ps-obf-02" data-severity="high" data-category="execution">
+          <div class="finding-header" onclick="toggleCard('card_fin-ps-obf-02')" tabindex="0" role="button" aria-expanded="false">
+            <span class="badge badge-high">high</span>
+            <div class="finding-title-row">
+              <div class="finding-title">Suspicious PowerShell Download Cradle and Script Block Execution</div>
+              <div class="finding-subtitle">
+                <span>Rule: <code>RULE-SCRIPT-PS-001</code></span>
+                <span>Artifact: <code>Unknown Target</code></span>
+                <span>Category: <strong>execution</strong></span>
+                <span>Confidence: <strong>92%</strong></span>
+              </div>
+            </div>
+            <div class="expand-toggle">▶</div>
+          </div>
+          <div class="finding-body">
+            <p>Dynamic in-memory download cradle detected in deploy-staging.ps1. Staging code downloads remote executable payload without local disk caching.</p>
+            
+            <div class="detail-grid">
+              <div class="detail-box">
+                <h4>Remediation Guidance</h4>
+                <p>Replace dynamic remote payload fetching with pinned, cryptographic artifact verification in CI/CD pipeline.</p>
+              </div>
+              <div class="detail-box">
+                <h4>Compliance & Citations</h4>
+                <p>CWE: <code>CWE-94</code></p>
+                <p style="margin-top: 0.25rem;">MITRE ATT&CK: <em>None cited</em></p>
+              </div>
+            </div>
+
+            <div style="margin-top: 0.75rem;">
+                     <h4 style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.25rem;">Associated Evidence Traces (1)</h4>
+                     <div class="evidence-item">
+                           <div><strong>[powershell-command]</strong> </div>
+                           
+                           
+                         </div>
+                   </div>
+          </div>
+        </div>
+
+        <div class="finding-card" id="card_fin-secret-leak-03" data-severity="high" data-category="credential-access">
+          <div class="finding-header" onclick="toggleCard('card_fin-secret-leak-03')" tabindex="0" role="button" aria-expanded="false">
+            <span class="badge badge-high">high</span>
+            <div class="finding-title-row">
+              <div class="finding-title">Hardcoded Production Private Key in Environment Configuration</div>
+              <div class="finding-subtitle">
+                <span>Rule: <code>RULE-SECRET-ENV-001</code></span>
+                <span>Artifact: <code>Unknown Target</code></span>
+                <span>Category: <strong>credential-access</strong></span>
+                <span>Confidence: <strong>90%</strong></span>
+              </div>
+            </div>
+            <div class="expand-toggle">▶</div>
+          </div>
+          <div class="finding-body">
+            <p>RSA private key detected in .env.production. Private keys committed to source repositories expose cryptographic identity and decryption capabilities.</p>
+            
+            <div class="detail-grid">
+              <div class="detail-box">
+                <h4>Remediation Guidance</h4>
+                <p>Immediately revoke and rotate the private key. Store production secrets in a dedicated vault (e.g. AWS Secrets Manager, HashiCorp Vault) rather than version-controlled files.</p>
+              </div>
+              <div class="detail-box">
+                <h4>Compliance & Citations</h4>
+                <p>CWE: <code>CWE-798</code> <code>CWE-312</code></p>
+                <p style="margin-top: 0.25rem;">MITRE ATT&CK: <em>None cited</em></p>
+              </div>
+            </div>
+
+            <div style="margin-top: 0.75rem;">
+                     <h4 style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.25rem;">Associated Evidence Traces (1)</h4>
+                     <div class="evidence-item">
+                           <div><strong>[credential-string]</strong> </div>
+                           
+                           
+                         </div>
+                   </div>
+          </div>
+        </div>
+
+        <div class="finding-card" id="card_fin-weak-crypto-04" data-severity="medium" data-category="cryptography">
+          <div class="finding-header" onclick="toggleCard('card_fin-weak-crypto-04')" tabindex="0" role="button" aria-expanded="false">
+            <span class="badge badge-medium">medium</span>
+            <div class="finding-title-row">
+              <div class="finding-title">Use of Deprecated Cryptographic Hash Function (MD5)</div>
+              <div class="finding-subtitle">
+                <span>Rule: <code>RULE-CRYPTO-ALGO-001</code></span>
+                <span>Artifact: <code>Unknown Target</code></span>
+                <span>Category: <strong>cryptography</strong></span>
+                <span>Confidence: <strong>85%</strong></span>
+              </div>
+            </div>
+            <div class="expand-toggle">▶</div>
+          </div>
+          <div class="finding-body">
+            <p>In token-handler.ts, createHash(&quot;md5&quot;) was detected for generating token verification checksums. MD5 is vulnerable to collision attacks.</p>
+            
+            <div class="detail-grid">
+              <div class="detail-box">
+                <h4>Remediation Guidance</h4>
+                <p>Upgrade to SHA-256 or SHA-384 for message digests, or Argon2id/bcrypt for password and secret hashing.</p>
+              </div>
+              <div class="detail-box">
+                <h4>Compliance & Citations</h4>
+                <p>CWE: <code>CWE-327</code> <code>CWE-328</code></p>
+                <p style="margin-top: 0.25rem;">MITRE ATT&CK: <em>None cited</em></p>
+              </div>
+            </div>
+
+            <div style="margin-top: 0.75rem;">
+                     <h4 style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.25rem;">Associated Evidence Traces (1)</h4>
+                     <div class="evidence-item">
+                           <div><strong>[crypto-algorithm]</strong> </div>
+                           
+                           
+                         </div>
+                   </div>
+          </div>
+        </div>
+    </div>
+
+    <!-- Scanned Artifacts Section -->
+    <div class="section-title">
+      <span>Scanned Artifacts Inventory (4)</span>
+    </div>
+
+    <div style="overflow-x: auto; margin-bottom: 2rem;">
+      <table>
+        <thead>
+          <tr>
+            <th>Path / Identifier</th>
+            <th>Type</th>
+            <th>Size</th>
+            <th>SHA256 Hash</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+            <tr>
+              <td><code>bin/native-helper.exe</code></td>
+              <td>executable</td>
+              <td>44.0 KB</td>
+              <td class="mono" style="font-size: 0.75rem;">[object Object]</td>
+            </tr>
+
+            <tr>
+              <td><code>src/auth/token-handler.ts</code></td>
+              <td>script</td>
+              <td>8.0 KB</td>
+              <td class="mono" style="font-size: 0.75rem;">[object Object]</td>
+            </tr>
+
+            <tr>
+              <td><code>scripts/deploy-staging.ps1</code></td>
+              <td>script</td>
+              <td>2.0 KB</td>
+              <td class="mono" style="font-size: 0.75rem;">[object Object]</td>
+            </tr>
+
+            <tr>
+              <td><code>.env.production</code></td>
+              <td>configuration</td>
+              <td>1.0 KB</td>
+              <td class="mono" style="font-size: 0.75rem;">[object Object]</td>
+            </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+
+  <footer>
+    VERIS Offline-First Deterministic Security Analysis &bull; Generated: 2026-09-24T15:52:55.194Z
+  </footer>
+
+  <script>
+    function toggleCard(id) {
+      var card = document.getElementById(id);
+      if (!card) return;
+      var isOpen = card.classList.contains('open');
+      if (isOpen) {
+        card.classList.remove('open');
+        card.querySelector('.finding-header').setAttribute('aria-expanded', 'false');
+      } else {
+        card.classList.add('open');
+        card.querySelector('.finding-header').setAttribute('aria-expanded', 'true');
+      }
+    }
+
+    // Search and Filter Logic
+    var searchInput = document.getElementById('searchInput');
+    var filterButtons = document.querySelectorAll('.filter-btn');
+    var currentFilter = 'all';
+
+    function applyFilters() {
+      var query = (searchInput.value || '').toLowerCase().trim();
+      var cards = document.querySelectorAll('.finding-card');
+
+      cards.forEach(function(card) {
+        var sev = card.getAttribute('data-severity');
+        var text = card.textContent.toLowerCase();
+
+        var matchesSeverity = (currentFilter === 'all') || (sev === currentFilter);
+        var matchesQuery = !query || text.indexOf(query) !== -1;
+
+        if (matchesSeverity && matchesQuery) {
+          card.style.display = '';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    if (searchInput) {
+      searchInput.addEventListener('input', applyFilters);
+    }
+
+    filterButtons.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        filterButtons.forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        currentFilter = btn.getAttribute('data-filter');
+        applyFilters();
+      });
+    });
+  </script>
+</body>
+</html>

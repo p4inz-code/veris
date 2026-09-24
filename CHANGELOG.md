@@ -5,7 +5,7 @@ All notable changes to VERIS are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.2.0] - 2026-09-24
 
 ### Added
 
@@ -13,6 +13,8 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **AI-Assisted Rule Authoring (`veris rule author`)** — intent-driven declarative rule generation with validation gate, AST purity verification, regex bounds, automated test fixture execution, and plugin promotion (`--promote`).
 - **Visual Investigation Dashboard (`veris dashboard`)** — interactive browser-based viewer and standalone zero-dependency HTML report export with CSP (`default-src 'none'`) and anti-framing security headers on local loopback.
 - **Plugin Ecosystem & Marketplace Foundation (`veris plugins`)** — ecosystem catalog index, Merkle SHA-256 integrity verification, safe installation/removal with receipt tracking, and capability auditing.
+- **Visual Acceptance & Showcase Capture (Phase 20)** — verified responsive terminal rendering (40-180 cols) across Windows Terminal, PowerShell, CMD, and standard VT consoles; generated authentic showcase screenshots and animated SVG banner with strict privacy audit.
+- **Final Release & Hold-Point Ship (Phase 21)** — monorepo-wide release versioning, package audits, zero-dependency certification, and disposable installation verification.
 - **Windows UNC Path Support** — enhanced `isAbsolute` path detection for Windows UNC paths (`\\server\share`).
 
 ### Fixed

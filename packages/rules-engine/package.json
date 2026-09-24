@@ -1,6 +1,6 @@
 {
   "name": "@veris/rules-engine",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "VERIS rule matching, evaluation, scheduling, and sandboxed expression evaluation",
   "license": "UNLICENSED",

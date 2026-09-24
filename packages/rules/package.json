@@ -1,6 +1,6 @@
 {
   "name": "@veris/rules",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "VERIS rule engine — deterministic, immutable rule evaluation on Evidence, Features, and Capabilities",
   "license": "UNLICENSED",

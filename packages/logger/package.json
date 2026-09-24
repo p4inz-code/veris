@@ -1,6 +1,6 @@
 {
   "name": "@veris/logger",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "VERIS structured logging with pluggable transports and formatters",
   "license": "UNLICENSED",

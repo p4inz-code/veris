@@ -22,9 +22,8 @@ VERIS is a **deterministic security analysis platform** that scans files and dir
 
 The entire analysis pipeline runs **100% offline**. No network calls, no telemetry, no cloud dependency. Identical inputs always produce identical analysis results — findings, evidence, ordering, and risk scores are byte-for-byte reproducible. Report files also record a run ID and timestamps as part of the report contract.
 
-> **Status**: v1.0.0 is the current stable release (frozen). Interactive scans show
-> a persistent animated VERIS header that stays pinned for the whole session —
-> see [MAINTENANCE](MAINTENANCE.md) for the freeze status and known limitations.
+> **Status**: v1.2.0 release candidate. Offline-first, 100% deterministic analysis engine with
+> interactive alternate-screen terminal session, visual investigation dashboard, CI security gates, and sandboxed plugin SDK.
 
 ```bash
 # Scan the current directory
@@ -33,6 +32,30 @@ npx veris-cli scan
 # Install globally (optional)
 npm install -g veris-cli
 ```
+
+## Visual Showcase
+
+<p align="center">
+  <img src="assets/showcase/startup-animation.svg" alt="VERIS Interactive Scan" width="100%">
+</p>
+
+<details open>
+<summary><strong>📸 Terminal & Dashboard Visual Walkthrough</strong></summary>
+<br>
+
+|                               Interactive Terminal Scan                                |                             Web Investigation Dashboard                             |
+| :------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------: |
+| <img src="assets/showcase/03-findings-summary.png" alt="Findings Summary" width="420"> | <img src="assets/showcase/dashboard.png" alt="Investigation Dashboard" width="420"> |
+
+|                           CI Security Gates & Baseline Diff                            |                              AI-Assisted Rule Authoring                               |
+| :------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------: |
+| <img src="assets/showcase/06-ci-security-gate.png" alt="CI Security Gate" width="420"> | <img src="assets/showcase/05-ai-rule-author.png" alt="AI Rule Authoring" width="420"> |
+
+|                           Engine Banner & Capabilities                            |                                 Sandboxed Plugin SDK                                  |
+| :-------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------: |
+| <img src="assets/showcase/01-startup-header.png" alt="Engine Banner" width="420"> | <img src="assets/showcase/04-plugin-workflow.png" alt="Plugin Ecosystem" width="420"> |
+
+</details>
 
 ## Why VERIS?
 

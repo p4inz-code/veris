@@ -1,8 +1,8 @@
-# @veris/plugins
+# @veris/shared
 
-## 0.3.0
+## 0.1.1
 
-### Minor Changes
+### Patch Changes
 
 - a7c7c26: feat(v2): complete V2 roadmap — AI rule authoring, visual dashboard, and plugin marketplace
 
@@ -24,28 +24,3 @@
     - Added `veris plugins verify` command for content-addressed Merkle SHA-256 checksum verification, engine compatibility check, and capability auditing.
     - Added `veris plugins install` and `veris plugins remove` commands with mandatory verification gates and immutable `.veris-installed.json` receipts.
     - Codified 4-stage lifecycle separation: Discovery -> Verification -> Installation -> Execution.
-
-### Patch Changes
-
-- Updated dependencies [a244426]
-- Updated dependencies [a7c7c26]
-  - @veris/config@0.3.0
-  - @veris/shared@0.1.1
-  - @veris/extractors@0.1.2
-  - @veris/logger@0.1.1
-  - @veris/rules@0.1.1
-
-## 0.2.0
-
-### Minor Changes
-
-- 47fd9d7: Implement local plugin host runtime with discovery, validation, loading, lifecycle supervision, and registry adapters.
-
-### Patch Changes
-
-- Harden plugin security: symlink containment, prototype pollution defense, execution timeouts, memory limits, and declarative purity enforcement.
-- Updated dependencies [a350870]
-- Updated dependencies [097a707]
-  - @veris/config@0.2.0
-  - @veris/plugin-sdk@0.2.0
-  - @veris/extractors@0.1.1

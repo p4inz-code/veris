@@ -1,6 +1,6 @@
 {
   "name": "@veris/api",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "description": "VERIS programmatic API — primary client for integrating VERIS into applications",
   "license": "UNLICENSED",

@@ -1,7 +1,8 @@
 # VERIS Roadmap
 
-> **Status**: v1.0.0 is released and frozen (maintenance mode, bug fixes only).
-> The V2+ section below is the deferred work list.
+> **Status**: v1.2.0 release candidate. All roadmap milestones M0 through Phase 21 completed.
+> Core invariants remain frozen: 100% deterministic analysis, offline-first, 0 telemetry,
+> zero dependencies for `@veris/core`, and permanent immutability of tags `v1.0.0` and `v1.1.0`.
 
 ## Legend
 
@@ -262,3 +263,21 @@
 - ✅ Performance benchmark certified: 16.3ms median execution time with canonical hash determinism
 - ✅ Architecture contracts and documentation verified against live implementations
 - ✅ Remote GitHub Actions CI verified across 9 matrix jobs (Ubuntu, macOS, Windows on Node 18, 20, 22)
+
+## Phase 20: Visual Acceptance, Showcase Capture & Terminal Aesthetics
+
+- ✅ Visual and terminal acceptance verified across Windows Terminal, PowerShell, CMD, and standard VT consoles
+- ✅ Multi-resolution responsive width testing (40, 60, 80, 120, 160, 180 cols) with zero text overlap or gutter clipping
+- ✅ Interactive HTML investigation dashboard verified with headless browser rendering, dark-slate theme, and strict CSP
+- ✅ Authentic showcase media capture in `assets/showcase/` (terminal flow screens, live scanning, findings summary, CI gates, rule authoring, plugin ecosystem)
+- ✅ Seamless animated terminal SVG banner (`startup-animation.svg`) integrated into root README.md
+- ✅ Rigorous asset privacy audit: zero private usernames, absolute local paths, or credential tokens in showcase assets
+
+## Phase 21: Release Rehearsal & Final Hold-Point Certification
+
+- ✅ Release versioning executed via Changesets (`v1.2.0` minor release)
+- ✅ Monorepo-wide build, typecheck, lint, and 189/189 test suite passes with 0 failures
+- ✅ Offline-first and zero-dependency invariants certified (`@veris/core` has 0 dependencies; `@veris/plugin-sdk` has 0 runtime dependencies)
+- ✅ Historical immutable tags `v1.0.0` and `v1.1.0` verified intact
+- ✅ Production tarball packaging and disposable outside-workspace installation verified
+- ✅ Exact CI preflight passed across all targets

@@ -1,0 +1,305 @@
+{
+  "id": "rep_7f8a9b2c3d4e5f60718293a4b5c6d7e8f90123456789abcdef0123456789abcd",
+  "session": {
+    "id": "scan_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "schemaVersion": "1.0.0",
+    "engineVersion": "1.2.0",
+    "startedAt": "2026-09-24T12:00:00.000Z",
+    "completedAt": "2026-09-24T12:00:01.420Z",
+    "durationMs": 1420,
+    "config": {
+      "target": "/workspace/fintech-payment-service",
+      "preset": "default",
+      "maxFindings": 1000
+    },
+    "environment": {
+      "os": "win32",
+      "arch": "x64",
+      "runtimeVersion": "v22.14.0",
+      "engineVersion": "1.2.0"
+    },
+    "artifactCount": 142,
+    "findingCount": 4,
+    "status": "completed"
+  },
+  "artifacts": [
+    {
+      "id": "art_payload_loader",
+      "sessionId": "scan_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "parentId": null,
+      "type": "executable",
+      "subType": "PE",
+      "originalPath": "/workspace/fintech-payment-service/bin/native-helper.exe",
+      "normalizedPath": "bin/native-helper.exe",
+      "size": 45056,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "mimeType": "application/x-dosexec",
+      "extractedAt": "2026-09-24T12:00:00.200Z",
+      "extractorId": "pe-extractor"
+    },
+    {
+      "id": "art_auth_service",
+      "sessionId": "scan_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "parentId": null,
+      "type": "script",
+      "subType": "typescript",
+      "originalPath": "/workspace/fintech-payment-service/src/auth/token-handler.ts",
+      "normalizedPath": "src/auth/token-handler.ts",
+      "size": 8192,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb"
+      },
+      "mimeType": "text/typescript",
+      "extractedAt": "2026-09-24T12:00:00.350Z",
+      "extractorId": "typescript-extractor"
+    },
+    {
+      "id": "art_deploy_script",
+      "sessionId": "scan_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "parentId": null,
+      "type": "script",
+      "subType": "powershell",
+      "originalPath": "/workspace/fintech-payment-service/scripts/deploy-staging.ps1",
+      "normalizedPath": "scripts/deploy-staging.ps1",
+      "size": 2048,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce"
+      },
+      "mimeType": "text/x-powershell",
+      "extractedAt": "2026-09-24T12:00:00.410Z",
+      "extractorId": "shell-extractor"
+    },
+    {
+      "id": "art_env_config",
+      "sessionId": "scan_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "parentId": null,
+      "type": "configuration",
+      "subType": "env",
+      "originalPath": "/workspace/fintech-payment-service/.env.production",
+      "normalizedPath": ".env.production",
+      "size": 1024,
+      "contentHash": {
+        "algorithm": "sha-256",
+        "value": "4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a"
+      },
+      "mimeType": "text/plain",
+      "extractedAt": "2026-09-24T12:00:00.450Z",
+      "extractorId": "env-extractor"
+    }
+  ],
+  "findings": [
+    {
+      "id": "fin_win_inject_01",
+      "ruleId": "RULE-WIN-INJECTION-001",
+      "category": "injection",
+      "severity": "critical",
+      "confidence": 0.95,
+      "title": "Windows Process Injection via Remote Thread Memory Allocation",
+      "message": "Binary contains API imports for VirtualAllocEx, WriteProcessMemory, and CreateRemoteThread paired with RWX section characteristics.",
+      "description": "Process injection indicators were observed in native-helper.exe. The binary imports memory manipulation APIs commonly used for cross-process payload staging.",
+      "evidence": [
+        {
+          "id": "ev_import_remotethread",
+          "type": "pe-import",
+          "category": "injection",
+          "confidence": 0.98,
+          "value": "kernel32.dll:CreateRemoteThread",
+          "metadata": {
+            "dll": "kernel32.dll",
+            "function": "CreateRemoteThread",
+            "rva": "0x140003020"
+          },
+          "locations": [
+            {
+              "path": "bin/native-helper.exe",
+              "startLine": 1,
+              "endLine": 1
+            }
+          ]
+        },
+        {
+          "id": "ev_rwx_sec",
+          "type": "pe-rwx-section",
+          "category": "anomaly",
+          "confidence": 0.94,
+          "value": ".loader",
+          "metadata": {
+            "sectionName": ".loader",
+            "permissions": "RWX",
+            "entropy": 7.21
+          },
+          "locations": [
+            {
+              "path": "bin/native-helper.exe",
+              "startLine": 1,
+              "endLine": 1
+            }
+          ]
+        }
+      ],
+      "remediation": "Audit binary compilation provenance. Ensure third-party binary artifacts are signed with a validated code-signing certificate and do not allocate executable writable memory.",
+      "mitreAttack": ["T1055.001", "T1055.002"],
+      "cwe": ["CWE-119", "CWE-78"],
+      "targetArtifactId": "art_payload_loader"
+    },
+    {
+      "id": "fin_ps_obf_02",
+      "ruleId": "RULE-SCRIPT-PS-001",
+      "category": "execution",
+      "severity": "high",
+      "confidence": 0.92,
+      "title": "Suspicious PowerShell Download Cradle and Script Block Execution",
+      "message": "PowerShell script invokes WebClient.DownloadString coupled with Invoke-Expression (IEX).",
+      "description": "Dynamic in-memory download cradle detected in deploy-staging.ps1. Staging code downloads remote executable payload without local disk caching.",
+      "evidence": [
+        {
+          "id": "ev_ps_cradle",
+          "type": "powershell-command",
+          "category": "scripting",
+          "confidence": 0.95,
+          "value": "IEX (New-Object Net.WebClient).DownloadString(...)",
+          "metadata": {
+            "function": "DownloadString",
+            "expression": "IEX"
+          },
+          "locations": [
+            {
+              "path": "scripts/deploy-staging.ps1",
+              "startLine": 14,
+              "endLine": 14
+            }
+          ]
+        }
+      ],
+      "remediation": "Replace dynamic remote payload fetching with pinned, cryptographic artifact verification in CI/CD pipeline.",
+      "mitreAttack": ["T1059.001", "T1105"],
+      "cwe": ["CWE-94"],
+      "targetArtifactId": "art_deploy_script"
+    },
+    {
+      "id": "fin_secret_leak_03",
+      "ruleId": "RULE-SECRET-ENV-001",
+      "category": "credential-access",
+      "severity": "high",
+      "confidence": 0.9,
+      "title": "Hardcoded Production Private Key in Environment Configuration",
+      "message": "Unencrypted RSA private key block committed directly into environment file.",
+      "description": "RSA private key detected in .env.production. Private keys committed to source repositories expose cryptographic identity and decryption capabilities.",
+      "evidence": [
+        {
+          "id": "ev_private_key",
+          "type": "credential-string",
+          "category": "secrets",
+          "confidence": 0.99,
+          "value": "BEGIN RSA PRIVATE KEY",
+          "metadata": {
+            "format": "PKCS#1",
+            "keyType": "RSA"
+          },
+          "locations": [
+            {
+              "path": ".env.production",
+              "startLine": 28,
+              "endLine": 45
+            }
+          ]
+        }
+      ],
+      "remediation": "Immediately revoke and rotate the private key. Store production secrets in a dedicated vault (e.g. AWS Secrets Manager, HashiCorp Vault) rather than version-controlled files.",
+      "mitreAttack": ["T1552.001"],
+      "cwe": ["CWE-798", "CWE-312"],
+      "targetArtifactId": "art_env_config"
+    },
+    {
+      "id": "fin_weak_crypto_04",
+      "ruleId": "RULE-CRYPTO-ALGO-001",
+      "category": "cryptography",
+      "severity": "medium",
+      "confidence": 0.85,
+      "title": "Use of Deprecated Cryptographic Hash Function (MD5)",
+      "message": "Token verification logic relies on MD5 algorithm for session fingerprinting.",
+      "description": "In token-handler.ts, createHash(\"md5\") was detected for generating token verification checksums. MD5 is vulnerable to collision attacks.",
+      "evidence": [
+        {
+          "id": "ev_md5_usage",
+          "type": "crypto-algorithm",
+          "category": "cryptography",
+          "confidence": 0.88,
+          "value": "crypto.createHash(\"md5\")",
+          "metadata": {
+            "algorithm": "md5",
+            "standard": "deprecated"
+          },
+          "locations": [
+            {
+              "path": "src/auth/token-handler.ts",
+              "startLine": 82,
+              "endLine": 82
+            }
+          ]
+        }
+      ],
+      "remediation": "Upgrade to SHA-256 or SHA-384 for message digests, or Argon2id/bcrypt for password and secret hashing.",
+      "mitreAttack": ["T1557"],
+      "cwe": ["CWE-327", "CWE-328"],
+      "targetArtifactId": "art_auth_service"
+    }
+  ],
+  "riskProfile": {
+    "id": "rp_0123456789abcdef",
+    "sessionId": "scan_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "trustProfileId": "tp_0123456789abcdef",
+    "riskScore": 7.8,
+    "riskLevel": "high",
+    "maxSeverity": {
+      "level": "critical",
+      "score": 9.5
+    },
+    "computedAt": "2026-09-24T12:00:01.400Z"
+  },
+  "trustProfile": {
+    "id": "tp_0123456789abcdef",
+    "sessionId": "scan_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "artifactId": "art_payload_loader",
+    "trustScore": 0.22,
+    "findingDensity": 0.028,
+    "severityBreakdown": {
+      "critical": 1,
+      "high": 2,
+      "medium": 1,
+      "low": 0,
+      "info": 0
+    },
+    "computedAt": "2026-09-24T12:00:01.400Z"
+  },
+  "knowledgeEnrichments": [
+    {
+      "packId": "malware-families",
+      "entryId": "process-injection",
+      "name": "Process Injection (Reflective DLL / Remote Thread)",
+      "family": "injection",
+      "description": "Adversaries may inject code into processes to evade process-based defenses and elevate privileges.",
+      "behavior": "Attacker process writes executable code into foreign address space and creates a remote thread.",
+      "severity": "critical",
+      "remediation": "Monitor process creation with unusual memory allocation flags. Employ EDR behavioral blocking.",
+      "references": [
+        {
+          "label": "MITRE ATT&CK T1055",
+          "url": "https://attack.mitre.org/techniques/T1055/",
+          "source": "mitre-attack"
+        }
+      ],
+      "mitreTechniques": ["T1055.001"],
+      "cweIds": ["CWE-119"],
+      "matchConfidence": 0.95,
+      "matchedIndicators": ["CreateRemoteThread", "VirtualAllocEx"],
+      "sourcePack": "malware-families",
+      "packVersion": "1.0.0"
+    }
+  ]
+}
