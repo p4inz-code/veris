@@ -121,7 +121,7 @@ node packages/cli/dist/cli.js scan ./fixtures/samples --format json --output ./r
 
 ## Known Limitations
 
-- **Logo Intro Animation**: The logo intro takes ~1.05s; a scan that finishes faster closes the alternate screen mid-wipe and prints the completed header + summary on the primary screen.
+- **Logo Intro Animation**: The logo intro performs its intended reveal (~1.05s) and settles into the final static header state; the header remains persistent throughout interactive execution and on primary screen restoration.
 - **AI Features (`explain` / `summarize`)**: Consumer-only; require user-supplied API keys or local Ollama instances. AI never participates in core detection or scoring.
 - **Published Artifacts**: Only `veris-cli` is published to npm; monorepo domain packages (`@veris/*`) are internal workspace packages bundled into the CLI executable.
 - **Offline-First Plugin Host**: Plugin packages must be reviewed and placed locally; remote internet registry downloading of untrusted code is intentionally omitted.

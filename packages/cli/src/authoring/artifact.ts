@@ -11,6 +11,8 @@
 
 import { deterministicId } from '@veris/shared';
 
+import { CLI_VERSION } from '../wirer.js';
+
 import type {
   CandidateRuleArtifact,
   PluginRulePack,
@@ -53,7 +55,7 @@ export function createCandidateRuleArtifact(options: {
     metadata: Object.freeze({
       provider: options.provider,
       model: options.model,
-      generatorVersion: '1.2.0',
+      generatorVersion: CLI_VERSION,
       reviewNotice: REVIEW_NOTICE,
       promotionInstructions: `To promote this candidate rule pack into your active plugin directory, execute:\n  veris rule author --promote <path-to-this-file> --target-dir <plugins-directory>`,
     }),

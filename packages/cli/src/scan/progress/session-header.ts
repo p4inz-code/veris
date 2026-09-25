@@ -480,13 +480,42 @@ export class SessionHeader {
   }
 
   /**
+   * Whether the startup reveal animation has finished and settled into the
+   * static logo/header state.
+   */
+  get isSettled(): boolean {
+    return !this.shouldAnimate() || this.frame >= this.introFrames();
+  }
+
+  /**
    * Number of frames the startup intro lasts (logo wipe + settle).
    *
    * Deterministic and independent of terminal size: 6 wipe frames plus one
    * settle frame (see INTRO_FRAME_COUNT).
    */
-  private introFrames(): number {
+  introFrames(): number {
     return INTRO_FRAME_COUNT;
+  }
+
+  /**
+   * Wait until the intro animation has completed and settled into the final
+   * static logo/header state. Returns immediately if already settled or not
+   * animated.
+   */
+  async waitForSettle(): Promise<void> {
+    if (this.isSettled || this.disposed) return;
+    const remainingFrames = this.introFrames() - this.frame;
+    const remainingMs = Math.max(0, remainingFrames * this.frameIntervalMs);
+    if (remainingMs > 0) {
+      await new Promise<void>((resolve) => setTimeout(resolve, remainingMs));
+    }
+    // Ensure the settle frame is painted on the alternate screen before leaving
+    if (this.started && !this.disposed && this.caps.isTty) {
+      if (this.frame < this.introFrames()) {
+        this.frame = this.introFrames();
+      }
+      this.repaintHeaderRegion();
+    }
   }
 
   /**

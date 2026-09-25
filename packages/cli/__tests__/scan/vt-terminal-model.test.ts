@@ -536,8 +536,11 @@ describe('persistent header against a REAL finite-height terminal (VT model)', (
     expect(joined.indexOf('\x1b[?1049h')).toBe(0);
     expect(joined.lastIndexOf('\x1b[?1049l')).toBeGreaterThan(joined.indexOf('\x1b[?1049h'));
     // After leaving the alternate screen, the final frame (header + summary)
-    // is printed on the PRIMARY screen so the result persists after exit.
+    // is printed on the PRIMARY screen anchored at row 1 (\x1b[H) so the
+    // logo stays pinned at the top and never scrolls off into scrollback.
     const tail = joined.slice(joined.lastIndexOf('\x1b[?1049l'));
+    expect(tail).toContain('\x1b[H');
+    expect(tail.indexOf('\x1b[H')).toBeLessThan(tail.indexOf(`VERIS v${CLI_VERSION}`));
     expect(tail).toContain(`VERIS v${CLI_VERSION}`);
     expect(tail).toContain('Scan Complete');
   });

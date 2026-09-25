@@ -449,6 +449,42 @@ describe('SessionHeader lifecycle', () => {
       header.dispose();
     }
   });
+
+  it('reports isSettled and waitForSettle awaits the settle frame', async () => {
+    vi.useRealTimers();
+    setSymbolSet('unicode');
+    const caps = captureStdout();
+    const header = new SessionHeader({
+      caps: animatableTtyCaps(),
+      frameIntervalMs: 20, // fast timer for test speed
+    });
+    try {
+      expect(header.isSettled).toBe(false);
+      header.start();
+      expect(header.isSettled).toBe(false);
+      await header.waitForSettle();
+      expect(header.isSettled).toBe(true);
+      expect(header.frameIndex).toBeGreaterThanOrEqual(header.introFrames());
+    } finally {
+      caps.restore();
+      header.dispose();
+    }
+  });
+
+  it('isSettled is immediately true when animation is disabled', async () => {
+    const caps = captureStdout();
+    const header = new SessionHeader({
+      caps: makeCaps({ isTty: true, prefersReducedMotion: true }),
+    });
+    try {
+      expect(header.isSettled).toBe(true);
+      await header.waitForSettle();
+      expect(header.isSettled).toBe(true);
+    } finally {
+      caps.restore();
+      header.dispose();
+    }
+  });
 });
 
 // ── Real-Terminal Alternate-Screen Protocol ──

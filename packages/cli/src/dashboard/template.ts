@@ -10,6 +10,8 @@
  * @module @veris/cli/dashboard/template
  */
 
+import { CLI_VERSION } from '../wirer.js';
+
 import { escapeHtml, sanitizeIdentifier } from './sanitizer.js';
 import type { DashboardViewModel } from './types.js';
 

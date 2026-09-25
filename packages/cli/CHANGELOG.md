@@ -1,5 +1,16 @@
 # veris-cli
 
+## 1.2.1
+
+### Patch Changes
+
+- fix(cli): keep session header persistent throughout interactive scans and on exit
+
+  - Fixed premature session teardown on fast scans by guaranteeing the intro animation completes and settles into the final static brand header.
+  - Fixed primary screen restoration on exit by positioning at home (`\x1b[H`) with screen boundary clipping (`maxLines <= R - 1`), preventing the logo and header from scrolling into scrollback.
+  - Added `isSettled` and `waitForSettle()` to `SessionHeader` for deterministic reveal lifecycle synchronization.
+  - Guaranteed the logo, runtime metadata, and status indicator remain permanently visible alongside scan progress, errors, summary, and cancellation across all terminal heights (12-50+ rows) and widths (40-180 cols).
+
 ## 1.2.0
 
 ### Minor Changes

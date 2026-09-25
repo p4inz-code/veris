@@ -387,35 +387,63 @@ export class DashboardRenderer implements ProgressRenderer {
     return this.finalSummaryText;
   }
 
+  private disposing: Promise<void> | null = null;
+  private disposed: boolean = false;
+
   async dispose(): Promise<void> {
-    this.stopAnimation();
-    process.stdout.removeListener('resize', this.handleResize);
-    if (this.header !== null) {
-      const wasTty = this.caps.isTty;
-      // Stop the header animation and leave the alternate screen buffer
-      // (restores the primary screen) exactly once (idempotent).
-      this.header.dispose();
-      if (wasTty && this.finalSummaryText.length > 0) {
-        // Print the final frame on the PRIMARY screen so the result persists
-        // after the interactive session ends (the alternate screen canvas is
-        // discarded on exit). Clipped to the screen so the header stays
-        // visible at the top of the result. finalLines() renders the
-        // COMPLETED header (full logo + identity) even when the session
-        // ended mid-reveal.
-        const headerLines = this.header.finalLines();
-        const R = this.caps.height > 0 ? this.caps.height : 24;
-        const body = this.finalSummaryText
-          .split('\n')
-          .slice(0, Math.max(0, R - headerLines.length));
-        const frame = [...headerLines, ...body];
-        for (let i = 0; i < frame.length; i++) {
-          const isLast = i === frame.length - 1;
-          process.stdout.write(frame[i] + (isLast && frame.length >= R ? '' : '\n'));
+    if (this.disposed) return;
+    if (this.disposing !== null) return this.disposing;
+
+    this.disposing = (async () => {
+      this.stopAnimation();
+      process.stdout.removeListener('resize', this.handleResize);
+
+      if (this.header !== null) {
+        const wasTty = this.caps.isTty;
+        const hasSummary = this.finalSummaryText.length > 0;
+        const isCancelled = this.currentSession?.cancelled ?? false;
+
+        // Guarantee the intro animation has completed and settled into the final
+        // static header before leaving the interactive session, but ONLY for a
+        // completed scan with a summary. Early shutdown or cancellation exits immediately.
+        if (wasTty && hasSummary && !isCancelled && this.header.shouldAnimate()) {
+          await this.header.waitForSettle();
         }
-        process.stdout.write('\x1b[0J');
+
+        const header = this.header;
+        this.header = null;
+        this.disposed = true;
+
+        // Stop the header animation and leave the alternate screen buffer
+        // (restores the primary screen) exactly once (idempotent).
+        header.dispose();
+
+        if (wasTty && hasSummary) {
+          // Print the final frame on the PRIMARY screen so the result persists
+          // after the interactive session ends (the alternate screen canvas is
+          // discarded on exit).
+          // Position at home (\x1b[H) so the header stays pinned at the top of
+          // the visible screen and is NEVER scrolled into scrollback by the shell.
+          const headerLines = header.finalLines();
+          const R = this.caps.height > 0 ? this.caps.height : 24;
+          const maxLines = Math.max(1, R - 1);
+          const body = this.finalSummaryText
+            .split('\n')
+            .slice(0, Math.max(0, maxLines - headerLines.length));
+          const frame = [...headerLines, ...body];
+
+          process.stdout.write('\x1b[H');
+          for (let i = 0; i < frame.length; i++) {
+            process.stdout.write(frame[i] + '\n');
+          }
+          process.stdout.write('\x1b[0J');
+        }
+      } else {
+        this.disposed = true;
       }
-      this.header = null;
-    }
+    })();
+
+    return this.disposing;
   }
 
   // ── Animation (body repaint loop) ──
