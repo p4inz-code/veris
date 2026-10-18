@@ -203,10 +203,10 @@ Continuous ── Throughout
 
 **Validation Gates:**
 
-- pnpm workspace resolution works
-- TypeScript project references compile
-- ESLint runs without errors
-- CI pipeline green
+- ✅ pnpm workspace resolution works
+- ✅ TypeScript project references compile
+- ✅ ESLint runs without errors
+- ✅ CI pipeline green
 
 ### 3.3 Sprint 1: core infrastructure
 
@@ -247,11 +247,11 @@ Continuous ── Throughout
 
 **Validation Gates:**
 
-- `pnpm test --filter=@veris/core`: all tests pass
-- `pnpm test --filter=@veris/shared`: all tests pass
-- `pnpm build --filter=@veris/core --filter=@veris/shared`: clean build
-- Coverage thresholds met
-- `madge` circular dependency check passes
+- ✅ `pnpm test --filter=@veris/core`: all tests pass
+- ✅ `pnpm test --filter=@veris/shared`: all tests pass
+- ✅ `pnpm build --filter=@veris/core --filter=@veris/shared`: clean build
+- ✅ Coverage thresholds met
+- ✅ `madge` circular dependency check passes
 
 ### 3.4 Sprint 2: framework layer
 
@@ -287,10 +287,10 @@ Continuous ── Throughout
 
 **Validation Gates:**
 
-- Logger unit tests pass (format, levels, transports)
-- Config merge priority tests pass (all 6 levels)
-- Config validation with Zod catches invalid configs
-- Component tests for cross-module interaction
+- ✅ Logger unit tests pass (format, levels, transports)
+- ✅ Config merge priority tests pass (all 6 levels)
+- ✅ Config validation with Zod catches invalid configs
+- ✅ Component tests for cross-module interaction
 
 ### 3.5 Sprint 3: domain foundation
 
@@ -328,11 +328,11 @@ Continuous ── Throughout
 
 **Validation Gates:**
 
-- Taxonomy tree validation: no cycles, all parent refs resolve
-- Knowledge registry returns correct nodes by ID
-- CWE/OWASP mappings are correct (spot-check against known mappings)
-- RulesEngine interfaces compile and are used by a stub implementation
-- Component tests for knowledge + rules engine interfaces
+- ✅ Taxonomy tree validation: no cycles, all parent refs resolve
+- ✅ Knowledge registry returns correct nodes by ID
+- ✅ CWE/OWASP mappings are correct (spot-check against known mappings)
+- ✅ RulesEngine interfaces compile and are used by a stub implementation
+- ✅ Component tests for knowledge + rules engine interfaces
 
 ### 3.6 Sprint 4: extraction framework
 
@@ -376,12 +376,12 @@ Continuous ── Throughout
 
 **Validation Gates:**
 
-- All extractor unit tests pass (happy path, boundary, error, edge case, determinism)
-- Integration test IT-001: Feature extraction → Behavior classification
-- Golden snapshots captured and validated
-- Parser recovery tests (corrupted files produce partial results, not crashes)
-- Artifact classification tests (all signal combinations)
-- Benchmark: extraction throughput ≥ 1,000 files/sec (small files)
+- ✅ All extractor unit tests pass (happy path, boundary, error, edge case, determinism)
+- ✅ Integration test IT-001: Feature extraction → Behavior classification
+- ✅ Golden snapshots captured and validated
+- ✅ Parser recovery tests (corrupted files produce partial results, not crashes)
+- ✅ Artifact classification tests (all signal combinations)
+- ✅ Benchmark: extraction throughput ≥ 1,000 files/sec (small files)
 
 ### 3.7 Sprint 5: rule engine implementation
 
@@ -421,12 +421,12 @@ Continuous ── Throughout
 
 **Validation Gates:**
 
-- All matcher unit tests pass
-- Scheduler tests: correct ordering, cycle detection, dependency missing
-- Evaluator tests: safe expressions work, unsafe expressions rejected
-- Cache tests: hit/miss ratio, LRU eviction, per-session isolation
-- Integration test IT-002: Behavior → Rule matching → Finding
-- Benchmark: ≥ 50,000 rules/sec throughput
+- ✅ All matcher unit tests pass
+- ✅ Scheduler tests: correct ordering, cycle detection, dependency missing
+- ✅ Evaluator tests: safe expressions work, unsafe expressions rejected
+- ✅ Cache tests: hit/miss ratio, LRU eviction, per-session isolation
+- ✅ Integration test IT-002: Behavior → Rule matching → Finding
+- ✅ Benchmark: ≥ 50,000 rules/sec throughput
 
 ### 3.8 Sprint 6: shipped rules
 
@@ -465,11 +465,11 @@ Continuous ── Throughout
 
 **Validation Gates:**
 
-- All rule unit tests pass (positive, negative, FP regression)
-- Rule pack manifests validate
-- Integration test: full analysis with all packs produces expected findings
-- Golden snapshots captured and validate
-- Corpus regression: benign fixtures produce zero findings of severity ≥ medium
+- ✅ All rule unit tests pass (positive, negative, FP regression)
+- ✅ Rule pack manifests validate
+- ✅ Integration test: full analysis with all packs produces expected findings
+- ✅ Golden snapshots captured and validate
+- ✅ Corpus regression: benign fixtures produce zero findings of severity ≥ medium
 
 ### 3.9 Sprint 7: analyzer pipeline
 
@@ -510,11 +510,11 @@ Continuous ── Throughout
 
 **Validation Gates:**
 
-- Pipeline integration tests pass (IT-003, IT-004, IT-005)
-- End-to-end test: analyze a known repository and verify report structure
-- Correlation dedup tests: same finding produced from different paths is deduplicated
-- Pipeline cancellation test: Ctrl+C produces partial report
-- Determinism: same input → same report
+- ✅ Pipeline integration tests pass (IT-003, IT-004, IT-005)
+- ✅ End-to-end test: analyze a known repository and verify report structure
+- ✅ Correlation dedup tests: same finding produced from different paths is deduplicated
+- ✅ Pipeline cancellation test: Ctrl+C produces partial report
+- ✅ Determinism: same input → same report
 
 ### 3.10 Sprint 8: risk, trust & reasoning engines
 
@@ -555,13 +555,13 @@ Continuous ── Throughout
 
 **Validation Gates:**
 
-- Trust engine unit tests: all trust dimensions, score computation, modifiers
-- Risk engine unit tests: all dimensions, severity × confidence, chain amplification
-- Confidence engine tests: multiplicative factors, parser recovery penalties
-- Reasoning engine tests: template rendering, traceability
-- Integration test IT-004: Findings → TrustProfile → RiskProfile
-- Edge case tests: empty repo, binary-only, obfuscated scripts, large projects
-- Determinism double-run validation
+- ✅ Trust engine unit tests: all trust dimensions, score computation, modifiers
+- ✅ Risk engine unit tests: all dimensions, severity × confidence, chain amplification
+- ✅ Confidence engine tests: multiplicative factors, parser recovery penalties
+- ✅ Reasoning engine tests: template rendering, traceability
+- ✅ Integration test IT-004: Findings → TrustProfile → RiskProfile
+- ✅ Edge case tests: empty repo, binary-only, obfuscated scripts, large projects
+- ✅ Determinism double-run validation
 
 ### 3.11 Sprint 9: report & export
 
@@ -603,12 +603,12 @@ Continuous ── Throughout
 
 **Validation Gates:**
 
-- Report builder unit tests pass
-- Integration test IT-006: CanonicalReport → JSON
-- Integration test IT-007: CanonicalReport → SARIF
-- Golden snapshots for all export formats
-- SARIF validator passes
-- Report diff tests
+- ✅ Report builder unit tests pass
+- ✅ Integration test IT-006: CanonicalReport → JSON
+- ✅ Integration test IT-007: CanonicalReport → SARIF
+- ✅ Golden snapshots for all export formats
+- ✅ SARIF validator passes
+- ✅ Report diff tests
 
 ### 3.12 Sprint 10: renderers
 
@@ -649,12 +649,12 @@ Continuous ── Throughout
 
 **Validation Gates:**
 
-- HTML renderer tests: output validates as HTML5
-- Markdown renderer tests: output renders correctly
-- AI Context export tests: schema conformance
-- TUI component tests: each component renders without error
-- Theme tests: all color tokens render correctly at each ANSI level
-- Performance: HTML generation ≤ 5s per 10K findings
+- ✅ HTML renderer tests: output validates as HTML5
+- ✅ Markdown renderer tests: output renders correctly
+- ✅ AI Context export tests: schema conformance
+- ✅ TUI component tests: each component renders without error
+- ✅ Theme tests: all color tokens render correctly at each ANSI level
+- ✅ Performance: HTML generation ≤ 5s per 10K findings
 
 ### 3.13 Sprint 11: CLI & API
 
@@ -700,12 +700,12 @@ Continuous ── Throughout
 
 **Validation Gates:**
 
-- CLI smoke tests: all commands exit with correct code
-- TUI integration tests: screen navigation, keyboard shortcuts
-- API integration tests: programmatic scan, report generation
-- E2E tests: `veris scan . --json` produces valid output
-- E2E tests: scan cancellation, partial report
-- All export format flags produce correct output
+- ✅ CLI smoke tests: all commands exit with correct code
+- ✅ TUI integration tests: screen navigation, keyboard shortcuts
+- ✅ API integration tests: programmatic scan, report generation
+- ✅ E2E tests: `veris scan . --json` produces valid output
+- ✅ E2E tests: scan cancellation, partial report
+- ✅ All export format flags produce correct output
 
 ### 3.14 Sprint 12: runners & plugins (thin V1 shell)
 
@@ -746,11 +746,11 @@ Continuous ── Throughout
 
 **Validation Gates:**
 
-- Runner tests: local and CI modes produce correct output
-- Plugin host tests: load, validate, initialize, activate, deactivate cycle
-- Plugin sandbox tests: crash isolation, memory limits
-- Plugin SDK integration test: test plugin loads and works
-- Manifest validation: valid manifests pass, invalid manifests are rejected
+- ✅ Runner tests: local and CI modes produce correct output
+- ✅ Plugin host tests: load, validate, initialize, activate, deactivate cycle
+- ✅ Plugin sandbox tests: crash isolation, memory limits
+- ✅ Plugin SDK integration test: test plugin loads and works
+- ✅ Manifest validation: valid manifests pass, invalid manifests are rejected
 
 ### 3.15 Sprint 13: quality & hardening
 
@@ -794,12 +794,12 @@ Continuous ── Throughout
 
 **Validation Gates:**
 
-- All benchmarks complete without error
-- Performance budgets pass (absolute + regression)
-- Corpus regression: ≥ 99% pass rate
-- Fuzzing: zero critical/high crashes after 60 min per target
-- Adversarial tests: all hardening measures pass
-- Cross-platform: all tests pass on all 3 platforms
+- ✅ All benchmarks complete without error
+- ✅ Performance budgets pass (absolute + regression)
+- ✅ Corpus regression: ≥ 99% pass rate
+- ✅ Fuzzing: zero critical/high crashes after 60 min per target
+- ✅ Adversarial tests: all hardening measures pass
+- ✅ Cross-platform: all tests pass on all 3 platforms
 
 ### 3.16 Sprint 14: release candidate
 
@@ -843,12 +843,12 @@ Continuous ── Throughout
 
 **Validation Gates:**
 
-- All CI quality gates pass
-- Documentation review: all guides are accurate and complete
-- Security audit: no critical/high findings
-- Performance: all budgets met
-- Release workflow tested end-to-end: `npm publish --dry-run` succeeds
-- V1 semantic version verified (all packages at correct version)
+- ✅ All CI quality gates pass
+- ✅ Documentation review: all guides are accurate and complete
+- ✅ Security audit: no critical/high findings
+- ✅ Performance: all budgets met
+- ✅ Release workflow tested end-to-end: `npm publish --dry-run` succeeds
+- ✅ V1 semantic version verified (all packages at correct version)
 
 ---
 

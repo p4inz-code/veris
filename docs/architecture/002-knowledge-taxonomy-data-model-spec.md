@@ -155,17 +155,17 @@ Every object has a factory function for test construction. Factories produce val
 
 | Field           | Type                     | Required | Description                                           |
 | --------------- | ------------------------ | -------- | ----------------------------------------------------- |
-| `id`            | `SessionId`              | | Globally unique session identifier                    |
-| `schemaVersion` | `string`                 | | Data model schema version (semver)                    |
-| `engineVersion` | `string`                 | | VERIS engine version that produced this session       |
-| `startedAt`     | `ISO8601`                | | Start timestamp                                       |
-| `completedAt`   | `ISO8601`                | | Completion timestamp                                  |
-| `durationMs`    | `number`                 | | `completedAt - startedAt`                             |
-| `config`        | `SessionConfig`          | | Snapshot of scan configuration                        |
-| `environment`   | `EnvironmentInfo`        | | OS, platform, runtime metadata                        |
-| `artifactCount` | `number`                 | | Total artifacts processed                             |
-| `findingCount`  | `number`                 | | Total findings generated                              |
-| `status`        | `SessionStatus`          | | `"completed" \| "partial" \| "failed" \| "cancelled"` |
+| `id`            | `SessionId`              | Yes | Globally unique session identifier                    |
+| `schemaVersion` | `string`                 | Yes | Data model schema version (semver)                    |
+| `engineVersion` | `string`                 | Yes | VERIS engine version that produced this session       |
+| `startedAt`     | `ISO8601`                | Yes | Start timestamp                                       |
+| `completedAt`   | `ISO8601`                | Yes | Completion timestamp                                  |
+| `durationMs`    | `number`                 | Yes | `completedAt - startedAt`                             |
+| `config`        | `SessionConfig`          | Yes | Snapshot of scan configuration                        |
+| `environment`   | `EnvironmentInfo`        | Yes | OS, platform, runtime metadata                        |
+| `artifactCount` | `number`                 | Yes | Total artifacts processed                             |
+| `findingCount`  | `number`                 | Yes | Total findings generated                              |
+| `status`        | `SessionStatus`          | Yes | `"completed" \| "partial" \| "failed" \| "cancelled"` |
 | `errors`        | `SessionError[]`         |          | Non-fatal errors during scan                          |
 | `tags`          | `Record<string, string>` |          | User-defined tags for categorization                  |
 
@@ -203,20 +203,20 @@ Every object has a factory function for test construction. Factories produce val
 
 | Field            | Type                      | Required | Description                                                           |
 | ---------------- | ------------------------- | -------- | --------------------------------------------------------------------- |
-| `id`             | `ArtifactId`              | | Content-derived deterministic ID                                      |
-| `sessionId`      | `SessionId`               | | Owning session                                                        |
-| `parentId`       | `ArtifactId \| null`      | | Parent artifact if extracted from another (e.g., file inside archive) |
-| `type`           | `ArtifactType`            | | Normalized type classification                                        |
+| `id`             | `ArtifactId`              | Yes | Content-derived deterministic ID                                      |
+| `sessionId`      | `SessionId`               | Yes | Owning session                                                        |
+| `parentId`       | `ArtifactId \| null`      | Yes | Parent artifact if extracted from another (e.g., file inside archive) |
+| `type`           | `ArtifactType`            | Yes | Normalized type classification                                        |
 | `subType`        | `string`                  |          | Further classification (e.g., "ELF", "PE", "Mach-O" for executables)  |
 | `originalPath`   | `string`                  |          | Original filesystem path or identifier                                |
-| `normalizedPath` | `string`                  | | Cross-platform normalized path                                        |
-| `size`           | `number`                  | | Size in bytes                                                         |
-| `contentHash`    | `ContentHash`             | | SHA-256 hash of content (or BLAKE3)                                   |
-| `mimeType`       | `string`                  | | Detected or declared MIME type                                        |
+| `normalizedPath` | `string`                  | Yes | Cross-platform normalized path                                        |
+| `size`           | `number`                  | Yes | Size in bytes                                                         |
+| `contentHash`    | `ContentHash`             | Yes | SHA-256 hash of content (or BLAKE3)                                   |
+| `mimeType`       | `string`                  | Yes | Detected or declared MIME type                                        |
 | `encoding`       | `string`                  |          | Detected text encoding (for textual artifacts)                        |
 | `metadata`       | `Record<string, unknown>` |          | Extractor-specific metadata (e.g., ELF sections, PE imports)          |
-| `extractedAt`    | `ISO8601`                 | | When the artifact was extracted                                       |
-| `extractorId`    | `string`                  | | ID of the extractor that produced this artifact                       |
+| `extractedAt`    | `ISO8601`                 | Yes | When the artifact was extracted                                       |
+| `extractorId`    | `string`                  | Yes | ID of the extractor that produced this artifact                       |
 
 **ArtifactType enum (open):**
 
@@ -261,13 +261,13 @@ Every object has a factory function for test construction. Factories produce val
 
 | Field        | Type                      | Required | Description                                              |
 | ------------ | ------------------------- | -------- | -------------------------------------------------------- |
-| `id`         | `FeatureId`               | | Deterministic ID derived from artifact + location + type |
-| `artifactId` | `ArtifactId`              | | Source artifact                                          |
-| `sessionId`  | `SessionId`               | | Owning session                                           |
-| `type`       | `FeatureType`             | | Classification of the feature                            |
-| `value`      | `FeatureValue`            | | The extracted value                                      |
-| `location`   | `SourceLocation`          | | Source location in the artifact                          |
-| `confidence` | `number`                  | | Confidence score [0.0, 1.0]                              |
+| `id`         | `FeatureId`               | Yes | Deterministic ID derived from artifact + location + type |
+| `artifactId` | `ArtifactId`              | Yes | Source artifact                                          |
+| `sessionId`  | `SessionId`               | Yes | Owning session                                           |
+| `type`       | `FeatureType`             | Yes | Classification of the feature                            |
+| `value`      | `FeatureValue`            | Yes | The extracted value                                      |
+| `location`   | `SourceLocation`          | Yes | Source location in the artifact                          |
+| `confidence` | `number`                  | Yes | Confidence score [0.0, 1.0]                              |
 | `metadata`   | `Record<string, unknown>` |          | Extractor-specific context                               |
 
 **FeatureType enum (open):**
@@ -340,12 +340,12 @@ type FeatureValue =
 
 | Field        | Type                      | Required | Description                          |
 | ------------ | ------------------------- | -------- | ------------------------------------ |
-| `id`         | `BehaviorId`              | | Deterministic ID                     |
-| `artifactId` | `ArtifactId`              | | Source artifact                      |
-| `sessionId`  | `SessionId`               | | Owning session                       |
-| `taxonomyId` | `TaxonomyId`              | | Canonical taxonomy node identifier   |
-| `featureIds` | `FeatureId[]`             | | Features that produced this behavior |
-| `confidence` | `number`                  | | Combined confidence [0.0, 1.0]       |
+| `id`         | `BehaviorId`              | Yes | Deterministic ID                     |
+| `artifactId` | `ArtifactId`              | Yes | Source artifact                      |
+| `sessionId`  | `SessionId`               | Yes | Owning session                       |
+| `taxonomyId` | `TaxonomyId`              | Yes | Canonical taxonomy node identifier   |
+| `featureIds` | `FeatureId[]`             | Yes | Features that produced this behavior |
+| `confidence` | `number`                  | Yes | Combined confidence [0.0, 1.0]       |
 | `properties` | `Record<string, unknown>` |          | Behavior-specific properties         |
 | `metadata`   | `Record<string, unknown>` |          | Classifier metadata                  |
 
@@ -383,14 +383,14 @@ type FeatureValue =
 
 | Field               | Type                      | Required | Description                                                |
 | ------------------- | ------------------------- | -------- | ---------------------------------------------------------- |
-| `id`                | `EvidenceId`              | | Deterministic ID                                           |
-| `ruleId`            | `RuleId`                  | | The Rule that matched                                      |
-| `behaviorId`        | `BehaviorId`              | | The Behavior that was matched                              |
-| `findingId`         | `FindingId`               | | The Finding this evidence supports                         |
-| `sessionId`         | `SessionId`               | | Owning session                                             |
-| `matchedProperties` | `Record<string, unknown>` | | The subset of behavior properties that triggered the match |
-| `matchDetail`       | `MatchDetail`             | | How the rule matched (pattern, heuristic, composite)       |
-| `confidence`        | `number`                  | | Confidence contributed to the finding [0.0, 1.0]           |
+| `id`                | `EvidenceId`              | Yes | Deterministic ID                                           |
+| `ruleId`            | `RuleId`                  | Yes | The Rule that matched                                      |
+| `behaviorId`        | `BehaviorId`              | Yes | The Behavior that was matched                              |
+| `findingId`         | `FindingId`               | Yes | The Finding this evidence supports                         |
+| `sessionId`         | `SessionId`               | Yes | Owning session                                             |
+| `matchedProperties` | `Record<string, unknown>` | Yes | The subset of behavior properties that triggered the match |
+| `matchDetail`       | `MatchDetail`             | Yes | How the rule matched (pattern, heuristic, composite)       |
+| `confidence`        | `number`                  | Yes | Confidence contributed to the finding [0.0, 1.0]           |
 
 **MatchDetail (discriminated union):**
 
@@ -440,14 +440,14 @@ type MatchDetail =
 
 | Field         | Type           | Required | Description                               |
 | ------------- | -------------- | -------- | ----------------------------------------- |
-| `id`          | `RuleId`       | | Unique, human-readable, stable identifier |
-| `packId`      | `string`       | | Rule pack it belongs to                   |
-| `version`     | `string`       | | Rule version (semver)                     |
-| `name`        | `string`       | | Human-readable name                       |
-| `description` | `string`       | | What this rule detects                    |
-| `severity`    | `Severity`     | | Severity level                            |
-| `taxonomyIds` | `TaxonomyId[]` | | Behavior taxonomy nodes this rule matches |
-| `matchLogic`  | `RuleLogic`    | | The matching logic                        |
+| `id`          | `RuleId`       | Yes | Unique, human-readable, stable identifier |
+| `packId`      | `string`       | Yes | Rule pack it belongs to                   |
+| `version`     | `string`       | Yes | Rule version (semver)                     |
+| `name`        | `string`       | Yes | Human-readable name                       |
+| `description` | `string`       | Yes | What this rule detects                    |
+| `severity`    | `Severity`     | Yes | Severity level                            |
+| `taxonomyIds` | `TaxonomyId[]` | Yes | Behavior taxonomy nodes this rule matches |
+| `matchLogic`  | `RuleLogic`    | Yes | The matching logic                        |
 | `metadata`    | `RuleMetadata` |          | Author, references, tags, CWE mappings    |
 
 **Severity:**
@@ -519,14 +519,14 @@ type RuleLogic =
 
 | Field             | Type                  | Required | Description                        |
 | ----------------- | --------------------- | -------- | ---------------------------------- |
-| `id`              | `RuleResultId`        | | Deterministic ID                   |
-| `ruleId`          | `RuleId`              | | The rule that was applied          |
-| `behaviorIds`     | `BehaviorId[]`        | | Behaviors involved in the match    |
-| `matched`         | `boolean`             | | Whether the rule matched           |
-| `confidence`      | `number`              | | Confidence in the match [0.0, 1.0] |
+| `id`              | `RuleResultId`        | Yes | Deterministic ID                   |
+| `ruleId`          | `RuleId`              | Yes | The rule that was applied          |
+| `behaviorIds`     | `BehaviorId[]`        | Yes | Behaviors involved in the match    |
+| `matched`         | `boolean`             | Yes | Whether the rule matched           |
+| `confidence`      | `number`              | Yes | Confidence in the match [0.0, 1.0] |
 | `matchDetail`     | `MatchDetail \| null` |          | Match detail if matched            |
-| `executionTimeMs` | `number`              | | How long the rule took to execute  |
-| `sessionId`       | `SessionId`           | | Owning session                     |
+| `executionTimeMs` | `number`              | Yes | How long the rule took to execute  |
+| `sessionId`       | `SessionId`           | Yes | Owning session                     |
 
 **Relationships:**
 
@@ -560,20 +560,20 @@ type RuleLogic =
 
 | Field               | Type                      | Required | Description                            |
 | ------------------- | ------------------------- | -------- | -------------------------------------- |
-| `id`                | `FindingId`               | | Deterministic ID                       |
-| `sessionId`         | `SessionId`               | | Owning session                         |
-| `ruleId`            | `RuleId`                  | | The rule that produced this finding    |
+| `id`                | `FindingId`               | Yes | Deterministic ID                       |
+| `sessionId`         | `SessionId`               | Yes | Owning session                         |
+| `ruleId`            | `RuleId`                  | Yes | The rule that produced this finding    |
 | `behaviorChainId`   | `BehaviorChainId \| null` |          | Associated behavior chain              |
-| `title`             | `string`                  | | Human-readable title                   |
-| `description`       | `string`                  | | Detailed description                   |
-| `severity`          | `Severity`                | | Severity level                         |
-| `confidence`        | `number`                  | | Overall confidence [0.0, 1.0]          |
-| `evidenceIds`       | `EvidenceId[]`            | | Supporting evidence                    |
-| `affectedArtifacts` | `ArtifactRef[]`           | | Artifacts involved                     |
+| `title`             | `string`                  | Yes | Human-readable title                   |
+| `description`       | `string`                  | Yes | Detailed description                   |
+| `severity`          | `Severity`                | Yes | Severity level                         |
+| `confidence`        | `number`                  | Yes | Overall confidence [0.0, 1.0]          |
+| `evidenceIds`       | `EvidenceId[]`            | Yes | Supporting evidence                    |
+| `affectedArtifacts` | `ArtifactRef[]`           | Yes | Artifacts involved                     |
 | `recommendationIds` | `RecommendationId[]`      |          | Remediation recommendations            |
-| `taxonomyIds`       | `TaxonomyId[]`            | | Taxonomy nodes this finding relates to |
+| `taxonomyIds`       | `TaxonomyId[]`            | Yes | Taxonomy nodes this finding relates to |
 | `properties`        | `Record<string, unknown>` |          | Finding-specific properties            |
-| `createdAt`         | `ISO8601`                 | | When the finding was created           |
+| `createdAt`         | `ISO8601`                 | Yes | When the finding was created           |
 
 **ArtifactRef:**
 
@@ -619,10 +619,10 @@ type RuleLogic =
 
 | Field              | Type                      | Required | Description                             |
 | ------------------ | ------------------------- | -------- | --------------------------------------- |
-| `id`               | `BehaviorChainId`         | | Deterministic ID                        |
-| `sessionId`        | `SessionId`               | | Owning session                          |
-| `relationshipType` | `ChainRelationshipType`   | | How behaviors relate                    |
-| `behaviorIds`      | `BehaviorId[]`            | | Behaviors in the chain (ordered)        |
+| `id`               | `BehaviorChainId`         | Yes | Deterministic ID                        |
+| `sessionId`        | `SessionId`               | Yes | Owning session                          |
+| `relationshipType` | `ChainRelationshipType`   | Yes | How behaviors relate                    |
+| `behaviorIds`      | `BehaviorId[]`            | Yes | Behaviors in the chain (ordered)        |
 | `findingIds`       | `FindingId[]`             |          | Findings produced from this chain       |
 | `trustImpact`      | `number`                  |          | Impact on trust score [-1.0, 1.0]       |
 | `description`      | `string`                  |          | Human-readable description of the chain |
@@ -672,16 +672,16 @@ type ChainRelationshipType =
 
 | Field                 | Type                            | Required | Description                                              |
 | --------------------- | ------------------------------- | -------- | -------------------------------------------------------- |
-| `id`                  | `TrustProfileId`                | | Deterministic ID                                         |
-| `sessionId`           | `SessionId`                     | | Owning session                                           |
-| `artifactId`          | `ArtifactId`                    | | The artifact this trust profile applies to               |
-| `trustScore`          | `number`                        | | Normalized trust score [0.0 (malicious) – 1.0 (trusted)] |
-| `findingDensity`      | `number`                        | | Findings per KB of analyzed content                      |
-| `severityBreakdown`   | `Record<SeverityLevel, number>` | | Count of findings per severity level                     |
+| `id`                  | `TrustProfileId`                | Yes | Deterministic ID                                         |
+| `sessionId`           | `SessionId`                     | Yes | Owning session                                           |
+| `artifactId`          | `ArtifactId`                    | Yes | The artifact this trust profile applies to               |
+| `trustScore`          | `number`                        | Yes | Normalized trust score [0.0 (malicious) – 1.0 (trusted)] |
+| `findingDensity`      | `number`                        | Yes | Findings per KB of analyzed content                      |
+| `severityBreakdown`   | `Record<SeverityLevel, number>` | Yes | Count of findings per severity level                     |
 | `taxonomyBreakdown`   | `Record<TaxonomyId, number>`    |          | Findings per taxonomy node                               |
 | `chainImpact`         | `number`                        |          | Impact of behavior chains on trust [-1.0, 1.0]           |
 | `contributingFactors` | `TrustFactor[]`                 |          | Factors that influenced the score                        |
-| `computedAt`          | `ISO8601`                       | | When the profile was computed                            |
+| `computedAt`          | `ISO8601`                       | Yes | When the profile was computed                            |
 
 **TrustFactor:**
 
@@ -724,16 +724,16 @@ type ChainRelationshipType =
 
 | Field                      | Type                                                        | Required | Description                     |
 | -------------------------- | ----------------------------------------------------------- | -------- | ------------------------------- |
-| `id`                       | `RiskProfileId`                                             | | Deterministic ID                |
-| `sessionId`                | `SessionId`                                                 | | Owning session                  |
-| `trustProfileId`           | `TrustProfileId`                                            | | Source trust profile            |
-| `riskScore`                | `number`                                                    | | Overall risk score [0.0 – 10.0] |
-| `riskLevel`                | `"critical" \| "high" \| "medium" \| "low" \| "negligible"` | | Categorized risk level          |
-| `maxSeverity`              | `Severity`                                                  | | Highest severity finding        |
+| `id`                       | `RiskProfileId`                                             | Yes | Deterministic ID                |
+| `sessionId`                | `SessionId`                                                 | Yes | Owning session                  |
+| `trustProfileId`           | `TrustProfileId`                                            | Yes | Source trust profile            |
+| `riskScore`                | `number`                                                    | Yes | Overall risk score [0.0 – 10.0] |
+| `riskLevel`                | `"critical" \| "high" \| "medium" \| "low" \| "negligible"` | Yes | Categorized risk level          |
+| `maxSeverity`              | `Severity`                                                  | Yes | Highest severity finding        |
 | `topFindings`              | `FindingId[]`                                               |          | Highest-risk findings (top 10)  |
 | `riskDrivers`              | `RiskDriver[]`                                              |          | Factors driving the risk score  |
 | `recommendationPriorities` | `RecommendationId[]`                                        |          | Ordered recommendations         |
-| `computedAt`               | `ISO8601`                                                   | | When computed                   |
+| `computedAt`               | `ISO8601`                                                   | Yes | When computed                   |
 
 **RiskDriver:**
 
@@ -775,13 +775,13 @@ type ChainRelationshipType =
 
 | Field              | Type                                        | Required | Description                            |
 | ------------------ | ------------------------------------------- | -------- | -------------------------------------- |
-| `id`               | `RecommendationId`                          | | Deterministic ID                       |
-| `sessionId`        | `SessionId`                                 | | Owning session                         |
-| `findingIds`       | `FindingId[]`                               | | Findings this recommendation addresses |
-| `title`            | `string`                                    | | Short action title                     |
-| `description`      | `string`                                    | | Steps to remediate                     |
-| `priority`         | `"critical" \| "high" \| "medium" \| "low"` | | Remediation priority                   |
-| `effort`           | `"minutes" \| "hours" \| "days"`            | | Estimated remediation effort           |
+| `id`               | `RecommendationId`                          | Yes | Deterministic ID                       |
+| `sessionId`        | `SessionId`                                 | Yes | Owning session                         |
+| `findingIds`       | `FindingId[]`                               | Yes | Findings this recommendation addresses |
+| `title`            | `string`                                    | Yes | Short action title                     |
+| `description`      | `string`                                    | Yes | Steps to remediate                     |
+| `priority`         | `"critical" \| "high" \| "medium" \| "low"` | Yes | Remediation priority                   |
+| `effort`           | `"minutes" \| "hours" \| "days"`            | Yes | Estimated remediation effort           |
 | `autoFixAvailable` | `boolean`                                   |          | Whether an automated fix exists        |
 | `references`       | `ExternalReference[]`                       |          | CWE, OWASP, documentation links        |
 | `codeExamples`     | `CodeExample[]`                             |          | Before/after code examples             |
@@ -826,17 +826,17 @@ type ChainRelationshipType =
 
 | Field             | Type               | Required | Description                           |
 | ----------------- | ------------------ | -------- | ------------------------------------- |
-| `id`              | `ReportId`         | | Deterministic ID                      |
-| `session`         | `ScanSession`      | | Session metadata                      |
-| `artifacts`       | `Artifact[]`       | | All artifacts analyzed                |
-| `findings`        | `Finding[]`        | | All findings (with embedded evidence) |
+| `id`              | `ReportId`         | Yes | Deterministic ID                      |
+| `session`         | `ScanSession`      | Yes | Session metadata                      |
+| `artifacts`       | `Artifact[]`       | Yes | All artifacts analyzed                |
+| `findings`        | `Finding[]`        | Yes | All findings (with embedded evidence) |
 | `behaviorChains`  | `BehaviorChain[]`  |          | Detected behavior chains              |
-| `trustProfile`    | `TrustProfile`     | | Trust assessment                      |
-| `riskProfile`     | `RiskProfile`      | | Risk assessment                       |
+| `trustProfile`    | `TrustProfile`     | Yes | Trust assessment                      |
+| `riskProfile`     | `RiskProfile`      | Yes | Risk assessment                       |
 | `recommendations` | `Recommendation[]` |          | Remediation recommendations           |
-| `summary`         | `ReportSummary`    | | High-level summary                    |
+| `summary`         | `ReportSummary`    | Yes | High-level summary                    |
 | `errors`          | `SessionError[]`   |          | Errors encountered during analysis    |
-| `generatedAt`     | `ISO8601`          | | Report generation timestamp           |
+| `generatedAt`     | `ISO8601`          | Yes | Report generation timestamp           |
 
 **ReportSummary:**
 
@@ -885,13 +885,13 @@ type ChainRelationshipType =
 
 | Field        | Type                      | Required | Description                          |
 | ------------ | ------------------------- | -------- | ------------------------------------ |
-| `id`         | `CapabilityId`            | | Deterministic ID                     |
-| `artifactId` | `ArtifactId`              | | Source artifact                      |
-| `name`       | `string`                  | | Canonical capability name            |
-| `category`   | `CapabilityCategory`      | | Category of capability               |
+| `id`         | `CapabilityId`            | Yes | Deterministic ID                     |
+| `artifactId` | `ArtifactId`              | Yes | Source artifact                      |
+| `name`       | `string`                  | Yes | Canonical capability name            |
+| `category`   | `CapabilityCategory`      | Yes | Category of capability               |
 | `properties` | `Record<string, unknown>` |          | Capability-specific properties       |
-| `source`     | `SourceLocation`          | | Where in the artifact this was found |
-| `confidence` | `number`                  | | Confidence [0.0, 1.0]                |
+| `source`     | `SourceLocation`          | Yes | Where in the artifact this was found |
+| `confidence` | `number`                  | Yes | Confidence [0.0, 1.0]                |
 
 **CapabilityCategory (open):**
 
@@ -1080,7 +1080,7 @@ T90000 ── ── Informational
 │   └── T90990 ── Other Informational
 ```
 
-### 4.3 Taxonomy node specification
+### 4.3 Taxonomy Node specification
 
 Each taxonomy node is defined as:
 

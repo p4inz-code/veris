@@ -622,7 +622,7 @@ The critical quality assurance layer between the LLM and the user.
 
 **`ValidationAgent`**, Semantic faithfulness scoring (LLM-assisted, optional):
 
-- This is the ONLY step that may use an LLM. It runs LAST, after all deterministic checks pass.
+- ⚠️ This is the ONLY step that may use an LLM. It runs LAST, after all deterministic checks pass.
 - Splits the LLM output into atomic factual claims
 - For each claim: checks if it is semantically supported by the context
 - Scoring: `supported` / `contradicted` / `unsupported` / `refused`

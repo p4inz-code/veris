@@ -1467,18 +1467,18 @@ interface AiBehaviorChain {
 
 | Terminal           | True Color      | Unicode | Test Priority |
 | ------------------ | --------------- | ------- | ------------- |
-| Windows Terminal   | | | High          |
-| macOS Terminal.app | Limited         | | High          |
-| iTerm2             | | | High          |
-| Kitty              | | | Medium        |
-| WezTerm            | | | Medium        |
-| Alacritty          | | | Medium        |
-| tmux               | (with config) | | Medium        |
-| screen             | Limited         | | Low           |
-| xterm              | | | Low           |
-| VS Code terminal   | | | Medium        |
-| GitHub Codespaces  | | | Low           |
-| SSH (basic)        | | Limited | Low           |
+| Windows Terminal   | Yes | Yes | High          |
+| macOS Terminal.app | Limited         | Yes | High          |
+| iTerm2             | Yes | Yes | High          |
+| Kitty              | Yes | Yes | Medium        |
+| WezTerm            | Yes | Yes | Medium        |
+| Alacritty          | Yes | Yes | Medium        |
+| tmux               | (with config) | Yes | Medium        |
+| screen             | Limited         | Yes | Low           |
+| xterm              | Yes | Yes | Low           |
+| VS Code terminal   | Yes | Yes | Medium        |
+| GitHub Codespaces  | Yes | Yes | Low           |
+| SSH (basic)        | No | Limited | Low           |
 
 ### 17.2 Fallback strategy
 

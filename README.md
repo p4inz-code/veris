@@ -18,9 +18,9 @@
 
 ## Overview
 
-VERIS is a **deterministic security analysis platform** that scans files and directories for security risks and produces reproducible, explainable reports.
+VERIS is a deterministic security analysis platform that scans files and directories for security risks and produces reproducible, explainable reports.
 
-The entire analysis pipeline runs **100% offline**. No network calls, no telemetry, no cloud dependency. Identical inputs always produce identical analysis results: findings, evidence, ordering, and risk scores are byte-for-byte reproducible. Report files also record a run ID and timestamps as part of the report contract.
+The entire analysis pipeline runs 100% offline, with no network calls, no telemetry and no cloud dependency. Identical inputs always produce identical analysis results: findings, evidence, ordering, and risk scores are byte-for-byte reproducible. Report files also record a run ID and timestamps as part of the report contract.
 
 > **Status**: PRODUCTION HOLD / MAINTENANCE ONLY (v1.2.0 released). Offline-first, 100% deterministic analysis engine with
 > interactive alternate-screen terminal session, visual investigation dashboard, CI security gates, and sandboxed plugin SDK.

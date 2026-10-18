@@ -2094,7 +2094,7 @@ Cache Performance:
   RuleResult:     41.3% (3,211 / 4,567) ← LOW
 
 Recommendations:
-  RuleResult cache ratio is low (41.3%). Consider:
+  ⚠ RuleResult cache ratio is low (41.3%). Consider:
     - Increasing rule time windows
     - Reducing rule churn between sessions
 ```

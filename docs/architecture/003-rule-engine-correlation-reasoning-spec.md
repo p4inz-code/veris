@@ -584,7 +584,7 @@ interface RuleMatcher {
 - Parallelism is per-artifact, not global.
 - Maximum concurrent rules per artifact: configurable (default 10).
 
-### 3.12 Rule execution diagrams
+### 3.12 Rule execution Diagrams
 
 **Single-behavior rule execution flow:**
 
