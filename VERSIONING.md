@@ -1,4 +1,4 @@
-# Versioning Policy
+# Versioning policy
 
 VERIS follows [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html) for all published packages.
 
@@ -48,11 +48,11 @@ Increment the major version when:
 
 While VERIS is in the 0.x phase:
 
-- **Minor version bumps** may include breaking changes during this phase, but they will be clearly documented in the changelog and migration guide
-- **Patch releases** never include breaking changes
-- The goal is to reach **1.0.0** with a stable, documented, fully backward-compatible API
+- Minor version bumps may include breaking changes during this phase, but they will be clearly documented in the changelog and migration guide
+- Patch releases never include breaking changes
+- The goal is to reach 1.0.0 with a stable, documented, fully backward-compatible API
 
-## Version Management
+## Version management
 
 Versioning is managed by [Changesets](https://github.com/changesets/changesets). Different
 components of the system may version independently as they evolve toward 1.0.0.
@@ -66,7 +66,7 @@ The CLI package is the primary user-facing component and drives the release cade
 4. The Release GitHub Action creates a release PR with updated versions and changelogs
 5. Merge the release PR to publish all changed packages to npm
 
-### Changeset Types
+### Changeset types
 
 | Type    | Version Bump | Use Case                                |
 | ------- | ------------ | --------------------------------------- |
@@ -74,7 +74,7 @@ The CLI package is the primary user-facing component and drives the release cade
 | `minor` | 0.x.0        | New features, non-breaking enhancements |
 | `major` | x.0.0        | Breaking changes                        |
 
-## Version Consistency
+## Version consistency
 
 The following locations must always be updated together when bumping the CLI version:
 
@@ -85,8 +85,8 @@ The following locations must always be updated together when bumping the CLI ver
 | `README.md`                 | Version references throughout |
 | `CHANGELOG.md`              | New version entry             |
 
-## Version Links
+## Version links
 
-- [CHANGELOG.md](CHANGELOG.md) — Complete release history
-- [RELEASE.md](RELEASE.md) — Release checklist and process
-- [MAINTENANCE.md](MAINTENANCE.md) — Maintenance guide
+- [CHANGELOG.md](CHANGELOG.md): Complete release history
+- [RELEASE.md](RELEASE.md): Release checklist and process
+- [MAINTENANCE.md](MAINTENANCE.md): Maintenance guide

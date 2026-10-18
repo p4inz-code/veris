@@ -1,4 +1,4 @@
-# VERIS AI Explanation Layer — Implementation Plan
+# VERIS AI explanation layer: implementation plan
 
 **Based on:** SPEC-011 (Frozen)
 **Package:** `@veris/explain`
@@ -25,7 +25,7 @@
 
 ---
 
-## 1. Dependency Graph
+## 1. Dependency graph
 
 ```
   M1: Foundation (types + interfaces)
@@ -74,28 +74,28 @@
 **Parallelizable paths:**
 
 - M2 (@veris/ai provider implementation), M3 (Context), M4 (Prompts), M6a (Deterministic Validation) can all be built in PARALLEL after M1
-- M6a depends on M1 types only — it does NOT need M2, M3, or M4
+- M6a depends on M1 types only. It does NOT need M2, M3, or M4
 - M5 runs after M2+M3+M4+M6a all complete
 - M7 can start after M1 types are stable (CacheKey), parallel with M5
 - M10 can run in parallel with M9 (golden/fuzz/perf/security tests)
 - M11 begins after M9 stabilizes (docs do NOT wait for M10)
 
-**Sequencing note — M1 ↔ M2 dependency:**
+**Sequencing note, M1 ↔ M2 dependency:**
 
 - M1 defines `ExplainerOptions` and `CacheKey` interfaces that reference types from `@veris/ai` (`ProviderRegistry`, `LLMProvider`, `ProviderCapabilities`)
 - M2 creates those types inside `@veris/ai`. Therefore M1's type files that depend on `@veris/ai` imports must be created AFTER M2's provider types are defined and exported.
-- **Practical sequencing:** Week 1 of Phase A builds M1 types that do NOT depend on `@veris/ai` (Citation, ExplanationMode, Explained*, ExplainResult, ExplainConfig). Week 2 completes M1's `Explainer` and `CacheKey` interfaces AFTER M2 has exported provider types from `@veris/ai`.
-- This does NOT change the milestone ordering — M2 can begin in Week 1 alongside M1, and M1's `@veris/ai`-dependent files are finalized in Week 2 once provider types are available.
+- Practical sequencing: Week 1 of Phase A builds M1 types that do NOT depend on `@veris/ai` (Citation, ExplanationMode, Explained*, ExplainResult, ExplainConfig). Week 2 completes M1's `Explainer` and `CacheKey` interfaces AFTER M2 has exported provider types from `@veris/ai`.
+- This does NOT change the milestone ordering, M2 can begin in Week 1 alongside M1, and M1's `@veris/ai`-dependent files are finalized in Week 2 once provider types are available.
 
 **No dependency cycles. No hidden dependencies. Every arrow is explicit.**
 
 ---
 
-## 2. Milestone Breakdown
+## 2. Milestone breakdown
 
 ---
 
-### M1: Foundation (Types, Interfaces, Configuration)
+### M1: foundation (types, interfaces, configuration)
 
 **Objective:** Establish every type, interface, and configuration schema so that all downstream modules compile against stable contracts.
 
@@ -122,25 +122,25 @@ packages/explain/src/internal.ts               # Internal API surface
 
 **Public APIs defined:**
 
-- `interface Citation` — with `id`, `sourceType` (10-value union), `sourceId`, `label`, `verified`, `verificationError?`
-- `interface CitationValidationResult` — with `valid`, `totalCitations`, `verifiedCitations`, `failedCitations`, `citations`
-- `type ExplanationMode` — `"simple" | "technical" | "expert"`
-- `interface Explanation` — complete explanation with citations, provider metadata, token usage, disclaimer
-- `interface ExplainedFinding` — pick of canonical Finding fields (uses `SeverityLevel` from `@veris/core`)
-- `interface ExplainedEvidence` — pick of canonical Evidence fields
-- `interface ExplainedRule` — pick of canonical Rule fields (uses `SeverityLevel` from `@veris/core`)
-- `interface ExplainedArtifact` — pick of canonical Artifact fields
-- `interface ExplainedRiskProfile` — pick of canonical RiskProfile fields
-- `interface ExplainedChain` — pick of canonical BehaviorChain fields
-- `interface ExplainedReportSummary` — pick of report summary fields
-- `type ExplainedSubject` — union of all explanation subject types
-- `interface ExplainedContext` — strongly-typed context with all above types, includes `contextSchemaVersion`
+- `interface Citation`: with `id`, `sourceType` (10-value union), `sourceId`, `label`, `verified`, `verificationError?`
+- `interface CitationValidationResult`: with `valid`, `totalCitations`, `verifiedCitations`, `failedCitations`, `citations`
+- `type ExplanationMode`: `"simple" | "technical" | "expert"`
+- `interface Explanation`: complete explanation with citations, provider metadata, token usage, disclaimer
+- `interface ExplainedFinding`: pick of canonical Finding fields (uses `SeverityLevel` from `@veris/core`)
+- `interface ExplainedEvidence`: pick of canonical Evidence fields
+- `interface ExplainedRule`: pick of canonical Rule fields (uses `SeverityLevel` from `@veris/core`)
+- `interface ExplainedArtifact`: pick of canonical Artifact fields
+- `interface ExplainedRiskProfile`: pick of canonical RiskProfile fields
+- `interface ExplainedChain`: pick of canonical BehaviorChain fields
+- `interface ExplainedReportSummary`: pick of report summary fields
+- `type ExplainedSubject`: union of all explanation subject types
+- `interface ExplainedContext`: strongly-typed context with all above types, includes `contextSchemaVersion`
 - `type ExplainResult`, `interface ExplainSuccess`, `interface ExplainRefused`, `interface ExplainError`
-- `interface ExplainConfig` — configuration schema
-- `interface Explainer` — top-level orchestrator interface
-- `interface ScopeManager` — scope determination interface
-- `interface TokenBudget` — token budget interface
-- `interface CacheKey` — with `promptVersion`, `modelId`, `modelVersion`, `inputHash`, `engineVersion`, **`mode: ExplanationMode`**
+- `interface ExplainConfig`: configuration schema
+- `interface Explainer`: top-level orchestrator interface
+- `interface ScopeManager`: scope determination interface
+- `interface TokenBudget`: token budget interface
+- `interface CacheKey`: with `promptVersion`, `modelId`, `modelVersion`, `inputHash`, `engineVersion`, `mode: ExplanationMode`
 
 **Internal (non-public) types (in `internal.ts`):**
 
@@ -159,7 +159,7 @@ packages/explain/src/internal.ts               # Internal API surface
 2. All public types are exported from `index.ts`
 3. No circular dependencies between type files
 4. `ExplanationMode` accepts exactly `"simple" | "technical" | "expert"`
-5. `ExplainedContext` uses no `Record<string, unknown>` — all fields are strongly typed
+5. `ExplainedContext` uses no `Record<string, unknown>`: all fields are strongly typed
 6. `ExplainResult` is a discriminated union (`success` | `refused` | `error`)
 7. `ExplainConfig` validates correct configs and rejects invalid ones
 8. All interfaces have TSDoc comments
@@ -173,13 +173,13 @@ packages/explain/src/internal.ts               # Internal API surface
 **Architectural invariants enforced:**
 
 - All interface properties are `readonly`
-- `CanonicalReport` is never imported as mutable — only readonly access
+- `CanonicalReport` is never imported as mutable. Only readonly access
 - No AI provider types leak into core types
 
 **Testing requirements:**
 
 - 8 unit tests: type instantiation, discriminated union narrowing, config validation, mode exhaustiveness, citation construction
-- `pnpm test:types` — compile-time check that types are correct
+- `pnpm test:types`: compile-time check that types are correct
 
 **Code review checklist:**
 
@@ -206,7 +206,7 @@ packages/explain/src/internal.ts               # Internal API surface
 
 ### M2: Provider Abstraction (owned by @veris/ai, consumed by @veris/explain)
 
-**Objective:** Implement the LLM provider interface, provider registry, and 4 adapters (OpenAI, Ollama, Anthropic, OpenAI-compatible) in `@veris/ai`. `@veris/explain` then CONSUMES these provider contracts — it never defines its own `LLMProvider` interface, registry, or adapters.
+**Objective:** Implement the LLM provider interface, provider registry, and 4 adapters (OpenAI, Ollama, Anthropic, OpenAI-compatible) in `@veris/ai`. `@veris/explain` then CONSUMES these provider contracts. It never defines its own `LLMProvider` interface, registry, or adapters.
 
 **Per SPEC-001 §3 (frozen architecture):** `@veris/ai` is the single owner of all provider contracts, adapters, transport, and model communication. This milestone implements `@veris/ai`'s provider layer.
 
@@ -236,22 +236,22 @@ packages/ai/__tests__/providers/adapters/mock.test.ts
 
 **Public APIs (exported from `@veris/ai`):**
 
-- `interface LLMProvider` — `generate()`, `generateStream()`, `healthCheck()`, `getCapabilities()`
-- `function createProviderRegistry(providers, options?)` — factory function
-- `interface ProviderRegistry` — `getActive()`, `setActive()`, `list()`, `register()`, `healthCheckAll()`, `getCapabilities()`
-- `interface ProviderCapabilities` — `supportsJsonMode`, `supportsStreaming`, `supportsFunctions`, `maxContextTokens`, `maxOutputTokens`, `models`, `requiresNetwork`
-- `interface GenerateOptions` — `messages`, `temperature?`, `maxTokens?`, `responseFormat?`, `abortSignal?`
-- `interface GenerateResult` — `content`, `finishReason`, `usage`, `provider`, `model`
+- `interface LLMProvider`: `generate()`, `generateStream()`, `healthCheck()`, `getCapabilities()`
+- `function createProviderRegistry(providers, options?)`: factory function
+- `interface ProviderRegistry`: `getActive()`, `setActive()`, `list()`, `register()`, `healthCheckAll()`, `getCapabilities()`
+- `interface ProviderCapabilities`: `supportsJsonMode`, `supportsStreaming`, `supportsFunctions`, `maxContextTokens`, `maxOutputTokens`, `models`, `requiresNetwork`
+- `interface GenerateOptions`: `messages`, `temperature?`, `maxTokens?`, `responseFormat?`, `abortSignal?`
+- `interface GenerateResult`: `content`, `finishReason`, `usage`, `provider`, `model`
 
 **Internal APIs:**
 
-- `class OpenAIAdapter implements LLMProvider` — maps to OpenAI chat completions format
-- `class AnthropicAdapter implements LLMProvider` — maps to Anthropic Messages API format
-- `class OllamaAdapter implements LLMProvider` — maps to Ollama chat API format
-- `class CustomAdapter implements LLMProvider` — generic OpenAI-compatible adapter
-- `class MockAdapter implements LLMProvider` — returns configurable responses for testing
+- `class OpenAIAdapter implements LLMProvider`: maps to OpenAI chat completions format
+- `class AnthropicAdapter implements LLMProvider`: maps to Anthropic Messages API format
+- `class OllamaAdapter implements LLMProvider`: maps to Ollama chat API format
+- `class CustomAdapter implements LLMProvider`: generic OpenAI-compatible adapter
+- `class MockAdapter implements LLMProvider`: returns configurable responses for testing
 
-**Dependencies:** `@veris/core` (types only — `AbortSignal`), HTTP client (Node.js built-in `fetch` or `undici`)
+**Dependencies:** `@veris/core` (types only, `AbortSignal`), HTTP client (Node.js built-in `fetch` or `undici`)
 
 **Acceptance criteria:**
 
@@ -269,9 +269,9 @@ packages/ai/__tests__/providers/adapters/mock.test.ts
 **Architectural invariants enforced:**
 
 - `LLMProvider` interface has zero dependencies on VERIS business logic
-- No provider adapter imports from `@veris/ai` business logic (there is none — `@veris/ai` is pure transport)
+- No provider adapter imports from `@veris/ai` business logic (there is none, `@veris/ai` is pure transport)
 - Provider adapters are stateless (state lives in ProviderRegistry)
-- `@veris/explain` never defines its own provider types — it imports `LLMProvider`, `ProviderRegistry`, etc. from `@veris/ai`
+- `@veris/explain` never defines its own provider types. It imports `LLMProvider`, `ProviderRegistry`, etc. from `@veris/ai`
 
 **Testing requirements:**
 
@@ -283,7 +283,7 @@ packages/ai/__tests__/providers/adapters/mock.test.ts
 **Code review checklist:**
 
 - [ ] No business logic leaks into provider adapters
-- [ ] `LLMProvider` interface is minimal — no VERIS-specific types beyond what the transport layer needs
+- [ ] `LLMProvider` interface is minimal. No VERIS-specific types beyond what the transport layer needs
 - [ ] Adapters handle network errors gracefully (no uncaught exceptions)
 - [ ] `AbortSignal` is propagated to native HTTP client
 - [ ] Streaming implementation does not buffer entire response before yielding
@@ -299,7 +299,7 @@ packages/ai/__tests__/providers/adapters/mock.test.ts
 
 ---
 
-### M3: Context Building
+### M3: context building
 
 **Objective:** Implement context builders that transform a `CanonicalReport` into a strongly-typed `ExplainedContext`, with deterministic scope and token budget management.
 
@@ -326,19 +326,19 @@ packages/explain/__tests__/fixtures/reports/edge-cases.ts
 
 **Public APIs:**
 
-- `function createContextBuilder()` — factory
+- `function createContextBuilder()`: factory
 - Context builder methods on `Explainer` (consumed by engine in M5)
 
 **Internal modules:**
 
-- `ScopeManager` — determines scope from `CanonicalReport`
-- `TokenBudget` — allocates tokens with deterministic sort order
-- `FindingContext` — builds `ExplainedFinding` + `ExplainedEvidence[]` + `ExplainedRule` + `ExplainedArtifact`
-- `ChainContext` — builds `ExplainedChain` + associated findings + evidence
-- `RiskContext` — builds `ExplainedRiskProfile` + dimension breakdown
-- `ReportContext` — builds `ExplainedReportSummary`
+- `ScopeManager`: determines scope from `CanonicalReport`
+- `TokenBudget`: allocates tokens with deterministic sort order
+- `FindingContext`: builds `ExplainedFinding` + `ExplainedEvidence[]` + `ExplainedRule` + `ExplainedArtifact`
+- `ChainContext`: builds `ExplainedChain` + associated findings + evidence
+- `RiskContext`: builds `ExplainedRiskProfile` + dimension breakdown
+- `ReportContext`: builds `ExplainedReportSummary`
 
-**Dependencies:** M1 (types), M2 (@veris/ai provider types — for reference), `@veris/core` (canonical types), `@veris/shared` (hashing)
+**Dependencies:** M1 (types), M2 (@veris/ai provider types: for reference), `@veris/core` (canonical types), `@veris/shared` (hashing)
 
 **Acceptance criteria:**
 
@@ -384,7 +384,7 @@ packages/explain/__tests__/fixtures/reports/edge-cases.ts
 
 ---
 
-### M4: Prompt System
+### M4: prompt system
 
 **Objective:** Implement the Handlebars-based prompt rendering pipeline with versioned templates, template loading, and structured output schemas.
 
@@ -412,25 +412,25 @@ packages/explain/__tests__/unit/prompts/loader.test.ts
 
 **Public APIs:**
 
-- `function createPromptRegistry(options?)` — factory
-- `interface PromptRegistry` — `render()`, `listTemplates()`, `getTemplateVersion()`, `loadCustomTemplate()`
-- `interface RenderedPrompt` — `systemPrompt`, `userPrompt`, `expectedCitations`, `tokenEstimate`, `version`
+- `function createPromptRegistry(options?)`: factory
+- `interface PromptRegistry`: `render()`, `listTemplates()`, `getTemplateVersion()`, `loadCustomTemplate()`
+- `interface RenderedPrompt`: `systemPrompt`, `userPrompt`, `expectedCitations`, `tokenEstimate`, `version`
 
 **Internal modules:**
 
-- `PromptRegistry` — loads, caches, and versions prompt templates
-- `PromptRenderer` — Handlebars compilation and rendering
-- `PromptLoader` — loads from package assets and user config directory
+- `PromptRegistry`: loads, caches, and versions prompt templates
+- `PromptRenderer`: Handlebars compilation and rendering
+- `PromptLoader`: loads from package assets and user config directory
 
 **Template files (7 V1 templates):**
 
-1. `finding-explain-system-v1.txt` — system prompt for finding explanations
-2. `finding-context-v1.txt` — context injection for finding (Handlebars `{{#each}}` over evidence)
-3. `chain-explain-system-v1.txt` — system prompt for chain explanations
-4. `chain-context-v1.txt` — context injection for chain
-5. `simple-format-v1.txt` — output format instructions for simple mode
-6. `technical-format-v1.txt` — output format instructions for technical mode
-7. `expert-format-v1.txt` — output format instructions for expert mode
+1. `finding-explain-system-v1.txt`: system prompt for finding explanations
+2. `finding-context-v1.txt`: context injection for finding (Handlebars `{{#each}}` over evidence)
+3. `chain-explain-system-v1.txt`: system prompt for chain explanations
+4. `chain-context-v1.txt`: context injection for chain
+5. `simple-format-v1.txt`: output format instructions for simple mode
+6. `technical-format-v1.txt`: output format instructions for technical mode
+7. `expert-format-v1.txt`: output format instructions for expert mode
 
 **Dependencies:** M1 (types), `handlebars` v4.x (npm dependency)
 
@@ -444,11 +444,11 @@ packages/explain/__tests__/unit/prompts/loader.test.ts
 6. `RenderedPrompt.expectedCitations` correctly lists all citation anchors in the template
 7. `RenderedPrompt.tokenEstimate` is within ±10% of actual rendered length
 8. `loadCustomTemplate()` rejects paths outside configured template directory
-9. Template versioning follows SPEC-011 Section 9.3 — semver format `MAJOR.MINOR.PATCH`, version stored in YAML frontmatter
+9. Template versioning follows SPEC-011 Section 9.3, semver format `MAJOR.MINOR.PATCH`, version stored in YAML frontmatter
 10. Template version is included in cache key generation (cache key component `prompt_version`)
 11. Template version is logged in audit trail
 12. Prompt compatibility validation: template variables match `ExplainedContext` fields (missing variables are caught, unknown variables are warned)
-13. YAML frontmatter is parsed correctly with `js-yaml` — `id`, `version`, `type`, `description`, `changed` fields
+13. YAML frontmatter is parsed correctly with `js-yaml`: `id`, `version`, `type`, `description`, `changed` fields
 
 **Architectural invariants enforced:**
 
@@ -483,7 +483,7 @@ packages/explain/__tests__/unit/prompts/loader.test.ts
 
 ---
 
-### M6a: Deterministic Validation (StructuralValidator + CitationVerifier + NullEvidenceRefusal + InputFilter + OutputFilter)
+### M6a: deterministic validation (StructuralValidator + CitationVerifier + NullEvidenceRefusal + InputFilter + OutputFilter)
 
 **Objective:** Implement the deterministic steps of the output validation pipeline. These steps run BEFORE the Core Engine (M5) so that M5 can validate output immediately after the LLM responds. No LLM is involved in any M6a step.
 
@@ -508,11 +508,11 @@ packages/explain/__tests__/unit/output/guardrails/output-filter.test.ts
 
 **Internal modules:**
 
-- `StructuralValidator` — deterministic: validates JSON schema, field presence, citation ID matching
-- `CitationVerifier` — deterministic: extracts `[src:type:id]` markers, resolves against context, checks type match, validates structural claim consistency
-- `NullEvidenceRefusal` — deterministic+heuristic: cross-references cited IDs against context object ID set, detects fabrication patterns, replaces fabricated content with refusal message
-- `InputFilter` — deterministic: strips control chars, Unicode bidirectional overrides, zero-width characters, Handlebars syntax `{{` / `}}`
-- `OutputFilter` — deterministic: enforces schema, max output length, detects off-topic content
+- `StructuralValidator`: deterministic: validates JSON schema, field presence, citation ID matching
+- `CitationVerifier`: deterministic: extracts `[src:type:id]` markers, resolves against context, checks type match, validates structural claim consistency
+- `NullEvidenceRefusal`: deterministic+heuristic: cross-references cited IDs against context object ID set, detects fabrication patterns, replaces fabricated content with refusal message
+- `InputFilter`: deterministic: strips control chars, Unicode bidirectional overrides, zero-width characters, Handlebars syntax `{{` / `}}`
+- `OutputFilter`: deterministic: enforces schema, max output length, detects off-topic content
 
 **Validation pipeline order in M6a:**
 
@@ -545,7 +545,7 @@ LLM response received
 5. Return to M5 orchestrator with validation result
 ```
 
-**Dependencies:** M1 (types for Citation, ExplainedContext, Explanation) **only** — does NOT depend on M2, M3, or M4
+**Dependencies:** M1 (types for Citation, ExplainedContext, Explanation) only: does NOT depend on M2, M3, or M4
 
 **Acceptance criteria:**
 
@@ -562,7 +562,7 @@ LLM response received
 
 **Architectural invariants enforced:**
 
-- ALL steps are PURELY DETERMINISTIC — no LLM provider is ever called
+- ALL steps are PURELY DETERMINISTIC. No LLM provider is ever called
 - CitationVerifier uses strongly-typed field access (never `Record<string, unknown>`)
 - NullEvidenceRefusal uses deterministic matching FIRST, pattern heuristics SECOND
 - InputFilter escapes Handlebars syntax in evidence content BEFORE it reaches the prompt renderer
@@ -592,7 +592,7 @@ LLM response received
 
 ---
 
-### M5: Core Engine (Explainer Orchestrator + Audit Logging)
+### M5: core engine (explainer orchestrator + audit logging)
 
 **Objective:** Implement the `Explainer` orchestrator that ties together ScopeManager, ContextBuilder, PromptRegistry, ProviderRegistry, M6a deterministic validation, and the audit logging infrastructure. This is the central nervous system of the package.
 
@@ -613,25 +613,25 @@ packages/explain/__tests__/integration/full-pipeline.test.ts
 **Files to modify:**
 
 - `packages/explain/src/index.ts` (add `createExplainer` export)
-- `packages/explain/src/engine/explainer.ts` (was interface only — now add implementation reference)
+- `packages/explain/src/engine/explainer.ts` (was interface only: now add implementation reference)
 
 **Public APIs:**
 
 - `function createExplainer(options: ExplainerOptions): Explainer` (already defined in M1, now implemented)
-- `Explainer.explainFinding()` — full flow: cache check → scope → context → prompt → provider → output pipeline
-- `Explainer.explainChain()` — same flow for behavior chains
-- `Explainer.explainRiskDimension()` — same flow for risk dimensions
-- `Explainer.summarizeReport()` — same flow for full report
-- `Explainer.clearCacheForReport()` — cache invalidation
+- `Explainer.explainFinding()`: full flow: cache check → scope → context → prompt → provider → output pipeline
+- `Explainer.explainChain()`: same flow for behavior chains
+- `Explainer.explainRiskDimension()`: same flow for risk dimensions
+- `Explainer.summarizeReport()`: same flow for full report
+- `Explainer.clearCacheForReport()`: cache invalidation
 
 **Internal modules:**
 
-- `ExplainerImpl` — orchestrator that coordinates M1-M4+M6a modules
-- `AuditLog` — append-only audit trail written to `~/.veris/logs/ai-audit.jsonl` with 0600 permissions
-- `Metrics` — aggregated token usage, latency, cache hit rate per provider
+- `ExplainerImpl`: orchestrator that coordinates M1-M4+M6a modules
+- `AuditLog`: append-only audit trail written to `~/.veris/logs/ai-audit.jsonl` with 0600 permissions
+- `Metrics`: aggregated token usage, latency, cache hit rate per provider
 - Error handling: provider failure → `ExplainError`, citation failure → `ExplainError` or retry, partial failure → caveat
 
-**Dependencies:** M2 (@veris/ai provider contracts), M3 (context), M4 (prompts), M6a (deterministic validation), M7 (cache — MockProvider or in-memory for testing)
+**Dependencies:** M2 (@veris/ai provider contracts), M3 (context), M4 (prompts), M6a (deterministic validation), M7 (cache, MockProvider or in-memory for testing)
 
 **Acceptance criteria:**
 
@@ -645,11 +645,11 @@ packages/explain/__tests__/integration/full-pipeline.test.ts
 8. `explainChain()` returns `ExplainSuccess` with chain explanation
 9. `summarizeReport()` returns `ExplainSuccess` with report summary
 10. Error codes are meaningful: `PROVIDER_UNAVAILABLE`, `CITATION_FAILURE`, `TIMEOUT`, `INVALID_RESPONSE`
-11. Audit log is append-only — entries are never modified after write
+11. Audit log is append-only: entries are never modified after write
 12. Audit log file is created with `0600` permissions (owner read/write only)
-13. Audit log format is deterministic — same request always produces identical log entry
+13. Audit log format is deterministic, same request always produces identical log entry
 14. Every provider failure is logged with: timestamp, provider ID, model, error code, duration
-15. Log-before-return invariant is enforced — audit log is written before function returns
+15. Log-before-return invariant is enforced: audit log is written before function returns
 
 **Architectural invariants enforced:**
 
@@ -687,7 +687,7 @@ packages/explain/__tests__/integration/full-pipeline.test.ts
 
 ---
 
-### M6b: LLM Validation + Formatter (ValidationAgent + Formatter)
+### M6b: LLM validation + formatter (ValidationAgent + formatter)
 
 **Objective:** Implement the optional LLM-based semantic validation and the deterministic output formatter. Runs AFTER the Core Engine (M5). The optional ValidationAgent does NOT block explanation delivery.
 
@@ -707,10 +707,10 @@ packages/explain/__tests__/unit/output/formatter.test.ts
 
 **Internal modules:**
 
-- `ValidationAgent` — OPTIONAL LLM-as-judge: splits output into atomic factual claims, scores each as `supported` / `contradicted` / `unsupported` / `refused`
-- `Formatter` — deterministic: formats validated output at simple/technical/expert levels
+- `ValidationAgent`: OPTIONAL LLM-as-judge: splits output into atomic factual claims, scores each as `supported` / `contradicted` / `unsupported` / `refused`
+- `Formatter`: deterministic: formats validated output at simple/technical/expert levels
 
-**Dependencies:** M5 (engine — provides Explanation type with validated citations), M1 (types)
+**Dependencies:** M5 (engine, provides Explanation type with validated citations), M1 (types)
 
 **Acceptance criteria:**
 
@@ -726,8 +726,8 @@ packages/explain/__tests__/unit/output/formatter.test.ts
 **Architectural invariants enforced:**
 
 - `ValidationAgent` is OPTIONAL and NEITHER blocks nor modifies the explanation
-- No LLM is the sole gatekeeper — deterministic M6a steps are always sufficient
-- `Formatter` is PURELY DETERMINISTIC — no LLM involved
+- No LLM is the sole gatekeeper, deterministic M6a steps are always sufficient
+- `Formatter` is PURELY DETERMINISTIC: no LLM involved
 
 **Testing requirements:**
 
@@ -752,7 +752,7 @@ packages/explain/__tests__/unit/output/formatter.test.ts
 
 ---
 
-### M7: Caching
+### M7: caching
 
 **Objective:** Implement the SQLite-backed persistent cache with deterministic key generation, schema versioning, TTL-based expiration, LRU eviction, and migration strategy.
 
@@ -771,23 +771,23 @@ packages/explain/__tests__/unit/cache/persistent-cache.test.ts
 **Public APIs:**
 
 - `function createPersistentCache(options: CacheOptions): PersistentCache`
-- `interface PersistentCache` — `get()`, `set()`, `has()`, `invalidate()`, `getStats()`, `clear()`
-- `interface CacheKey` — `promptVersion`, `modelId`, `modelVersion`, `inputHash`, `engineVersion`
-- `interface CacheOptions` — `maxSizeMb`, `defaultTtlMs`, `dbPath`, `schemaVersion`
+- `interface PersistentCache`: `get()`, `set()`, `has()`, `invalidate()`, `getStats()`, `clear()`
+- `interface CacheKey`: `promptVersion`, `modelId`, `modelVersion`, `inputHash`, `engineVersion`
+- `interface CacheOptions`: `maxSizeMb`, `defaultTtlMs`, `dbPath`, `schemaVersion`
 
 **Internal modules:**
 
-- `CacheKeyGenerator` — generates SHA-256 cache keys from 6 components
-- `PersistentCache` — SQLite-backed storage with in-memory fallback
-- LRU eviction — removes oldest entries when cache exceeds `maxSizeMb`
-- Schema migration — re-validates entries on version mismatch
+- `CacheKeyGenerator`: generates SHA-256 cache keys from 6 components
+- `PersistentCache`: SQLite-backed storage with in-memory fallback
+- LRU eviction: removes oldest entries when cache exceeds `maxSizeMb`
+- Schema migration: re-validates entries on version mismatch
 
-**Dependencies:** M1 (CacheKey type — includes `mode: ExplanationMode`), `better-sqlite3` (optional)
+**Dependencies:** M1 (CacheKey type, includes `mode: ExplanationMode`), `better-sqlite3` (optional)
 
 **Acceptance criteria:**
 
 1. Cache keys are deterministic (same inputs produce identical keys)
-2. `CacheKey` type includes `mode: ExplanationMode` — different modes produce different cache keys
+2. `CacheKey` type includes `mode: ExplanationMode`: different modes produce different cache keys
 3. Cache hit returns stored `Explanation` without calling provider
 4. Cache miss generates new explanation and stores it
 5. Cache invalidation works: by prompt version, by model, by report, by age, by mode
@@ -807,7 +807,7 @@ packages/explain/__tests__/unit/cache/persistent-cache.test.ts
 **Architectural invariants enforced:**
 
 - Cache keys NEVER include runtime state (timestamps, session IDs)
-- Cache is CRYPTOGRAPHICALLY KEYED (SHA-256) — tampering produces cache miss
+- Cache is CRYPTOGRAPHICALLY KEYED (SHA-256), tampering produces cache miss
 - Cache always returns immutable objects (deep-frozen `Explanation`)
 - Cache hit before provider call (enforced by Explainer, but cache is independently testable)
 
@@ -839,7 +839,7 @@ packages/explain/__tests__/unit/cache/persistent-cache.test.ts
 
 ---
 
-### M8: Modes & Formatting
+### M8: modes & formatting
 
 **Objective:** Implement the 3 explanation mode formatters within `output/formatter.ts`. Modes are configuration objects, not separate modules.
 
@@ -852,9 +852,9 @@ packages/explain/__tests__/unit/cache/persistent-cache.test.ts
 
 **Internal modules (within `formatter.ts`):**
 
-- `SimpleMode` — configuration: `{ maxSentences: 5, citationsPerClaim: 1, noTechnicalJargon: true }`
-- `TechnicalMode` — configuration: `{ maxParagraphs: 3, citationsPerClaim: "all", showSeverity: true }`
-- `ExpertMode` — configuration: `{ maxParagraphs: 5, showTraceability: true, showConfidence: true, showSourceLocations: true }`
+- `SimpleMode`: configuration: `{ maxSentences: 5, citationsPerClaim: 1, noTechnicalJargon: true }`
+- `TechnicalMode`: configuration: `{ maxParagraphs: 3, citationsPerClaim: "all", showSeverity: true }`
+- `ExpertMode`: configuration: `{ maxParagraphs: 5, showTraceability: true, showConfidence: true, showSourceLocations: true }`
 
 **Dependencies:** M6b (output pipeline, specifically the Formatter)
 
@@ -864,7 +864,7 @@ packages/explain/__tests__/unit/cache/persistent-cache.test.ts
 2. Technical mode produces 1-3 paragraphs with all citations visible, severity labels
 3. Expert mode produces 3-5 paragraphs with complete traceability chain, confidence breakdown, source locations
 4. Each mode produces valid Markdown
-5. Mode switching is purely cosmetic — same evidence, same citations, different presentation
+5. Mode switching is purely cosmetic: same evidence, same citations, different presentation
 6. Modes are configuration objects passed to `Formatter`, not separate classes
 
 **Architectural invariants enforced:**
@@ -894,7 +894,7 @@ packages/explain/__tests__/unit/cache/persistent-cache.test.ts
 
 ---
 
-### M9: CLI Integration
+### M9: CLI integration
 
 **Objective:** Integrate `@veris/explain` into `@veris/cli` with `veris explain` and `veris summarize` commands, and add TUI components for AI explanations.
 
@@ -947,8 +947,8 @@ packages/cli/__tests__/commands/summarize.test.ts
 
 **Code review checklist:**
 
-- [ ] CLI commands use `ExplainResult` directly — no additional transformation
-- [ ] TUI components consume `Explanation` directly — no reformatting
+- [ ] CLI commands use `ExplainResult` directly. No additional transformation
+- [ ] TUI components consume `Explanation` directly. No reformatting
 - [ ] JSON output uses the same serialization as the public API
 - [ ] Error states are tested (no provider, provider down, citation failure)
 - [ ] `--no-audit` flag correctly suppresses audit log write
@@ -962,7 +962,7 @@ packages/cli/__tests__/commands/summarize.test.ts
 
 ---
 
-### M10: Testing Suite
+### M10: testing suite
 
 **Objective:** Build the complete testing infrastructure: golden tests, fuzz testing, performance benchmarks, security tests, and provider integration tests.
 
@@ -990,16 +990,16 @@ packages/explain/__tests__/determinism/determinism.test.ts
 
 **Test categories:**
 
-1. **Golden tests** (6 snapshot files, 6 test runners):
+1. Golden tests (6 snapshot files, 6 test runners):
    - Frozen `CanonicalReport` fixtures + mock provider = deterministic output
    - Snapshot comparison on every test run
    - Commands: `pnpm test:golden`, `pnpm golden:update`, `pnpm golden:compare`
 
-2. **Fuzz tests** (1 test file, ~1,000 iterations):
+2. Fuzz tests (1 test file, ~1,000 iterations):
    - Random permutations of canonical reports
    - Verify no crashes, no NaN values, no negative allocations
 
-3. **Performance benchmarks** (1 test file):
+3. Performance benchmarks (1 test file):
    - Context build time: < 5ms for 1 finding, < 50ms for 100 findings
    - Prompt rendering: < 2ms
    - Cache key generation: < 1ms
@@ -1012,17 +1012,17 @@ packages/explain/__tests__/determinism/determinism.test.ts
    - Cache lookup (SQLite hit): < 5ms
    - Cache lookup (in-memory hit): < 1ms
 
-4. **Security tests** (3 test files):
+4. Security tests (3 test files):
    - Prompt injection: evidence isolation, sanitization, output validation
    - Cache integrity: tampered cache files produce cache misses
    - Audit integrity: append-only checks, permission enforcement
 
-5. **Provider integration tests** (release-only):
+5. Provider integration tests (release-only):
    - OpenAI adapter against real API (requires API key)
    - Ollama adapter against localhost:11434 (if available)
    - These run manually, not in CI
 
-6. **Determinism tests** (1 test file):
+6. Determinism tests (1 test file):
    - 100-run test for context building, token budget, evidence ordering
    - Verify stable sort across all iterations
 
@@ -1045,7 +1045,7 @@ packages/explain/__tests__/determinism/determinism.test.ts
 
 ---
 
-### M11: Documentation
+### M11: documentation
 
 **Files to create:**
 
@@ -1057,7 +1057,7 @@ packages/explain/docs/prompt-authoring.md
 
 **Files to modify:** `packages/explain/README.md` (add usage examples, API reference)
 
-**Dependencies:** M9 (CLI integration — does NOT wait for M10)
+**Dependencies:** M9 (CLI integration, does NOT wait for M10)
 
 **Acceptance criteria:**
 
@@ -1074,16 +1074,16 @@ packages/explain/docs/prompt-authoring.md
 
 ---
 
-## 3. Recommended Implementation Order
+## 3. Recommended implementation order
 
-**Phase A (Parallelizable — weeks 1-4):**
+**Phase A (Parallelizable, weeks 1-4):**
 
 ```
 Week 1-2:   M1 Foundation
 Week 2-4:   M2 @veris/ai Provider Impl ── M3 Context ── M4 Prompts ── M6a Det. Validation (all parallel after M1)
 ```
 
-**Phase B (Sequential — weeks 3-10):**
+**Phase B (Sequential, weeks 3-10):**
 
 ```
 Week 3-4:   M6a Deterministic Validation (needs M1 types only — parallel with M2/M3/M4)
@@ -1093,7 +1093,7 @@ Week 8-9:   M7 Caching (needs M1 types + M6b; starts after M6b stabilizes)
 Week 9-10:  M8 Modes & Formatting (needs M6b)
 ```
 
-**Phase C (Parallel — weeks 8-14):**
+**Phase C (Parallel, weeks 8-14):**
 
 ```
 Week 8-10:  M9 CLI Integration (needs M5+M6b+M8)
@@ -1105,7 +1105,7 @@ Week 12-14: M11 Documentation (needs M9 — does NOT wait for M10)
 
 ---
 
-## 4. Estimated File and Test Counts
+## 4. Estimated file and test counts
 
 | Milestone                       | Files Created | Files Modified | Tests Added | Source Lines (est.) |
 | ------------------------------- | ------------- | -------------- | ----------- | ------------------- |
@@ -1121,57 +1121,57 @@ Week 12-14: M11 Documentation (needs M9 — does NOT wait for M10)
 | M9: CLI Integration             | 7             | 2              | 25-30       | ~800                |
 | M10: Testing Suite              | 12            | 2              | 40-50       | ~600                |
 | M11: Documentation              | 3             | 1              | 0           | ~200                |
-| **Total**                       | **119**       | **20**         | **263-351** | **~10,400**         |
+| Total                       | 119       | 20         | 263-351 | ~10,400         |
 
 ---
 
-## 5. Risks Before Implementation
+## 5. Risks before implementation
 
 | Risk                                                                                  | Probability | Impact                              | Affected Milestones | Mitigation                                                                              |
 | ------------------------------------------------------------------------------------- | ----------- | ----------------------------------- | ------------------- | --------------------------------------------------------------------------------------- |
-| **LLM provider API changes** (OpenAI deprecates chat completions endpoint)            | Low         | High — adapter breaks               | M2 (@veris/ai)      | Abstracted interface in @veris/ai; fix isolated to one adapter                          |
-| **Handlebars template complexity** (nested `#each` with `ExplainedContext` structure) | Medium      | Medium — templates hard to maintain | M4                  | Context pre-processing in PromptRenderer decouples Handlebars from TS types             |
-| **ValidationAgent LLM-as-judge reliability** (false positives create user distrust)   | Medium      | High — user trust                   | M6b                 | ValidationAgent is OPTIONAL and NEVER blocks delivery                                   |
-| **SQLite native compilation** (better-sqlite3 platform compatibility)                 | Medium      | Low — fallback exists               | M7                  | In-memory fallback cache when SQLite unavailable                                        |
-| **Large evidence sets** (finding with 1,000+ evidence items)                          | Low         | Medium — memory pressure            | M3, M5              | ScopeManager limits to 10 evidence items; token budget enforces truncation              |
-| **Prompt injection bypass** (evasion of InputFilter patterns)                         | Low         | High — LLM compromised              | M6a, M6b            | Defense-in-depth (6 layers per SPEC-011 Section 8.5); single layer failure is contained |
-| **M6a→M5 dependency ordering** (M5 cannot validate output without M6a)                | Low         | High — blocks M5 completion         | M5, M6a             | M6a runs BEFORE M5; dependency graph explicitly enforces this                           |
-| **M5 missing audit logging** (engine created without logging infrastructure)          | Low         | Medium — audit gaps                 | M5                  | Audit logging is BUILT INTO M5, not a separate milestone                                |
-| **Cache schema migration failure** (schema mismatch causes data loss)                 | Low         | Medium — cache invalidation         | M7                  | Schema version column, migration strategy, compatibility tests                          |
-| **Cross-package interface drift** (@veris/cli types diverge from @veris/explain)      | Medium      | High — integration failures         | M9                  | Shared type contracts from M1; integration tests in M9                                  |
+| LLM provider API changes (OpenAI deprecates chat completions endpoint)            | Low         | High, adapter breaks               | M2 (@veris/ai)      | Abstracted interface in @veris/ai; fix isolated to one adapter                          |
+| Handlebars template complexity (nested `#each` with `ExplainedContext` structure) | Medium      | Medium, templates hard to maintain | M4                  | Context pre-processing in PromptRenderer decouples Handlebars from TS types             |
+| ValidationAgent LLM-as-judge reliability (false positives create user distrust)   | Medium      | High, user trust                   | M6b                 | ValidationAgent is OPTIONAL and NEVER blocks delivery                                   |
+| SQLite native compilation (better-sqlite3 platform compatibility)                 | Medium      | Low, fallback exists               | M7                  | In-memory fallback cache when SQLite unavailable                                        |
+| Large evidence sets (finding with 1,000+ evidence items)                          | Low         | Medium, memory pressure            | M3, M5              | ScopeManager limits to 10 evidence items; token budget enforces truncation              |
+| Prompt injection bypass (evasion of InputFilter patterns)                         | Low         | High — LLM compromised              | M6a, M6b            | Defense-in-depth (6 layers per SPEC-011 Section 8.5); single layer failure is contained |
+| M6a→M5 dependency ordering (M5 cannot validate output without M6a)                | Low         | High, blocks M5 completion         | M5, M6a             | M6a runs BEFORE M5; dependency graph explicitly enforces this                           |
+| M5 missing audit logging (engine created without logging infrastructure)          | Low         | Medium, audit gaps                 | M5                  | Audit logging is BUILT INTO M5, not a separate milestone                                |
+| Cache schema migration failure (schema mismatch causes data loss)                 | Low         | Medium, cache invalidation         | M7                  | Schema version column, migration strategy, compatibility tests                          |
+| Cross-package interface drift (@veris/cli types diverge from @veris/explain)      | Medium      | High, integration failures         | M9                  | Shared type contracts from M1; integration tests in M9                                  |
 
 ---
 
-## 6. Things That Must NEVER Be Refactored During Implementation
+## 6. Things that must NEVER be Refactored during implementation
 
-1. **IE1-IE8 invariants** — AI is read-only, never modifies canonical objects
-2. **`ExplainedContext` strongly-typed interfaces** — never revert to `Record<string, unknown>`
-3. **Deterministic validation pipeline order** — StructuralValidator → CitationVerifier → NullEvidenceRefusal (always M6a deterministic first)
-4. **Cache key composition** — `promptVersion:modelId:modelVersion:inputHash:engineVersion:mode` (6 components)
-5. **Evidence ordering** — `confidence DESC, severity DESC, path ASC, line ASC, ID ASC`
-6. **Provider adapter interface** — `LLMProvider` with `generate()`, `generateStream()`, `healthCheck()`, `getCapabilities()` (owned by `@veris/ai`, consumed by `@veris/explain`)
-7. **Citation format** — `[src:type:id]` (machine-parseable, structured)
-8. **`ExplanationMode`** — `"simple" | "technical" | "expert"` (exactly 3 values)
-9. **`ExplainResult`** — discriminated union with `kind: "success" | "refused" | "error"`
-10. **Default: No provider configured** — AI is always opt-in
+1. IE1-IE8 invariants: AI is read-only, never modifies canonical objects
+2. `ExplainedContext` strongly-typed interfaces: never revert to `Record<string, unknown>`
+3. Deterministic validation pipeline order: StructuralValidator → CitationVerifier → NullEvidenceRefusal (always M6a deterministic first)
+4. Cache key composition: `promptVersion:modelId:modelVersion:inputHash:engineVersion:mode` (6 components)
+5. Evidence ordering: `confidence DESC, severity DESC, path ASC, line ASC, ID ASC`
+6. Provider adapter interface: `LLMProvider` with `generate()`, `generateStream()`, `healthCheck()`, `getCapabilities()` (owned by `@veris/ai`, consumed by `@veris/explain`)
+7. Citation format: `[src:type:id]` (machine-parseable, structured)
+8. `ExplanationMode`: `"simple" | "technical" | "expert"` (exactly 3 values)
+9. `ExplainResult`: discriminated union with `kind: "success" | "refused" | "error"`
+10. Default: No provider configured: AI is always opt-in
 
 ---
 
-## 7. Rollback Strategy
+## 7. Rollback strategy
 
-### 7.1 When Rollback Is Needed
+### 7.1 When rollback is needed
 
 | Scenario                           | Trigger                                     | Rollback Action                                                   |
 | ---------------------------------- | ------------------------------------------- | ----------------------------------------------------------------- |
-| **M2 provider adapter regression** | Tests fail after adapter change             | Revert adapter file; re-run M2 tests                              |
-| **M3 context builder change**      | Context output differs from golden snapshot | Revert context builder; re-run determinism tests                  |
-| **M4 prompt template change**      | Prompt output differs from expected         | Revert template file; re-run golden tests                         |
-| **M5 engine orchestration change** | Pipeline behavior changes unexpectedly      | Revert engine file; cache is invalidated on version change        |
-| **M6a validation logic change**    | Citation verification behavior diverges     | Revert validation file; re-run citation tests                     |
-| **M7 cache schema change**         | Schema migration produces errors            | Revert schema; clear cache with `clear()`; re-run migration tests |
-| **M8 mode formatting change**      | Output format degrades                      | Revert formatter; re-run formatter tests                          |
+| M2 provider adapter regression | Tests fail after adapter change             | Revert adapter file; re-run M2 tests                              |
+| M3 context builder change      | Context output differs from golden snapshot | Revert context builder; re-run determinism tests                  |
+| M4 prompt template change      | Prompt output differs from expected         | Revert template file; re-run golden tests                         |
+| M5 engine orchestration change | Pipeline behavior changes unexpectedly      | Revert engine file; cache is invalidated on version change        |
+| M6a validation logic change    | Citation verification behavior diverges     | Revert validation file; re-run citation tests                     |
+| M7 cache schema change         | Schema migration produces errors            | Revert schema; clear cache with `clear()`; re-run migration tests |
+| M8 mode formatting change      | Output format degrades                      | Revert formatter; re-run formatter tests                          |
 
-### 7.2 Cache Rollback (Post-M7)
+### 7.2 Cache rollback (post-M7)
 
 When cache schema or engine version is rolled back:
 
@@ -1181,7 +1181,7 @@ When cache schema or engine version is rolled back:
 4. Full cache clear is available via `PersistentCache.clear()`
 5. Partial cache invalidation is available via `PersistentCache.invalidate({ engineVersion: oldVersion })`
 
-### 7.3 API Compatibility Guarantee
+### 7.3 API compatibility guarantee
 
 - All public interfaces from M1 are treated as stable contracts
 - Backward-incompatible changes to `Explainer`, `ExplainConfig`, `Explanation`, or `ExplainResult` require a MAJOR version bump in `@veris/explain`
@@ -1189,7 +1189,7 @@ When cache schema or engine version is rolled back:
 
 ---
 
-## 8. Cross-Package Dependency Table
+## 8. Cross-Package dependency table
 
 | Milestone                       | Depends On                                                                    | Used By                                   | Interface Contract                                                                              |
 | ------------------------------- | ----------------------------------------------------------------------------- | ----------------------------------------- | ----------------------------------------------------------------------------------------------- |
@@ -1210,7 +1210,7 @@ When cache schema or engine version is rolled back:
 
 ---
 
-## 9. Acceptance Checklist for V1 Release
+## 9. Acceptance checklist for V1 release
 
 Before V1 can be released:
 
@@ -1229,7 +1229,7 @@ Before V1 can be released:
 - [ ] Changelog documents all breaking changes from architecture revisions
 - [ ] Security tests pass (prompt injection, cache integrity, audit integrity)
 - [ ] No orphan modules, no undocumented APIs, no circular dependencies
-- [ ] `@veris/explain` has NO `providers/` directory — all provider contracts come from `@veris/ai`
+- [ ] `@veris/explain` has NO `providers/` directory. All provider contracts come from `@veris/ai`
 - [ ] `Citation.sourceType` verified as 10-value union matching SPEC-011 §8.2 canonical list
 - [ ] `CacheKey.mode` verified present and used in all cache operations
 - [ ] `ExplainedContext.contextSchemaVersion` verified present

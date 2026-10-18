@@ -2,11 +2,11 @@
 
 ## Documentation
 
-- [README](README.md) — Project overview and quick start
-- [INSTALL](INSTALL.md) — Installation instructions
-- [QUICKSTART](QUICKSTART.md) — Step-by-step tutorial
-- [USAGE](USAGE.md) — Command reference
-- [FAQ](FAQ.md) — Frequently asked questions
+- [README](README.md): Project overview and quick start
+- [INSTALL](INSTALL.md): Installation instructions
+- [QUICKSTART](QUICKSTART.md): Step-by-step tutorial
+- [USAGE](USAGE.md): Command reference
+- [FAQ](FAQ.md): Frequently asked questions
 
 ## Getting help
 

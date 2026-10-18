@@ -5,7 +5,7 @@
 ### What is VERIS?
 
 VERIS is a security analysis tool that scans files and directories for security
-risks. It produces deterministic reports — the same input always produces the
+risks. It produces deterministic reports, the same input always produces the
 same output. It runs entirely offline with no cloud dependency.
 
 ### Is VERIS an antivirus or EDR?
@@ -22,7 +22,7 @@ AI explanations can use Ollama for a fully offline experience.
 ### Does VERIS use AI for analysis?
 
 No. AI is strictly a consumer of analysis results. It explains findings and
-summarizes reports — it never participates in detection or scoring.
+summarizes reports, it never participates in detection or scoring.
 
 ### Is VERIS free?
 
@@ -84,7 +84,7 @@ progress output, or target a specific subdirectory.
 ### Results differ between runs
 
 If you get different results, check that your files haven't changed between
-runs. VERIS is deterministic — the same input always produces the same output.
+runs. VERIS is deterministic, the same input always produces the same output.
 
 ### How do I report a bug?
 

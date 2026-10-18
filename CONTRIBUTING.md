@@ -15,21 +15,21 @@ contributors.
 
 ### Branch strategy
 
-- `main` — Stable, release-ready
-- `feat/*` — Feature branches
-- `fix/*` — Bug fix branches
-- `docs/*` — Documentation branches
+- `main`: Stable, release-ready
+- `feat/*`: Feature branches
+- `fix/*`: Bug fix branches
+- `docs/*`: Documentation branches
 
 ### Commit conventions
 
 Use [Conventional Commits](https://www.conventionalcommits.org/):
 
-- `feat:` — New feature
-- `fix:` — Bug fix
-- `docs:` — Documentation
-- `refactor:` — Code refactoring
-- `test:` — Test changes
-- `chore:` — Maintenance
+- `feat:`: New feature
+- `fix:`: Bug fix
+- `docs:`: Documentation
+- `refactor:`: Code refactoring
+- `test:`: Test changes
+- `chore:`: Maintenance
 
 ### Pull request process
 

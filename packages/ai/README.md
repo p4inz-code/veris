@@ -1,6 +1,6 @@
 # @veris/ai
 
-AI provider adapters — consumer only, never analysis.
+AI provider adapters, consumer only, never analysis.
 
 ## Architecture
 

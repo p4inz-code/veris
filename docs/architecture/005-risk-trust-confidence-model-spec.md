@@ -1,4 +1,4 @@
-# VERIS Risk Engine, Trust Engine & Confidence Model — SPEC-005
+# VERIS risk engine, trust engine & confidence model: SPEC-005
 
 **Status:** Frozen  
 **Version:** 1.0  
@@ -7,7 +7,7 @@
 
 ---
 
-## Table of Contents
+## Table of contents
 
 1. [Core Philosophy](#1-core-philosophy)
 2. [Mathematical Foundation](#2-mathematical-foundation)
@@ -27,27 +27,27 @@
 
 ---
 
-## 1. Core Philosophy
+## 1. Core philosophy
 
-### 1.1 First Principles
+### 1.1 First principles
 
 VERIS evaluates **observable behaviors**, not intent. The scoring system is built on five non-negotiable principles:
 
-1. **Determinism** — Same input, same scores. Every time. No randomness, no LLM approximation, no floating-point non-determinism.
-2. **Traceability** — Every point added or removed from any score traces to a specific piece of Evidence. No hidden calculations.
-3. **No Magic Numbers** — Every coefficient, weight, and threshold is derived from a documented formula. No arbitrarily chosen constants.
-4. **No Exaggeration** — Scores reflect the evidence, not the severity of the finding's title. A low-confidence finding contributes less than a high-confidence one, regardless of how alarming the rule name sounds.
-5. **Explainability** — Every score can answer: "Why this value and not higher or lower?"
+1. Determinism: Same input, same scores. Every time. No randomness, no LLM approximation, no floating-point non-determinism.
+2. Traceability: Every point added or removed from any score traces to a specific piece of Evidence. No hidden calculations.
+3. No Magic Numbers: Every coefficient, weight, and threshold is derived from a documented formula. No arbitrarily chosen constants.
+4. No Exaggeration: Scores reflect the evidence, not the severity of the finding's title. A low-confidence finding contributes less than a high-confidence one, regardless of how alarming the rule name sounds.
+5. Explainability: Every score can answer: "Why this value and not higher or lower?"
 
-### 1.2 What VERIS Does Not Do
+### 1.2 What VERIS does not do
 
-- VERIS does **not** claim malware. It reports observed behaviors and their risk.
-- VERIS does **not** use reputation databases (unless explicitly configured as an optional add-on).
-- VERIS does **not** use AI for scoring.
-- VERIS does **not** adjust scores based on filenames.
-- VERIS does **not** hide score methodology.
+- VERIS does not claim malware. It reports observed behaviors and their risk.
+- VERIS does not use reputation databases (unless explicitly configured as an optional add-on).
+- VERIS does not use AI for scoring.
+- VERIS does not adjust scores based on filenames.
+- VERIS does not hide score methodology.
 
-### 1.3 Three Independent Engines
+### 1.3 Three independent engines
 
 ```
 ┌───────────────────┐
@@ -80,9 +80,9 @@ VERIS evaluates **observable behaviors**, not intent. The scoring system is buil
 
 ---
 
-## 2. Mathematical Foundation
+## 2. Mathematical foundation
 
-### 2.1 Normalization Strategy
+### 2.1 Normalization strategy
 
 All scores use **bounded normalization** to [0.0, 1.0] for intermediate scores and [0.0, 10.0] for final risk scores.
 
@@ -97,7 +97,7 @@ normalized = raw_score / max_possible
 Where:
 
 - If `max_possible = 0` (no evidence), `normalized = 0`.
-- Normalization is **contextual** — the max possible for a single file differs from a repository.
+- Normalization is contextual: the max possible for a single file differs from a repository.
 - Normalization uses the actual maximum possible given the current rule set and artifact count, not an arbitrary ceiling.
 
 **Saturation:**
@@ -118,7 +118,7 @@ final_score = saturated × 10.0
 
 This produces a [0.0, 10.0] range for the final risk score.
 
-### 2.2 Weighting Strategy
+### 2.2 Weighting strategy
 
 Weights are derived from **evidence density**, not arbitrary importance rankings.
 
@@ -128,9 +128,9 @@ Weights are derived from **evidence density**, not arbitrary importance rankings
 weight(dimension) = evidence_count(dimension) / total_evidence_count
 ```
 
-This means: a dimension with more evidence contributes proportionally more to the overall score. No dimension is assigned a fixed "importance" — importance is evidence-driven.
+This means: a dimension with more evidence contributes proportionally more to the overall score. No dimension is assigned a fixed "importance", importance is evidence-driven.
 
-**Exception — Severity multiplier:**
+**Exception, Severity multiplier:**
 
 Evidence of higher-severity findings is up-weighted:
 
@@ -145,7 +145,7 @@ where:
 
 This ensures that a single critical finding with high confidence contributes meaningfully, while a hundred info-level findings do not overwhelm it.
 
-### 2.3 Composite Score Calculation
+### 2.3 Composite score calculation
 
 ```
 overall_risk = Σ_{d ∈ dimensions} effective_weight(d) × dimension_risk(d)
@@ -191,7 +191,7 @@ When two findings produce the same risk score, they are ordered by:
 
 ---
 
-## 3. Confidence Engine
+## 3. Confidence engine
 
 ### 3.1 Purpose
 
@@ -199,7 +199,7 @@ Confidence answers: **"How certain are we that this evidence is real and the fin
 
 Confidence is **not** severity. Severity says "how bad is this if true." Confidence says "how likely is it to be true."
 
-### 3.2 Confidence Inputs
+### 3.2 Confidence inputs
 
 | Input                    | Source                 | Range      | Description                                                                        |
 | ------------------------ | ---------------------- | ---------- | ---------------------------------------------------------------------------------- |
@@ -212,7 +212,7 @@ Confidence is **not** severity. Severity says "how bad is this if true." Confide
 | Evidence completeness    | Evidence count         | [0.0, 1.0] | Ratio of expected evidence to actual evidence                                      |
 | Missing evidence penalty | Correlation            | [0.0, 0.3] | Penalty if expected correlating evidence is missing                                |
 
-### 3.3 Confidence Calculation
+### 3.3 Confidence calculation
 
 **Per-Evidence Confidence:**
 
@@ -227,7 +227,7 @@ where:
   rule_confidence = match_quality_factor
 ```
 
-**Explanation of multiplication:** Each factor is a necessary condition. If any factor is low, the overall confidence is low. This is intentional — confidence should degrade gracefully when any link in the chain is weak.
+**Explanation of multiplication:** Each factor is a necessary condition. If any factor is low, the overall confidence is low. This is intentional, confidence should degrade gracefully when any link in the chain is weak.
 
 **Per-Finding Confidence:**
 
@@ -241,7 +241,7 @@ where:
   completeness_factor is capped at 1.0 (exceeding expectations doesn't boost confidence)
 ```
 
-### 3.4 Confidence Levels
+### 3.4 Confidence levels
 
 | Confidence Range | Level     | Interpretation                                                           |
 | ---------------- | --------- | ------------------------------------------------------------------------ |
@@ -251,7 +251,7 @@ where:
 | 0.1 – 0.4        | Low       | Weak match. Significant ambiguity, parser recovery, or missing evidence. |
 | 0.0 – 0.1        | Very Low  | Insufficient evidence. Finding likely spurious.                          |
 
-### 3.5 Confidence Explainability
+### 3.5 Confidence explainability
 
 Every confidence score explains its factors:
 
@@ -277,7 +277,7 @@ interface ConfidenceFactor {
 }
 ```
 
-### 3.6 Missing Evidence Penalties
+### 3.6 Missing evidence penalties
 
 | Scenario                                | Penalty                                | Explanation                                               |
 | --------------------------------------- | -------------------------------------- | --------------------------------------------------------- |
@@ -286,7 +286,7 @@ interface ConfidenceFactor {
 | Ambiguous taxonomy mapping              | -0.1 to -0.3                           | Feature could map to multiple taxonomy nodes              |
 | Truncated extraction                    | -0.2                                   | Artifact limits caused partial extraction                 |
 
-### 3.7 Parser Recovery Penalty
+### 3.7 Parser recovery penalty
 
 ```
 parser_recovery_penalty = min(recovery_count × 0.01, 0.5)
@@ -303,7 +303,7 @@ This means:
 
 ---
 
-## 4. Risk Engine
+## 4. Risk engine
 
 ### 4.1 Purpose
 
@@ -311,7 +311,7 @@ Risk answers: **"How concerning are the observed behaviors, given our confidence
 
 Risk is derived from: Behavior × Evidence × Correlation × Confidence × Context.
 
-### 4.2 Risk Dimensions
+### 4.2 Risk dimensions
 
 Risk is computed across **independent dimensions** (see Section 6). Each dimension produces a dimension risk score.
 
@@ -326,7 +326,7 @@ Where:
 - `severity(e)` is the severity score [0.0, 10.0] from the rule that produced this evidence
 - `max_possible_for_dimension(d)` is the theoretical maximum if every artifact exhibited the highest-severity behavior in this dimension
 
-### 4.3 Risk Categories
+### 4.3 Risk categories
 
 Risk categories map to the output risk levels:
 
@@ -338,7 +338,7 @@ Risk categories map to the output risk levels:
 | 2.0 – 3.9   | Low        | Minor risk          | Low-confidence findings or informational issues                                       |
 | 0.0 – 1.9   | Negligible | Informational       | No significant findings                                                               |
 
-### 4.4 Severity Normalization
+### 4.4 Severity normalization
 
 Severity scores [0.0, 10.0] are mapped from the finding's severity level:
 
@@ -352,7 +352,7 @@ Severity scores [0.0, 10.0] are mapped from the finding's severity level:
 
 The default is used unless the rule specifies a different score. Scores are linear within their range.
 
-### 4.5 Behavior Contribution
+### 4.5 Behavior contribution
 
 Each behavior contributes to risk proportionally to:
 
@@ -364,7 +364,7 @@ Each behavior contributes to risk proportionally to:
 behavior_risk(behavior) = confidence(behavior) × severity(matched_rule) × dimension_weight(taxonomy(behavior))
 ```
 
-### 4.6 Chain Contribution
+### 4.6 Chain contribution
 
 A BehaviorChain contributes to risk by amplifying the risk of its constituent findings:
 
@@ -386,7 +386,7 @@ This means:
 
 **Invariant:** Chain risk replaces individual finding risk for findings in the chain. The findings' individual risks are not counted independently (prevents double-counting, see §4.11).
 
-### 4.7 Artifact Contribution
+### 4.7 Artifact contribution
 
 Per-artifact risk is the saturated sum of its findings and chains:
 
@@ -395,7 +395,7 @@ artifact_risk(a) = saturate(Σ_{f ∈ findings_of_artifact(a)} risk(f)
                             + Σ_{c ∈ chains_of_artifact(a)} chain_risk(c))
 ```
 
-### 4.8 Repository Contribution
+### 4.8 Repository contribution
 
 Repository risk is the aggregation of all artifact risks:
 
@@ -410,7 +410,7 @@ The division by artifact_count prevents large repositories from having
 automatically inflated risk. It measures risk density, not risk volume.
 ```
 
-### 4.9 Aggregate Risk Calculation
+### 4.9 Aggregate risk calculation
 
 ```
 1. For each artifact, compute artifact_risk(a)
@@ -420,7 +420,7 @@ automatically inflated risk. It measures risk density, not risk volume.
 5. Map to risk category (critical/high/medium/low/negligible)
 ```
 
-### 4.10 Risk Propagation Rules
+### 4.10 Risk Propagation rules
 
 | Propagation                | Direction | Rule                                                       |
 | -------------------------- | --------- | ---------------------------------------------------------- |
@@ -431,7 +431,7 @@ automatically inflated risk. It measures risk density, not risk volume.
 | Artifact → Parent Artifact | Upward    | Nested artifacts (archives) contribute to parent risk      |
 | Dimension → Overall        | Upward    | Dimension risk weighted by evidence density                |
 
-### 4.11 Risk Double-Counting Prevention
+### 4.11 Risk Double-Counting prevention
 
 | Scenario                                        | Prevention                                                                                                                            |
 | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
@@ -443,7 +443,7 @@ automatically inflated risk. It measures risk density, not risk volume.
 
 ---
 
-## 5. Trust Engine
+## 5. Trust engine
 
 ### 5.1 Purpose
 
@@ -453,7 +453,7 @@ Trust is **independent** of risk. A file can be high-trust and high-risk (a know
 
 **Trust never eliminates evidence.** It only influences interpretation.
 
-### 5.2 Trust Dimensions
+### 5.2 Trust dimensions
 
 | Dimension              | Signal                                                  | Range       | Weight |
 | ---------------------- | ------------------------------------------------------- | ----------- | ------ |
@@ -468,7 +468,7 @@ Trust is **independent** of risk. A file can be high-trust and high-risk (a know
 | Certificate validity   | Valid cert chain, not expired, not self-signed          | [-0.5, 0.5] | 0.10   |
 | Expected layout        | Project follows expected conventions                    | [-0.3, 0.3] | 0.05   |
 
-### 5.3 Trust Score Calculation
+### 5.3 Trust score calculation
 
 ```
 trust_score = Σ(dimension_trust(d) × dimension_weight(d))
@@ -484,7 +484,7 @@ Normalized for output:
   (0.0 = fully untrusted, 1.0 = fully trusted)
 ```
 
-### 5.4 Trust Levels
+### 5.4 Trust levels
 
 | Normalized Score | Level          | Interpretation                                                |
 | ---------------- | -------------- | ------------------------------------------------------------- |
@@ -494,7 +494,7 @@ Normalized for output:
 | 0.1 – 0.3        | Suspicious     | Some trust signals missing or inconsistent                    |
 | 0.0 – 0.1        | Untrusted      | Multiple trust violations, unsigned, unknown origin           |
 
-### 5.5 Trust Modifiers on Risk
+### 5.5 Trust modifiers on risk
 
 Trust does not change the risk score. It changes how risk is **presented**:
 
@@ -513,7 +513,7 @@ This means:
 
 **Invariant:** The base risk score is always available. Trust is a presentation layer modifier, not a data layer change.
 
-### 5.6 Trust Explainability
+### 5.6 Trust explainability
 
 Every trust score explains its factors:
 
@@ -551,13 +551,13 @@ interface TrustSignal {
 
 ---
 
-## 6. Score Dimensions
+## 6. Score dimensions
 
 ### 6.1 Purpose
 
 Dimensions provide the categorization framework for risk scoring. Each dimension is an independent axis of analysis.
 
-### 6.2 Dimension Definitions
+### 6.2 Dimension definitions
 
 | ID    | Name                   | Description                    | Taxonomy Nodes          |
 | ----- | ---------------------- | ------------------------------ | ----------------------- |
@@ -577,10 +577,10 @@ Dimensions provide the categorization framework for risk scoring. Each dimension
 | D1400 | Privilege              | Privilege issues               | T15000–T15999           |
 | D1500 | Environment            | Environment manipulation       | T16000–T16999           |
 | D1600 | Repository Hygiene     | Repository health signals      | T90000+ (informational) |
-| D1700 | Supply Chain           | Supply chain risk              | (TBD — future)          |
+| D1700 | Supply Chain           | Supply chain risk              | (TBD, future)          |
 | D1800 | Trust (Dimension)      | Trust-related observations     | T12000–T12999           |
 
-### 6.3 Dimension Properties
+### 6.3 Dimension properties
 
 ```typescript
 interface ScoreDimension {
@@ -598,7 +598,7 @@ interface ScoreDimension {
 }
 ```
 
-### 6.4 Dimension Aggregation
+### 6.4 Dimension aggregation
 
 ```
 dimension_risk(d) = Σ_{b ∈ behaviors_in_dimension(d)} behavior_risk(b)
@@ -611,7 +611,7 @@ Where:
   max_possible = evidence_count × max_severity × max_confidence
 ```
 
-### 6.5 Adding New Dimensions
+### 6.5 Adding new dimensions
 
 New dimensions are additive:
 
@@ -623,13 +623,13 @@ This ensures extensibility without redesign.
 
 ---
 
-## 7. Repository-Level Scoring
+## 7. Repository-Level scoring
 
 ### 7.1 Challenge
 
 A repository may have thousands of files. Naively summing risk across all files inflates the score for large repositories and deflates it for small ones.
 
-### 7.2 Risk Density Model
+### 7.2 Risk density model
 
 VERIS uses **risk density** rather than risk volume:
 
@@ -646,7 +646,7 @@ This means:
 - A 1000-file repo with 10 risky files: density = mean(10 × high + 990 × 0) / 1000 = low density
 - A 10-file repo with 5 risky files: density = mean(5 × high + 5 × 0) / 10 = high density
 
-### 7.3 Handling Thousands of Findings
+### 7.3 Handling thousands of findings
 
 **Binning strategy:**
 
@@ -656,21 +656,21 @@ This means:
 - Within each bin, only the count matters for scoring, not individual findings.
 - This reduces O(n) computation to O(1) per bin.
 
-### 7.4 Handling Duplicate Libraries
+### 7.4 Handling duplicate libraries
 
 - Content-addressed deduplication (same contentHash → same artifact ID).
 - Duplicate artifacts contribute once to the score.
 - The discovery phase marks duplicates before any extraction occurs.
 - A `duplicateCount` field records how many times the artifact appeared.
 
-### 7.5 Vendored Dependencies
+### 7.5 Vendored dependencies
 
 - Vendored dependencies are detected by directory structure (`vendor/`, `node_modules/`, `third_party/`).
 - Vendored dependencies are analyzed but reported separately from the project's own code.
 - They contribute to repository risk with a `vendorMultiplier` of 0.5 (their risk is halved).
 - Vendored dependency findings are tagged with `context: "vendored"`.
 
-### 7.6 Nested Archives
+### 7.6 Nested archives
 
 ```
 Archive risk propagation:
@@ -680,7 +680,7 @@ Archive risk propagation:
   But: archive risk does not add to its own entries' artifact risks (no feedback loop)
 ```
 
-### 7.7 Repository-Level Aggregation Formula
+### 7.7 Repository-Level aggregation formula
 
 ```
 repository_risk = saturate(
@@ -699,7 +699,7 @@ Where:
 
 ## 8. Explainability
 
-### 8.1 Score Explanation Model
+### 8.1 Score explanation model
 
 Every score generates a structured explanation:
 
@@ -718,7 +718,7 @@ interface ScoreExplanation {
 }
 ```
 
-### 8.2 Human-Readable Risk Explanation
+### 8.2 Human-Readable risk explanation
 
 **Template-based generation:**
 
@@ -743,7 +743,7 @@ interface ScoreExplanation {
   Risk modifier: {modifier}× ({modifier_explanation})"
 ```
 
-### 8.3 Score Traceability
+### 8.3 Score traceability
 
 Every point in every score traces to evidence:
 
@@ -761,7 +761,7 @@ risk_score = 6.3 (high)
                       └─ ...
 ```
 
-### 8.4 "Why Not Higher/Lower?"
+### 8.4 "Why not higher/Lower?"
 
 Every explanation answers the counterfactual:
 
@@ -778,50 +778,50 @@ Why is risk not lower?
 
 ---
 
-## 9. Edge Cases
+## 9. Edge cases
 
-### 9.1 Empty Repository
+### 9.1 Empty repository
 
 - No artifacts → no findings → `risk = 0`, `trust = 0.5` (neutral), `confidence = 0`.
 - Special message: "No artifacts found to analyze."
 
-### 9.2 Binary-Only Repository
+### 9.2 Binary-Only repository
 
 - No source code to analyze → limited Features.
 - Binary extractors (PE, ELF) run on any matching files.
 - Text fallback still provides entropy, string, and structure analysis.
 - Risk may be lower due to fewer features, but trust is also lower (no source verification).
-- Diagnostic note: "Limited analysis — no source code detected."
+- Diagnostic note: "Limited analysis: no source code detected."
 
-### 9.3 Obfuscated Scripts
+### 9.3 Obfuscated scripts
 
 - High parser recovery penalty reduces confidence.
 - Entropy features may be present (high-entropy strings).
 - Capabilities may still be extracted (obfuscated API calls still appear as imports).
-- Confidence is explicitly lowered with explanation: "Parser recovery rate: X% — file appears obfuscated."
+- Confidence is explicitly lowered with explanation: "Parser recovery rate: X%, file appears obfuscated."
 
-### 9.4 Mixed Languages
+### 9.4 Mixed languages
 
 - Each language gets its own extractor.
 - Features from all extractors are normalized to the same canonical types.
 - Risk is aggregated across languages naturally (evidence density weighting).
 - Dimension breakdown shows which languages contributed to which dimensions.
 
-### 9.5 Broken Archives
+### 9.5 Broken archives
 
 - Attempt extraction with available decompressors.
 - If all fail, produce extraction error diagnostic.
 - Artifact is marked as `truncated: true`.
 - Partial extraction results are used if available.
 
-### 9.6 Partial Scans
+### 9.6 Partial scans
 
 - Cancelled scan → `ScanSession.status = "cancelled"`.
 - Partial results are still valid for the artifacts that were fully processed.
 - Risk report includes: "Scan was cancelled after processing N of M artifacts. Results are partial."
 - Confidence is not reduced for completed artifacts.
 
-### 9.7 Unsupported Formats
+### 9.7 Unsupported formats
 
 - File is classified as `unknown` type.
 - `binary-extractor` or `text-extractor` fallback runs.
@@ -829,14 +829,14 @@ Why is risk not lower?
 - Risk reflects only what could be extracted.
 - Diagnostic: "File type could not be classified. Using generic extraction."
 
-### 9.8 Extremely Large Projects
+### 9.8 Extremely large projects
 
 - Risk density model prevents inflation.
 - Top-N reporting: only top 10 findings by risk contribution are detailed.
 - Bin-based aggregation prevents O(n) performance issues.
 - Memory limit for findings: 1,000,000. Beyond that, only bin counts are tracked.
 
-### 9.9 Duplicate Artifacts
+### 9.9 Duplicate artifacts
 
 - Same contentHash → same artifactId → first occurrence contributes, rest are skipped.
 - Skip reason: "Duplicate artifact (same content as {originalArtifactId})."
@@ -846,7 +846,7 @@ Why is risk not lower?
 
 ## 10. Diagnostics
 
-### 10.1 Score Breakdown
+### 10.1 Score breakdown
 
 ```
 Risk Score Breakdown:
@@ -862,7 +862,7 @@ Risk Score Breakdown:
 Overall Risk: 6.3 (high)
 ```
 
-### 10.2 Weight Contribution
+### 10.2 Weight contribution
 
 ```
 Weight Contribution Analysis:
@@ -878,7 +878,7 @@ Weight Contribution Analysis:
     - Effective weight: 0.10 × 1.2 = 0.12
 ```
 
-### 10.3 Risk Trace
+### 10.3 Risk trace
 
 ```
 Risk Trace for finding fin_abc123:
@@ -895,7 +895,7 @@ Risk Trace for finding fin_abc123:
   Risk contribution to overall: 0.18 × 0.64 = 0.12 (out of 10.0)
 ```
 
-### 10.4 Trust Trace
+### 10.4 Trust trace
 
 ```
 Trust Trace for artifact src/main.py:
@@ -917,7 +917,7 @@ Trust Trace for artifact src/main.py:
   Risk modifier: 1.0 + (0.5 - 0.85) × 0.2 = 0.93 (risk reduced by 7%)
 ```
 
-### 10.5 Confidence Trace
+### 10.5 Confidence trace
 
 ```
 Confidence Trace for evidence ev_xyz789:
@@ -936,7 +936,7 @@ Confidence Trace for evidence ev_xyz789:
   Weak link: Feature confidence (0.95) — the most limiting factor
 ```
 
-### 10.6 Dimension Analysis
+### 10.6 Dimension analysis
 
 ```
 Dimension Analysis:
@@ -949,7 +949,7 @@ Dimension Analysis:
     Top finding: Debug mode enabled at config.py:10 (confidence: 0.60)
 ```
 
-### 10.7 Correlation Summary
+### 10.7 Correlation summary
 
 ```
 Correlation Summary:
@@ -965,7 +965,7 @@ Correlation Summary:
     ...
 ```
 
-### 10.8 Saturation Detection
+### 10.8 Saturation detection
 
 ```
 Saturation Detection:
@@ -981,9 +981,9 @@ Saturation Detection:
 
 ---
 
-## 11. Performance Strategy
+## 11. Performance strategy
 
-### 11.1 Performance Targets
+### 11.1 Performance targets
 
 | Metric                  | Target                    |
 | ----------------------- | ------------------------- |
@@ -992,7 +992,7 @@ Saturation Detection:
 | Aggregate calculation   | ≤ 100ms for 1M findings   |
 | Memory per 10K findings | ≤ 5 MB                    |
 
-### 11.2 Optimization Techniques
+### 11.2 Optimization techniques
 
 | Technique                      | Applied To         | Expected Gain                        |
 | ------------------------------ | ------------------ | ------------------------------------ |
@@ -1002,7 +1002,7 @@ Saturation Detection:
 | Cached normalization factors   | Score calculation  | Pre-compute max_possible per session |
 | Batch confidence calculation   | Confidence engine  | Process all evidence at once         |
 
-### 11.3 Memory Budget
+### 11.3 Memory budget
 
 | Component          | Budget                             |
 | ------------------ | ---------------------------------- |
@@ -1010,13 +1010,13 @@ Saturation Detection:
 | Confidence factors | ~10 MB (for 10K evidence)          |
 | Risk breakdown     | ~5 MB (for 10K findings)           |
 | Explanation cache  | ~50 MB (for detailed explanations) |
-| **Total**          | **~66 MB**                         |
+| Total          | ~66 MB                         |
 
 ---
 
-## 12. Future Compatibility
+## 12. Future compatibility
 
-### 12.1 AI Explanation Consumers
+### 12.1 AI explanation consumers
 
 The structured score explanations (`ScoreExplanation`) are designed for AI consumption. An AI service can:
 
@@ -1024,7 +1024,7 @@ The structured score explanations (`ScoreExplanation`) are designed for AI consu
 - Generate natural language summary from the structured data
 - Never modify the scores themselves
 
-### 12.2 Organization Policies
+### 12.2 Organization policies
 
 Organizations can apply policy modifiers:
 
@@ -1039,7 +1039,7 @@ interface PolicyModifier {
 
 Policies adjust the presentation, not the base scores. The unmodified base risk is always available.
 
-### 12.3 Compliance Scoring
+### 12.3 Compliance scoring
 
 Compliance frameworks (PCI-DSS, SOC2, HIPAA) are mapped to dimensions:
 
@@ -1055,7 +1055,7 @@ interface ComplianceMapping {
 
 Compliance scores are computed by projecting the risk profile onto the compliance framework's dimensions.
 
-### 12.4 SBOM Analysis
+### 12.4 SBOM analysis
 
 SBOM (Software Bill of Materials) analysis is a new dimension:
 
@@ -1067,7 +1067,7 @@ Dimension: Supply Chain (D1700)
   This is purely additive — no existing dimension changes.
 ```
 
-### 12.5 Reputation & Threat Intelligence (Optional)
+### 12.5 Reputation & threat intelligence (optional)
 
 External reputation and threat intelligence feeds are consumed as **optional trust dimension** inputs:
 
@@ -1082,7 +1082,7 @@ interface ExternalReputationSignal {
 
 These signals feed into the Trust Engine as additional dimensions. They are **off by default** and must be explicitly enabled and configured.
 
-### 12.6 Historical Comparisons
+### 12.6 Historical comparisons
 
 - Reports are stored with their dimension breakdowns.
 - Historical comparison is computed by diffing dimension scores.
@@ -1090,33 +1090,33 @@ These signals feed into the Trust Engine as additional dimensions. They are **of
 
 ---
 
-## 13. Engineering Tradeoffs
+## 13. Engineering tradeoffs
 
-### 13.1 Risk Density vs. Risk Volume
+### 13.1 Risk density vs. risk volume
 
 **Tradeoff:** Density (risk per artifact) fairly represents the concentration of issues but can hide the overall magnitude of problems in a large repository. Volume (total risk) highlights magnitude but unfairly penalizes large projects.
 
 **Decision:** Use risk density as the primary metric. Display volume as secondary information: "12 critical findings across 3,000 files (0.4% of files affected)."
 
-### 13.2 Multiplicative vs. Additive Confidence
+### 13.2 Multiplicative vs. additive confidence
 
-**Tradeoff:** Multiplicative confidence (product of factors) is strict — one low factor dominantly reduces confidence. Additive confidence (weighted sum) is more forgiving but can mask weak links.
+**Tradeoff:** Multiplicative confidence (product of factors) is strict, one low factor dominantly reduces confidence. Additive confidence (weighted sum) is more forgiving but can mask weak links.
 
 **Decision:** Multiplicative confidence. This ensures that every link in the evidence chain must be strong for confidence to be high. A weak parser recovery in an otherwise perfect match reduces confidence appropriately.
 
-### 13.3 Static vs. Evidence-Driven Weights
+### 13.3 Static vs. evidence-driven weights
 
 **Tradeoff:** Static weights (pre-assigned importance per dimension) are simple but may not reflect actual evidence distribution. Evidence-driven weights (importance proportional to evidence count) reflect reality but can be skewed by over-extraction.
 
 **Decision:** Evidence-driven weights with severity multipliers. This prevents a dimension with many low-severity findings from dominating, while ensuring that dimensions with genuine evidence contribute proportionally.
 
-### 13.4 Saturated vs. Linear Scaling
+### 13.4 Saturated vs. linear scaling
 
 **Tradeoff:** Linear scaling (raw score / max) is simple but can exceed bounds in edge cases. Saturated scaling (tanh) is bounded but compresses high scores.
 
 **Decision:** Saturated scaling with `tanh`. The compression at high values is acceptable because the difference between a score of 9.5 and 9.8 is rarely meaningful in practice. The bounded output ensures stability.
 
-### 13.5 Per-Finding vs. Aggregate Explanation
+### 13.5 Per-Finding vs. aggregate explanation
 
 **Tradeoff:** Per-finding explanations are detailed but verbose. Aggregate explanations are concise but lose detail.
 
@@ -1124,49 +1124,49 @@ These signals feed into the Trust Engine as additional dimensions. They are **of
 
 ---
 
-## 14. Common Mistakes to Avoid
+## 14. Common Mistakes to avoid
 
-### 14.1 Adding Arbitrary Weights
+### 14.1 Adding arbitrary weights
 
 **Mistake:** Assigning fixed importance weights to dimensions (e.g., "Execution is 30% of risk") without mathematical justification.
 **Prevention:** Weights are evidence-driven. The importance of a dimension is proportional to the volume and severity of evidence in that dimension.
 
-### 14.2 Double-Counting Evidence
+### 14.2 Double-Counting evidence
 
 **Mistake:** A finding contributes to a dimension, and its evidence also contributes independently to the same dimension.
 **Prevention:** Evidence is the atomic unit. Findings aggregate evidence. Evidence never contributes more than once.
 
-### 14.3 Confusing Confidence with Severity
+### 14.3 Confusing confidence with severity
 
 **Mistake:** A high-severity rule producing a low-confidence match is presented as concerning as a high-confidence match.
 **Prevention:** Risk = severity × confidence. A low-confidence finding contributes proportionally less risk regardless of its severity label.
 
-### 14.4 Trust Eliminating Evidence
+### 14.4 Trust Eliminating evidence
 
 **Mistake:** A signed binary from a trusted publisher has its findings suppressed because it's "trusted."
 **Prevention:** Trust never eliminates evidence. It only influences the presentation modifier (±10%). The base risk is always visible.
 
-### 14.5 Ignoring Parser Quality
+### 14.5 Ignoring parser quality
 
 **Mistake:** All extractions are treated equally regardless of parser recovery, leading to confident scores from unreliable extraction.
 **Prevention:** Parser recovery penalties directly reduce extraction confidence, which propagates to evidence and finding confidence.
 
-### 14.6 Inflating Repository Scores
+### 14.6 Inflating repository scores
 
 **Mistake:** Summing all artifact risks for a repository score, making every large repository appear high-risk.
 **Prevention:** Risk density (mean artifact risk) prevents size inflation. Volume is reported as secondary information.
 
-### 14.7 Non-Deterministic Floating Point
+### 14.7 Non-Deterministic floating point
 
 **Mistake:** Using floating-point accumulations that produce different results depending on evaluation order.
 **Prevention:** Use deterministic accumulation (sorted order, fixed precision, no SIMD vectorization that changes accumulation order).
 
-### 14.8 Overfitting to Known Samples
+### 14.8 Overfitting to known samples
 
 **Mistake:** Adjusting weights and formulas to produce "correct" scores for test samples, creating brittle scoring that doesn't generalize.
 **Prevention:** The scoring model is derived from first principles, not tuned to samples. Test samples validate correctness but do not drive formula design.
 
-### 14.9 Hiding the Methodology
+### 14.9 Hiding the methodology
 
 **Mistake:** Presenting scores without explaining how they were computed.
 **Prevention:** Every score carries a structured explanation answering: how, why, what contributed, what didn't, and why not higher/lower.
@@ -1178,33 +1178,33 @@ These signals feed into the Trust Engine as additional dimensions. They are **of
 
 ---
 
-## 15. Final Recommendations
+## 15. Final recommendations
 
-### 15.1 Implementation Order
+### 15.1 Implementation order
 
 | Phase          | Components                                                  | Rationale                                |
 | -------------- | ----------------------------------------------------------- | ---------------------------------------- |
-| **Phase 1**    | Mathematical primitives (saturation, normalization, bounds) | Foundation — everything depends on these |
-| **Phase 2**    | Confidence engine (per-evidence, per-finding)               | Needed before risk can be meaningful     |
-| **Phase 3**    | Risk engine (per-dimension, per-artifact, aggregate)        | Core scoring                             |
-| **Phase 4**    | Trust engine (per-signal, per-artifact)                     | Independent scoring axis                 |
-| **Phase 5**    | Dimension framework and mapping                             | Categorization                           |
-| **Phase 6**    | Repository-level aggregation                                | Multi-artifact scoring                   |
-| **Phase 7**    | Explainability system (structured explanations)             | Traceability                             |
-| **Phase 8**    | Diagnostics system                                          | Debugging and validation                 |
-| **Phase 9**    | Edge case handling                                          | Robustness                               |
-| **Continuous** | Formula validation against corpus                           | Quality assurance                        |
+| Phase 1    | Mathematical primitives (saturation, normalization, bounds) | Foundation, everything depends on these |
+| Phase 2    | Confidence engine (per-evidence, per-finding)               | Needed before risk can be meaningful     |
+| Phase 3    | Risk engine (per-dimension, per-artifact, aggregate)        | Core scoring                             |
+| Phase 4    | Trust engine (per-signal, per-artifact)                     | Independent scoring axis                 |
+| Phase 5    | Dimension framework and mapping                             | Categorization                           |
+| Phase 6    | Repository-level aggregation                                | Multi-artifact scoring                   |
+| Phase 7    | Explainability system (structured explanations)             | Traceability                             |
+| Phase 8    | Diagnostics system                                          | Debugging and validation                 |
+| Phase 9    | Edge case handling                                          | Robustness                               |
+| Continuous | Formula validation against corpus                           | Quality assurance                        |
 
-### 15.2 Critical Success Factors
+### 15.2 Critical success factors
 
-1. **Test determinism first.** Before testing correctness, test that identical inputs produce identical outputs. This is the most important property.
-2. **Explain every formula.** Every coefficient and threshold must have a documented derivation. There are no magic numbers.
-3. **Bin-based repository scoring.** For repositories with thousands of findings, bin-based aggregation is essential for performance.
-4. **Confidence is multiplicative.** This is the single most important design decision. It ensures that the weakest link in the evidence chain determines overall confidence.
-5. **Trust is independent.** Trust never eliminates evidence. This preserves the integrity of the risk assessment.
-6. **Edge cases are not afterthoughts.** Empty repos, broken archives, obfuscated scripts, and partial scans are common in practice. Handle them explicitly.
+1. Test determinism first. Before testing correctness, test that identical inputs produce identical outputs. This is the most important property.
+2. Explain every formula. Every coefficient and threshold must have a documented derivation. There are no magic numbers.
+3. Bin-based repository scoring. For repositories with thousands of findings, bin-based aggregation is essential for performance.
+4. Confidence is multiplicative. This is the single most important design decision. It ensures that the weakest link in the evidence chain determines overall confidence.
+5. Trust is independent. Trust never eliminates evidence. This preserves the integrity of the risk assessment.
+6. Edge cases are not afterthoughts. Empty repos, broken archives, obfuscated scripts, and partial scans are common in practice. Handle them explicitly.
 
-### 15.3 Architectural Invariants
+### 15.3 Architectural invariants
 
 ```
 1. All scores are deterministic. Same input → same output, every time.

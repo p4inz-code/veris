@@ -1,6 +1,6 @@
 # @veris/cli
 
-VERIS CLI — deterministic security analysis platform.
+VERIS CLI, deterministic security analysis platform.
 
 ## Usage
 
@@ -21,7 +21,7 @@ veris <command> [options]
 | `version`    | Show version information                   |
 | `completion` | Generate shell completions                 |
 
-## Explain Command
+## Explain command
 
 The `explain` command generates AI-powered natural-language explanations
 of deterministic analysis results. The AI is always read-only and optional
@@ -41,11 +41,11 @@ veris explain <finding-id> --model <name>       Use a specific model
 
 **Explanation modes:**
 
-- `simple` — One-paragraph explanation with minimal technical jargon
-- `technical` — Detailed explanation with evidence and citations (default)
-- `expert` — Full traceability chain with all evidence and source locations
+- `simple`: One-paragraph explanation with minimal technical jargon
+- `technical`: Detailed explanation with evidence and citations (default)
+- `expert`: Full traceability chain with all evidence and source locations
 
-## Summarize Command
+## Summarize command
 
 The `summarize` command generates an AI-powered summary of a complete
 scan report, including top findings, risk assessment, and recommendations.
@@ -58,7 +58,7 @@ veris summarize --no-audit               Disable audit logging
 veris summarize --offline                Force offline mode
 ```
 
-## Exit Codes
+## Exit codes
 
 | Code | Meaning              |
 | ---- | -------------------- |
@@ -69,7 +69,7 @@ veris summarize --offline                Force offline mode
 | 4    | Provider unavailable |
 | 5    | Cache error          |
 
-## Global Options
+## Global options
 
 | Option            | Description               |
 | ----------------- | ------------------------- |

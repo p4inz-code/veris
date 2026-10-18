@@ -13,6 +13,6 @@ Analysis pipeline orchestrator.
 
 ## Architecture
 
-- **pipeline/** — AnalysisPipeline orchestrator
-- **lifecycle/** — Pre/post hooks, middleware
-- **scheduler/** — Artifact scheduling and deduplication
+- pipeline/: AnalysisPipeline orchestrator
+- lifecycle/: Pre/post hooks, middleware
+- scheduler/: Artifact scheduling and deduplication

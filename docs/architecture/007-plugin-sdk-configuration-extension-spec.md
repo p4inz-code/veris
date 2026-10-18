@@ -1,4 +1,4 @@
-# VERIS Plugin SDK, Configuration System & Extension Architecture — SPEC-007
+# VERIS plugin SDK, configuration system & extension architecture: SPEC-007
 
 **Status:** Frozen  
 **Version:** 1.0  
@@ -7,7 +7,7 @@
 
 ---
 
-## Table of Contents
+## Table of contents
 
 1. [Core Principles](#1-core-principles)
 2. [Plugin Architecture Overview](#2-plugin-architecture-overview)
@@ -31,9 +31,9 @@
 
 ---
 
-## 1. Core Principles
+## 1. Core principles
 
-### 1.1 The Core is Inviolable
+### 1.1 The core is inviolable
 
 The core engine is frozen and must never be modified by plugins. The core owns:
 
@@ -45,15 +45,15 @@ The core engine is frozen and must never be modified by plugins. The core owns:
 | Risk/Trust/Confidence calculation | Modify formulas or override scores         |
 | Report generation                 | Modify the CanonicalReport structure       |
 
-### 1.2 Plugins are Extensions, Not Modifications
+### 1.2 Plugins are extensions, not modifications
 
 A plugin adds functionality through approved extension points. It never modifies existing behavior. If a plugin is removed, the system behaves exactly as before the plugin was installed.
 
-### 1.3 Determinism Must Be Preserved
+### 1.3 Determinism must be preserved
 
 Plugins must not introduce non-determinism. A plugin that produces different output for the same input is a bug, not a feature. The host validates determinism by running plugin operations twice and comparing results (in debug mode).
 
-### 1.4 Failure Isolation
+### 1.4 Failure isolation
 
 A plugin must never crash the host. Plugin crashes are caught, logged, and isolated. The analysis continues without the failed plugin.
 
@@ -63,7 +63,7 @@ All plugin APIs work fully offline. Network access is an optional permission tha
 
 ---
 
-## 2. Plugin Architecture Overview
+## 2. Plugin architecture overview
 
 ```
 ┌──────────────────────────────────────────────────────────┐
@@ -106,7 +106,7 @@ All plugin APIs work fully offline. Network access is an optional permission tha
 └──────────────────────────────────────────────────────────┘
 ```
 
-### 2.1 Package Structure
+### 2.1 Package structure
 
 ```
 packages/plugins/
@@ -158,7 +158,7 @@ packages/plugins/
 └── package.json
 ```
 
-### 2.2 SDK npm Package
+### 2.2 SDK npm package
 
 The Plugin SDK is published as a separate npm package so third-party authors never need to depend on the full monorepo:
 
@@ -172,9 +172,9 @@ Dependencies:
 
 ---
 
-## 3. Plugin Lifecycle
+## 3. Plugin lifecycle
 
-### 3.1 Lifecycle States
+### 3.1 Lifecycle states
 
 ```
   ┌────────────────┐
@@ -230,7 +230,7 @@ Dependencies:
   └────────────────┘
 ```
 
-### 3.2 Lifecycle Hooks
+### 3.2 Lifecycle hooks
 
 ```typescript
 interface PluginLifecycle {
@@ -254,7 +254,7 @@ interface PluginLifecycle {
 }
 ```
 
-### 3.3 Timeout Budget
+### 3.3 Timeout budget
 
 | Lifecycle Stage  | Timeout | Action on Timeout                    |
 | ---------------- | ------- | ------------------------------------ |
@@ -268,9 +268,9 @@ interface PluginLifecycle {
 
 ---
 
-## 4. Plugin Types & Extension Contracts
+## 4. Plugin types & extension contracts
 
-### 4.1 Plugin Type Registry
+### 4.1 Plugin type registry
 
 | Plugin Type            | Extension Point          | Host Integration                | Published V1? |
 | ---------------------- | ------------------------ | ------------------------------- | ------------- |
@@ -285,7 +285,7 @@ interface PluginLifecycle {
 | Diagnostics            | `DiagnosticsPlugin`      | Reads diagnostics stream        | V3            |
 | Enterprise Integration | TBD                      | Varies                          | V3+           |
 
-### 4.2 Base Plugin Interface
+### 4.2 Base plugin interface
 
 All plugins implement this base interface:
 
@@ -314,7 +314,7 @@ interface Plugin {
 }
 ```
 
-### 4.3 Extractor Plugin Contract
+### 4.3 Extractor plugin contract
 
 ```typescript
 interface ExtractorPlugin extends Plugin {
@@ -353,7 +353,7 @@ Extractor plugins implement the same `Extractor` interface defined in SPEC-004 �
 - Access to other plugins' data
 - Modification of canonical objects after creation
 
-### 4.4 Rule Pack Plugin Contract
+### 4.4 Rule pack plugin contract
 
 ```typescript
 interface RulePackPlugin extends Plugin {
@@ -384,7 +384,7 @@ Rule pack plugins implement the same `RulePack` contract defined in SPEC-003 §8
 - Overriding built-in rule severities (use Policy Engine instead)
 - Access to the Correlation Engine or Trust Engine
 
-### 4.5 Renderer Plugin Contract
+### 4.5 Renderer plugin contract
 
 ```typescript
 interface RendererPlugin extends Plugin {
@@ -412,7 +412,7 @@ Renderer plugins implement the same `Renderer` interface defined in SPEC-006 §2
 - Access to the analysis pipeline
 - Reading files outside the output directory
 
-### 4.6 AI Consumer Plugin Contract
+### 4.6 AI consumer plugin contract
 
 ```typescript
 interface AiConsumerPlugin extends Plugin {
@@ -444,7 +444,7 @@ AI Consumer plugins consume `AIReadyContext` (from SPEC-003 §7.7) and produce `
 - Reading files from the scanned target
 - Caching or persisting scan data
 
-### 4.7 Terminal Panel Plugin Contract (V2)
+### 4.7 Terminal panel plugin contract (V2)
 
 ```typescript
 interface PanelPlugin extends Plugin {
@@ -476,7 +476,7 @@ interface PanelPlugin extends Plugin {
 - Animation control outside component lifecycle
 - Blocking the main render loop
 
-### 4.8 Theme Plugin Contract (V2)
+### 4.8 Theme plugin contract (V2)
 
 ```typescript
 interface ThemePlugin extends Plugin {
@@ -490,7 +490,7 @@ interface ThemePlugin extends Plugin {
 }
 ```
 
-### 4.9 Exporter Plugin Contract (V2)
+### 4.9 Exporter plugin contract (V2)
 
 ```typescript
 interface ExporterPlugin extends Plugin {
@@ -504,7 +504,7 @@ interface ExporterPlugin extends Plugin {
 }
 ```
 
-### 4.10 Policy Plugin Contract (V2)
+### 4.10 Policy plugin contract (V2)
 
 ```typescript
 interface PolicyPlugin extends Plugin {
@@ -526,9 +526,9 @@ interface PolicyPlugin extends Plugin {
 
 ---
 
-## 5. Plugin SDK Design
+## 5. Plugin SDK design
 
-### 5.1 SDK Layout (Published as `@veris/plugin-sdk`)
+### 5.1 SDK layout (published as `@veris/plugin-sdk`)
 
 ```
 @veris/plugin-sdk/
@@ -562,10 +562,10 @@ interface PolicyPlugin extends Plugin {
 
 **Dependencies:**
 
-- `@veris/core` (types only — no runtime dependency)
+- `@veris/core` (types only: no runtime dependency)
 - Zero additional runtime dependencies
 
-### 5.2 Plugin SDK Helpers
+### 5.2 Plugin SDK helpers
 
 **Logger:**
 
@@ -630,7 +630,7 @@ const result = await plugin.onInit(mockHost.createInitContext());
 expect(result.success).toBe(true);
 ```
 
-### 5.3 SDK Versioning
+### 5.3 SDK versioning
 
 SDK version follows semver independently of the engine:
 
@@ -644,9 +644,9 @@ A plugin's manifest declares `sdkVersion` which is checked at load time.
 
 ---
 
-## 6. Manifest Specification
+## 6. Manifest specification
 
-### 6.1 Manifest File
+### 6.1 Manifest file
 
 Every plugin includes `manifest.json` at its root:
 
@@ -703,7 +703,7 @@ Every plugin includes `manifest.json` at its root:
 }
 ```
 
-### 6.2 Manifest Schema
+### 6.2 Manifest schema
 
 ```typescript
 interface PluginManifest {
@@ -757,7 +757,7 @@ interface PluginManifest {
 }
 ```
 
-### 6.3 Manifest Validation
+### 6.3 Manifest validation
 
 | Check                            | Failure Action                     |
 | -------------------------------- | ---------------------------------- |
@@ -773,9 +773,9 @@ interface PluginManifest {
 
 ---
 
-## 7. Configuration System
+## 7. Configuration system
 
-### 7.1 Configuration Hierarchy
+### 7.1 Configuration hierarchy
 
 ```
 Level 0: Defaults (hardcoded in engine)
@@ -795,7 +795,7 @@ Level 6: Environment variables (VERIS_*)
 
 **Deterministic precedence:** Higher level always overrides lower level. No merging of conflicting values. Objects at lower levels are deep-merged with higher levels.
 
-### 7.2 Configuration Schema
+### 7.2 Configuration schema
 
 ```typescript
 interface VerisConfig {
@@ -844,7 +844,7 @@ interface VerisConfig {
 }
 ```
 
-### 7.3 Configuration File Locations
+### 7.3 Configuration file locations
 
 | Level      | Location                               | Auto-created              |
 | ---------- | -------------------------------------- | ------------------------- |
@@ -853,7 +853,7 @@ interface VerisConfig {
 | Repository | `.verisrc` or `.verisrc.json`          | No (user creates)         |
 | Profile    | `~/.config/veris/profiles/<name>.json` | On `veris profile create` |
 
-### 7.4 Configuration Resolution Algorithm
+### 7.4 Configuration resolution algorithm
 
 ```
 1. Start with deep-cloned defaults
@@ -866,7 +866,7 @@ interface VerisConfig {
 8. Return validated Config object
 ```
 
-### 7.5 Environment Variable Mapping
+### 7.5 Environment variable mapping
 
 | Env Var                 | Config Path           | Example                       |
 | ----------------------- | --------------------- | ----------------------------- |
@@ -879,9 +879,9 @@ interface VerisConfig {
 
 ---
 
-## 8. Scan Profiles
+## 8. Scan profiles
 
-### 8.1 Profile Definition
+### 8.1 Profile definition
 
 ```typescript
 interface ScanProfile {
@@ -923,12 +923,12 @@ interface ScanProfile {
 }
 ```
 
-### 8.2 Built-in Profiles
+### 8.2 Built-in profiles
 
 | Profile          | ID              | Use Case                                 | Rule Packs                                   | Extraction             | Limits       |
 | ---------------- | --------------- | ---------------------------------------- | -------------------------------------------- | ---------------------- | ------------ |
 | Quick            | `quick`         | Rapid feedback during development        | Secrets, Configuration                       | Shallow                | 30s, 100MB   |
-| Balanced         | `balanced`      | Default — good coverage, reasonable time | All standard packs                           | Normal                 | 5min, 512MB  |
+| Balanced         | `balanced`      | Default, good coverage, reasonable time | All standard packs                           | Normal                 | 5min, 512MB  |
 | Deep             | `deep`          | Thorough analysis                        | All packs including experimental             | Deep                   | 30min, 2GB   |
 | Forensics        | `forensics`     | Malware/triage analysis                  | Execution, Persistence, Network, Obfuscation | Deep, archive depth=10 | 60min, 4GB   |
 | CI               | `ci`            | CI pipeline integration                  | Secrets, Configuration, Injection            | Normal                 | 10min, 512MB |
@@ -936,7 +936,7 @@ interface ScanProfile {
 | Archive Audit    | `archive-audit` | Archive/dependency analysis              | Archives, Secrets, Execution                 | Deep, archive depth=20 | 30min, 1GB   |
 | Large Repository | `large-repo`    | Performance-optimized for large projects | Secrets, Configuration, Injection            | Shallow, max 10K files | 30min, 1GB   |
 
-### 8.3 Profile Merging
+### 8.3 Profile merging
 
 Custom profiles can extend built-in profiles:
 
@@ -958,9 +958,9 @@ The extending profile deep-merges with the base profile. Extended values overrid
 
 ---
 
-## 9. Policy Engine
+## 9. Policy engine
 
-### 9.1 Policy File
+### 9.1 Policy file
 
 ```yaml
 # .verispolicy.yaml
@@ -1011,7 +1011,7 @@ output:
   onFailure: 'html' # Generate HTML report on failure
 ```
 
-### 9.2 Policy Evaluation
+### 9.2 Policy evaluation
 
 ```typescript
 interface PolicyEvaluation {
@@ -1055,7 +1055,7 @@ interface GateResult {
 }
 ```
 
-### 9.3 Policy Enforcement
+### 9.3 Policy enforcement
 
 | Action | Behavior                                               |
 | ------ | ------------------------------------------------------ |
@@ -1063,7 +1063,7 @@ interface GateResult {
 | `warn` | Warning printed, scan continues, exit code 0           |
 | `info` | Informational message printed, scan continues          |
 
-### 9.4 Policy Resolution
+### 9.4 Policy resolution
 
 1. Look for `.verispolicy.yaml`, `.verispolicy.yml`, or `.verispolicy.json` in the scan target root.
 2. If not found, look in `~/.config/veris/policy.yaml`.
@@ -1072,29 +1072,29 @@ interface GateResult {
 
 ---
 
-## 10. Permission Model
+## 10. Permission model
 
-### 10.1 Permission Registry
+### 10.1 Permission registry
 
 | Permission ID        | Scope                           | Default                 | Risk     |
 | -------------------- | ------------------------------- | ----------------------- | -------- |
-| `core-types-read`    | Read canonical object types     | ✅ Always granted       | None     |
-| `config-read`        | Read plugin-specific config     | ✅ Always granted       | None     |
-| `config-write`       | Write to plugin config section  | ❌ User must approve    | Low      |
-| `fs-read-target`     | Read scanned files              | ❌ User must approve    | Medium   |
-| `fs-read-cache`      | Read plugin cache directory     | ❌ User must approve    | Low      |
-| `fs-write-cache`     | Write to plugin cache directory | ❌ User must approve    | Low      |
-| `fs-write-output`    | Write to output directory       | ❌ User must approve    | Low      |
-| `network`            | Make network requests           | ❌ User must approve    | High     |
-| `env-read`           | Read environment variables      | ❌ User must approve    | Medium   |
-| `process-spawn`      | Spawn child processes           | ❌ User must approve    | Critical |
-| `diagnostics-read`   | Read diagnostics stream         | ✅ Always granted       | None     |
-| `ai-context-read`    | Read AI context                 | ✅ Always granted       | None     |
-| `report-read`        | Read the CanonicalReport        | ✅ Always granted       | None     |
-| `other-plugins-read` | Read other plugins' metadata    | ❌ User must approve    | Low      |
-| `ui-component`       | Register UI components          | ✅ Always granted (TUI) | None     |
+| `core-types-read`    | Read canonical object types     | Always granted       | None     |
+| `config-read`        | Read plugin-specific config     | Always granted       | None     |
+| `config-write`       | Write to plugin config section  | User must approve    | Low      |
+| `fs-read-target`     | Read scanned files              | User must approve    | Medium   |
+| `fs-read-cache`      | Read plugin cache directory     | User must approve    | Low      |
+| `fs-write-cache`     | Write to plugin cache directory | User must approve    | Low      |
+| `fs-write-output`    | Write to output directory       | User must approve    | Low      |
+| `network`            | Make network requests           | User must approve    | High     |
+| `env-read`           | Read environment variables      | User must approve    | Medium   |
+| `process-spawn`      | Spawn child processes           | User must approve    | Critical |
+| `diagnostics-read`   | Read diagnostics stream         | Always granted       | None     |
+| `ai-context-read`    | Read AI context                 | Always granted       | None     |
+| `report-read`        | Read the CanonicalReport        | Always granted       | None     |
+| `other-plugins-read` | Read other plugins' metadata    | User must approve    | Low      |
+| `ui-component`       | Register UI components          | Always granted (TUI) | None     |
 
-### 10.2 Permission Enforcement
+### 10.2 Permission enforcement
 
 ```typescript
 interface PermissionEnforcer {
@@ -1115,7 +1115,7 @@ interface PermissionEnforcer {
 }
 ```
 
-### 10.3 Permission Approval Flow
+### 10.3 Permission approval flow
 
 ```
 Plugin requests permission
@@ -1132,7 +1132,7 @@ Show prompt to user at runtime
   → Deny: Operation fails gracefully, plugin continues with reduced capability
 ```
 
-### 10.4 Permission Groups
+### 10.4 Permission groups
 
 ```json
 {
@@ -1151,9 +1151,9 @@ Plugins requesting permissions from the `dangerous` group trigger additional scr
 
 ---
 
-## 11. Sandboxing Strategy
+## 11. Sandboxing strategy
 
-### 11.1 Isolation Model
+### 11.1 Isolation model
 
 VERIS uses **process-level isolation** for plugins (not VM-level, not thread-level).
 
@@ -1175,7 +1175,7 @@ VERIS uses **process-level isolation** for plugins (not VM-level, not thread-lev
 └─────────────────────┘  └─────────────────────┘
 ```
 
-### 11.2 Process Isolation Details
+### 11.2 Process isolation details
 
 | Property       | Implementation                                   |
 | -------------- | ------------------------------------------------ |
@@ -1188,7 +1188,7 @@ VERIS uses **process-level isolation** for plugins (not VM-level, not thread-lev
 | File system    | Restricted to plugin directory + cache directory |
 | Network        | Blocked unless `network` permission granted      |
 
-### 11.3 API Surface
+### 11.3 API surface
 
 **Available in sandbox:**
 
@@ -1213,7 +1213,7 @@ VERIS uses **process-level isolation** for plugins (not VM-level, not thread-lev
 - Worker                  → Blocked (no sub-processes)
 ```
 
-### 11.4 Crash Recovery
+### 11.4 Crash recovery
 
 ```
 Plugin crash detected
@@ -1239,9 +1239,9 @@ A quarantined plugin is:
 
 ---
 
-## 12. Plugin Packaging & Distribution
+## 12. Plugin packaging & distribution
 
-### 12.1 Package Format
+### 12.1 Package format
 
 Plugins are distributed as **npm packages** with a `veris-plugin` keyword:
 
@@ -1288,7 +1288,7 @@ veris plugin install @acme/veris-plugin-secrets-plus
 6. Prompt user to approve permissions (or auto-approve if configured).
 7. Activate plugin.
 
-### 12.3 Local Installation
+### 12.3 Local installation
 
 Plugins can be installed from a local directory:
 
@@ -1298,7 +1298,7 @@ veris plugin install ./path/to/my-plugin
 
 The plugin is symlinked into the plugin directory for development.
 
-### 12.4 Plugin Discovery
+### 12.4 Plugin discovery
 
 Plugins are discovered from:
 
@@ -1308,9 +1308,9 @@ Plugins are discovered from:
 
 ---
 
-## 13. Plugin Diagnostics
+## 13. Plugin diagnostics
 
-### 13.1 Plugin Load Report
+### 13.1 Plugin load report
 
 ```
 Plugin Load Report:
@@ -1331,7 +1331,7 @@ Failed plugins:
     Resolution: Install @acme/veris-plugin-core@^2.0.0
 ```
 
-### 13.2 Capability Matrix
+### 13.2 Capability matrix
 
 ```
 Capability Matrix:
@@ -1350,7 +1350,7 @@ Total capabilities:
   • 0 extractors
 ```
 
-### 13.3 Permission Usage
+### 13.3 Permission usage
 
 ```
 Permission Usage:
@@ -1368,7 +1368,7 @@ Permission Usage:
 Permission violations: 0
 ```
 
-### 13.4 Performance Report
+### 13.4 Performance report
 
 ```
 Plugin Performance Report:
@@ -1385,7 +1385,7 @@ Total plugin memory: 14.8 MB
 Total plugin CPU: 2.3% of scan time
 ```
 
-### 13.5 Configuration Resolution Trace
+### 13.5 Configuration resolution trace
 
 ```
 Configuration Resolution Trace:
@@ -1398,7 +1398,7 @@ Configuration Resolution Trace:
   Level 6 (Env):       VERIS_DIAGNOSTICS=true → diagnostics.enabled = true
 ```
 
-### 13.6 Policy Evaluation Trace
+### 13.6 Policy evaluation trace
 
 ```
 Policy Evaluation Trace:
@@ -1430,7 +1430,7 @@ Policy Evaluation Trace:
 
 ## 14. Security Considerations
 
-### 14.1 Threat Model
+### 14.1 Threat model
 
 | Threat                                 | Impact                  | Mitigation                                    |
 | -------------------------------------- | ----------------------- | --------------------------------------------- |
@@ -1442,7 +1442,7 @@ Policy Evaluation Trace:
 | Plugin reads other plugin data         | Privacy violation       | Process isolation, IPC only                   |
 | Plugin modifies files outside scope    | Data integrity          | Sandboxed FS, restricted paths                |
 
-### 14.2 Supply Chain Security
+### 14.2 Supply chain security
 
 | Measure                | Implementation                                          |
 | ---------------------- | ------------------------------------------------------- |
@@ -1452,7 +1452,7 @@ Policy Evaluation Trace:
 | Permission review      | All permissions reviewed at install time                |
 | Audit log              | All plugin operations logged                            |
 
-### 14.3 Plugin Signing (V2+)
+### 14.3 Plugin signing (V2+)
 
 - Plugins can be signed with a private key.
 - Signature is stored in `manifest.metadata.signature`.
@@ -1463,7 +1463,7 @@ Policy Evaluation Trace:
 
 ## 15. Performance Considerations
 
-### 15.1 Plugin Overhead Budget
+### 15.1 Plugin overhead budget
 
 | Metric                    | Budget             |
 | ------------------------- | ------------------ |
@@ -1474,7 +1474,7 @@ Policy Evaluation Trace:
 | Total plugin overhead     | ≤ 10% of scan time |
 | Total plugin memory       | ≤ 256 MB           |
 
-### 15.2 Optimization Techniques
+### 15.2 Optimization techniques
 
 | Technique                      | Applied To          | Expected Gain                              |
 | ------------------------------ | ------------------- | ------------------------------------------ |
@@ -1486,7 +1486,7 @@ Policy Evaluation Trace:
 
 ---
 
-## 16. Future Compatibility
+## 16. Future compatibility
 
 ### 16.1 Marketplace (V3+)
 
@@ -1496,64 +1496,64 @@ Policy Evaluation Trace:
 - Signed plugin verification.
 - Automatic update checking.
 
-### 16.2 Organization Plugin Repositories (V3+)
+### 16.2 Organization plugin repositories (V3+)
 
 - Private npm registry for organization plugins.
 - `veris plugin add-registry https://npm.corp.com/`.
 - Organization-wide plugin policies.
 
-### 16.3 Signed Plugins (V2+)
+### 16.3 Signed plugins (V2+)
 
 - Plugins signed with GPG or Sigstore.
 - Signature verified at load time.
 - Unsigned plugin warning.
 
-### 16.4 Cloud Sync (Optional)
+### 16.4 Cloud Sync (optional)
 
 - Plugin configuration synced across machines.
 - Permission decisions synced.
 - Plugin list synced.
 
-### 16.5 Enterprise Bundles (V4+)
+### 16.5 Enterprise bundles (V4+)
 
 - Pre-configured plugin bundles for enterprise customers.
 - Compliance-specific plugin sets (PCI-DSS bundle, SOC2 bundle).
 - Centralized management.
 
-### 16.6 Remote Execution (Optional)
+### 16.6 Remote execution (optional)
 
 - Plugins can run on a remote server (for heavy AI processing).
 - Local sandbox still validates and mediates all calls.
 
 ---
 
-## 17. Engineering Tradeoffs
+## 17. Engineering tradeoffs
 
-### 17.1 Process Isolation vs. Thread Isolation
+### 17.1 Process isolation vs. thread isolation
 
 **Tradeoff:** Process isolation is stronger (separate memory space, crash isolation) but slower (IPC overhead). Thread isolation is faster but weaker (shared memory, crash can affect host).
 
 **Decision:** Process isolation for all plugins. Security and reliability outweigh the IPC overhead. Plugin calls are infrequent enough that IPC latency is negligible.
 
-### 17.2 Permission Prompt at Install vs. Runtime
+### 17.2 Permission prompt at install vs. runtime
 
 **Tradeoff:** Install-time permission prompts are convenient but may lead to "prompt fatigue" where users approve everything. Runtime prompts are safer but interrupt workflow.
 
 **Decision:** Install-time prompts for required permissions. Runtime prompts for optional permissions that are rarely used. Pre-approval via config for CI environments.
 
-### 17.3 Full SDK vs. Minimal SDK
+### 17.3 Full SDK vs. minimal SDK
 
 **Tradeoff:** Full SDK (includes helper utilities, testing framework, type definitions) is more convenient for plugin authors but increases SDK surface area and versioning burden. Minimal SDK is easier to maintain but harder to develop with.
 
 **Decision:** Full SDK with helper utilities and testing framework. SDK is versioned independently. Breaking changes to SDK trigger major version bumps.
 
-### 17.4 Plugin Registry vs. Filesystem Discovery
+### 17.4 Plugin registry vs. filesystem discovery
 
 **Tradeoff:** A plugin registry (database of installed plugins) provides querying, dependency resolution, and management but adds complexity. Filesystem discovery (scan a directory) is simpler but lacks management features.
 
 **Decision:** Filesystem discovery for V1 (scan `plugins/node_modules/`). Plugin registry is a V2 enhancement.
 
-### 17.5 Sandbox Strictness vs. Plugin Capability
+### 17.5 Sandbox Strictness vs. plugin capability
 
 **Tradeoff:** Strict sandboxing (blocked APIs, limited permissions) is more secure but may limit what plugins can do. Loose sandboxing enables more powerful plugins but increases risk.
 
@@ -1561,14 +1561,14 @@ Policy Evaluation Trace:
 
 ---
 
-## 18. Common Mistakes to Avoid
+## 18. Common Mistakes to avoid
 
-### 18.1 Plugins Modifying Canonical Objects
+### 18.1 Plugins modifying canonical objects
 
 **Mistake:** A plugin adds fields to a Finding or modifies the RiskProfile, making the output non-deterministic and unreproducible without the plugin.
 **Prevention:** Canonical objects are frozen. Plugins can read them but never write them. Plugin data is stored in the `metadata` field as opaque JSON.
 
-### 18.2 Plugin Bypassing the Analysis Pipeline
+### 18.2 Plugin bypassing the analysis pipeline
 
 **Mistake:** An extractor plugin directly emits Findings or Behaviors instead of Features, bypassing the Knowledge Layer and Rule Engine.
 **Prevention:** Plugin type contracts enforce the correct output type. An extractor plugin's `extract()` return type is `ExtractionResult`, not `Finding[]`.
@@ -1578,73 +1578,73 @@ Policy Evaluation Trace:
 **Mistake:** A plugin requests all permissions "just in case," including network and filesystem access, when it only needs config read.
 **Prevention:** Permission review at install time. Permissions are granular. "Request what you need, not what you might want."
 
-### 18.4 Plugin Dependency Hell
+### 18.4 Plugin dependency hell
 
 **Mistake:** Plugin A depends on v1 of Plugin B, and Plugin C depends on v2 of Plugin B, causing version conflicts.
 **Prevention:** Process isolation means each plugin has its own dependencies. No shared plugin runtime. Version conflicts only prevent loading.
 
-### 18.5 Assuming Network Availability
+### 18.5 Assuming network availability
 
 **Mistake:** An AI consumer plugin blocks if the API endpoint is unreachable, preventing the scan from completing.
 **Prevention:** AI consumers are optional enhancements. If network is unavailable or the API call fails, the plugin degrades gracefully (no AI explanation generated, scan continues).
 
-### 18.6 Plugin Leaking Memory Across Sessions
+### 18.6 Plugin Leaking memory across sessions
 
 **Mistake:** A plugin caches data in a global variable that persists across scan sessions, causing memory growth.
 **Prevention:** Plugin processes are created per-scan and destroyed after the scan. No state persists between sessions unless explicitly written to the cache directory.
 
-### 18.7 Ignoring Plugin Performance
+### 18.7 Ignoring plugin performance
 
 **Mistake:** A slow plugin (e.g., 500ms per extraction call) is not noticed until users complain about scan times.
 **Prevention:** Performance budgets are declared in the manifest and enforced by the host. A plugin that exceeds its declared budget is flagged in diagnostics.
 
-### 18.8 Plugin Impersonation
+### 18.8 Plugin impersonation
 
 **Mistake:** A malicious plugin uses the same ID as a legitimate plugin to hijack its functionality.
 **Prevention:** Plugin IDs are scoped (npm-style `@scope/name`). The host checks for duplicate IDs at load time. Signature verification (V2+) prevents impersonation.
 
-### 18.9 Configuration Leakage
+### 18.9 Configuration leakage
 
 **Mistake:** A plugin's configuration contains sensitive data (API keys) that are logged or exposed in diagnostics.
 **Prevention:** Configuration values matching sensitive patterns (`apiKey`, `token`, `password`) are masked in logs and diagnostics.
 
-### 18.10 Plugin Assume Core Version
+### 18.10 Plugin Assume core version
 
 **Mistake:** A plugin uses an API that was removed in the current engine version, causing a load failure.
 **Prevention:** Manifest declares `minEngineVersion` and `maxEngineVersion`. The host checks compatibility before loading. SDK versioning ensures API stability.
 
 ---
 
-## 19. Final Recommendations
+## 19. Final recommendations
 
-### 19.1 Implementation Order
+### 19.1 Implementation order
 
 | Phase        | Components                                                  | Rationale                                      |
 | ------------ | ----------------------------------------------------------- | ---------------------------------------------- |
-| **Phase 1**  | Plugin manifest schema, validation pipeline                 | Foundation — needed before any plugin can load |
-| **Phase 2**  | Plugin Host core (loader, lifecycle, basic sandbox)         | Core infrastructure                            |
-| **Phase 3**  | Plugin SDK (`@veris/plugin-sdk`) with contracts and helpers | Published separately                           |
-| **Phase 4**  | Extractor plugin type (first plugin type to ship)           | Most impactful extension point                 |
-| **Phase 5**  | Rule pack plugin type                                       | Second extension point                         |
-| **Phase 6**  | Configuration system (hierarchical, file-based, env-based)  | Needed by everything                           |
-| **Phase 7**  | Scan profiles (quick, balanced, deep, CI)                   | Usability                                      |
-| **Phase 8**  | Permission model and enforcement                            | Security                                       |
-| **Phase 9**  | Renderer, AI Consumer, Exporter plugin types                | Additional extension points                    |
-| **Phase 10** | Policy engine                                               | Enterprise readiness                           |
-| **Phase 11** | Sandboxing and crash recovery                               | Robustness                                     |
-| **Phase 12** | Diagnostics system                                          | Developer experience                           |
-| **V2+**      | Panel, Theme, Policy plugin types                           | Advanced extensibility                         |
+| Phase 1  | Plugin manifest schema, validation pipeline                 | Foundation, needed before any plugin can load |
+| Phase 2  | Plugin Host core (loader, lifecycle, basic sandbox)         | Core infrastructure                            |
+| Phase 3  | Plugin SDK (`@veris/plugin-sdk`) with contracts and helpers | Published separately                           |
+| Phase 4  | Extractor plugin type (first plugin type to ship)           | Most impactful extension point                 |
+| Phase 5  | Rule pack plugin type                                       | Second extension point                         |
+| Phase 6  | Configuration system (hierarchical, file-based, env-based)  | Needed by everything                           |
+| Phase 7  | Scan profiles (quick, balanced, deep, CI)                   | Usability                                      |
+| Phase 8  | Permission model and enforcement                            | Security                                       |
+| Phase 9  | Renderer, AI Consumer, Exporter plugin types                | Additional extension points                    |
+| Phase 10 | Policy engine                                               | Enterprise readiness                           |
+| Phase 11 | Sandboxing and crash recovery                               | Robustness                                     |
+| Phase 12 | Diagnostics system                                          | Developer experience                           |
+| V2+      | Panel, Theme, Policy plugin types                           | Advanced extensibility                         |
 
-### 19.2 Critical Success Factors
+### 19.2 Critical success factors
 
-1. **SDK before host.** Publish the Plugin SDK as the first deliverable. Plugin authors should be able to develop and test plugins before the host is complete (using mock host).
-2. **Permission model from day one.** It's much harder to add permissions after plugins already have unrestricted access.
-3. **Plugin isolation is non-negotiable.** Process isolation, memory limits, timeouts, and crash recovery are not optional. A crashing plugin must never crash the host.
-4. **Configuration hierarchy must be deterministic.** Users must be able to trace exactly which config value was used and why.
-5. **Policy engine is the enterprise differentiator.** The ability to define compliance gates and risk thresholds is what makes VERIS enterprise-ready.
-6. **Plugin performance is monitored, not assumed.** Every plugin has a declared performance budget. The host measures and reports actual performance.
+1. SDK before host. Publish the Plugin SDK as the first deliverable. Plugin authors should be able to develop and test plugins before the host is complete (using mock host).
+2. Permission model from day one. It's much harder to add permissions after plugins already have unrestricted access.
+3. Plugin isolation is non-negotiable. Process isolation, memory limits, timeouts, and crash recovery are not optional. A crashing plugin must never crash the host.
+4. Configuration hierarchy must be deterministic. Users must be able to trace exactly which config value was used and why.
+5. Policy engine is the enterprise differentiator. The ability to define compliance gates and risk thresholds is what makes VERIS enterprise-ready.
+6. Plugin performance is monitored, not assumed. Every plugin has a declared performance budget. The host measures and reports actual performance.
 
-### 19.3 Architectural Invariants
+### 19.3 Architectural invariants
 
 ```
 1. The core engine is inviolable. Plugins never modify canonical objects.

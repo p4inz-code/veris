@@ -1,4 +1,4 @@
-# VERIS Knowledge Taxonomy & Canonical Data Model — SPEC-002
+# VERIS knowledge taxonomy & canonical data model: SPEC-002
 
 **Status:** Frozen  
 **Version:** 1.0  
@@ -7,7 +7,7 @@
 
 ---
 
-## Table of Contents
+## Table of contents
 
 1. [Pipeline Overview](#1-pipeline-overview)
 2. [Design Philosophy](#2-design-philosophy)
@@ -59,7 +59,7 @@
 
 ---
 
-## 1. Pipeline Overview
+## 1. Pipeline overview
 
 The VERIS analysis pipeline is frozen as:
 
@@ -106,9 +106,9 @@ The VERIS analysis pipeline is frozen as:
 
 ---
 
-## 2. Design Philosophy
+## 2. Design philosophy
 
-### 2.1 Deterministic Analysis
+### 2.1 Deterministic analysis
 
 Given the same input (same files, same rules, same taxonomy), the engine must produce the same output. No randomness, no non-determinism, no AI approximation in the analysis pipeline.
 
@@ -138,7 +138,7 @@ Every object has a factory function for test construction. Factories produce val
 
 ---
 
-## 3. Canonical Objects
+## 3. Canonical objects
 
 ### 3.1 ScanSession
 
@@ -155,24 +155,24 @@ Every object has a factory function for test construction. Factories produce val
 
 | Field           | Type                     | Required | Description                                           |
 | --------------- | ------------------------ | -------- | ----------------------------------------------------- |
-| `id`            | `SessionId`              | ✓        | Globally unique session identifier                    |
-| `schemaVersion` | `string`                 | ✓        | Data model schema version (semver)                    |
-| `engineVersion` | `string`                 | ✓        | VERIS engine version that produced this session       |
-| `startedAt`     | `ISO8601`                | ✓        | Start timestamp                                       |
-| `completedAt`   | `ISO8601`                | ✓        | Completion timestamp                                  |
-| `durationMs`    | `number`                 | ✓        | `completedAt - startedAt`                             |
-| `config`        | `SessionConfig`          | ✓        | Snapshot of scan configuration                        |
-| `environment`   | `EnvironmentInfo`        | ✓        | OS, platform, runtime metadata                        |
-| `artifactCount` | `number`                 | ✓        | Total artifacts processed                             |
-| `findingCount`  | `number`                 | ✓        | Total findings generated                              |
-| `status`        | `SessionStatus`          | ✓        | `"completed" \| "partial" \| "failed" \| "cancelled"` |
+| `id`            | `SessionId`              | | Globally unique session identifier                    |
+| `schemaVersion` | `string`                 | | Data model schema version (semver)                    |
+| `engineVersion` | `string`                 | | VERIS engine version that produced this session       |
+| `startedAt`     | `ISO8601`                | | Start timestamp                                       |
+| `completedAt`   | `ISO8601`                | | Completion timestamp                                  |
+| `durationMs`    | `number`                 | | `completedAt - startedAt`                             |
+| `config`        | `SessionConfig`          | | Snapshot of scan configuration                        |
+| `environment`   | `EnvironmentInfo`        | | OS, platform, runtime metadata                        |
+| `artifactCount` | `number`                 | | Total artifacts processed                             |
+| `findingCount`  | `number`                 | | Total findings generated                              |
+| `status`        | `SessionStatus`          | | `"completed" \| "partial" \| "failed" \| "cancelled"` |
 | `errors`        | `SessionError[]`         |          | Non-fatal errors during scan                          |
 | `tags`          | `Record<string, string>` |          | User-defined tags for categorization                  |
 
 **Relationships:**
 
-- **Parent of:** `Artifact[]` (via `sessionId`)
-- **Owned by:** User/CI system (external ownership)
+- Parent of: `Artifact[]` (via `sessionId`)
+- Owned by: User/CI system (external ownership)
 
 **Lifecycle:**
 
@@ -203,20 +203,20 @@ Every object has a factory function for test construction. Factories produce val
 
 | Field            | Type                      | Required | Description                                                           |
 | ---------------- | ------------------------- | -------- | --------------------------------------------------------------------- |
-| `id`             | `ArtifactId`              | ✓        | Content-derived deterministic ID                                      |
-| `sessionId`      | `SessionId`               | ✓        | Owning session                                                        |
-| `parentId`       | `ArtifactId \| null`      | ✓        | Parent artifact if extracted from another (e.g., file inside archive) |
-| `type`           | `ArtifactType`            | ✓        | Normalized type classification                                        |
+| `id`             | `ArtifactId`              | | Content-derived deterministic ID                                      |
+| `sessionId`      | `SessionId`               | | Owning session                                                        |
+| `parentId`       | `ArtifactId \| null`      | | Parent artifact if extracted from another (e.g., file inside archive) |
+| `type`           | `ArtifactType`            | | Normalized type classification                                        |
 | `subType`        | `string`                  |          | Further classification (e.g., "ELF", "PE", "Mach-O" for executables)  |
 | `originalPath`   | `string`                  |          | Original filesystem path or identifier                                |
-| `normalizedPath` | `string`                  | ✓        | Cross-platform normalized path                                        |
-| `size`           | `number`                  | ✓        | Size in bytes                                                         |
-| `contentHash`    | `ContentHash`             | ✓        | SHA-256 hash of content (or BLAKE3)                                   |
-| `mimeType`       | `string`                  | ✓        | Detected or declared MIME type                                        |
+| `normalizedPath` | `string`                  | | Cross-platform normalized path                                        |
+| `size`           | `number`                  | | Size in bytes                                                         |
+| `contentHash`    | `ContentHash`             | | SHA-256 hash of content (or BLAKE3)                                   |
+| `mimeType`       | `string`                  | | Detected or declared MIME type                                        |
 | `encoding`       | `string`                  |          | Detected text encoding (for textual artifacts)                        |
 | `metadata`       | `Record<string, unknown>` |          | Extractor-specific metadata (e.g., ELF sections, PE imports)          |
-| `extractedAt`    | `ISO8601`                 | ✓        | When the artifact was extracted                                       |
-| `extractorId`    | `string`                  | ✓        | ID of the extractor that produced this artifact                       |
+| `extractedAt`    | `ISO8601`                 | | When the artifact was extracted                                       |
+| `extractorId`    | `string`                  | | ID of the extractor that produced this artifact                       |
 
 **ArtifactType enum (open):**
 
@@ -228,9 +228,9 @@ Every object has a factory function for test construction. Factories produce val
 
 **Relationships:**
 
-- **Child of:** `ScanSession` (via `sessionId`)
-- **Parent of:** `Feature[]` (via `artifactId`)
-- **Sibling of:** Other Artifacts sharing the same `sessionId` and `parentId`
+- Child of: `ScanSession` (via `sessionId`)
+- Parent of: `Feature[]` (via `artifactId`)
+- Sibling of: Other Artifacts sharing the same `sessionId` and `parentId`
 
 **Lifecycle:**
 
@@ -240,7 +240,7 @@ Every object has a factory function for test construction. Factories produce val
 
 **Serialization:** Content hash is stored; actual content is optionally stored (for inline reports) or referenced by hash (for external blob stores).
 
-**Versioning:** `ArtifactType` enum is open — new types are additive. Removal of a type is major.
+**Versioning:** `ArtifactType` enum is open, new types are additive. Removal of a type is major.
 
 **Immutability:** Fully immutable after creation.
 
@@ -248,7 +248,7 @@ Every object has a factory function for test construction. Factories produce val
 
 ### 3.3 Feature
 
-**Purpose:** A discrete, atomic piece of data extracted from an Artifact. Features are the lowest-level analytical unit — the "atoms" that behaviors are built from.
+**Purpose:** A discrete, atomic piece of data extracted from an Artifact. Features are the lowest-level analytical unit. The "atoms" that behaviors are built from.
 
 **Responsibilities:**
 
@@ -261,13 +261,13 @@ Every object has a factory function for test construction. Factories produce val
 
 | Field        | Type                      | Required | Description                                              |
 | ------------ | ------------------------- | -------- | -------------------------------------------------------- |
-| `id`         | `FeatureId`               | ✓        | Deterministic ID derived from artifact + location + type |
-| `artifactId` | `ArtifactId`              | ✓        | Source artifact                                          |
-| `sessionId`  | `SessionId`               | ✓        | Owning session                                           |
-| `type`       | `FeatureType`             | ✓        | Classification of the feature                            |
-| `value`      | `FeatureValue`            | ✓        | The extracted value                                      |
-| `location`   | `SourceLocation`          | ✓        | Source location in the artifact                          |
-| `confidence` | `number`                  | ✓        | Confidence score [0.0, 1.0]                              |
+| `id`         | `FeatureId`               | | Deterministic ID derived from artifact + location + type |
+| `artifactId` | `ArtifactId`              | | Source artifact                                          |
+| `sessionId`  | `SessionId`               | | Owning session                                           |
+| `type`       | `FeatureType`             | | Classification of the feature                            |
+| `value`      | `FeatureValue`            | | The extracted value                                      |
+| `location`   | `SourceLocation`          | | Source location in the artifact                          |
+| `confidence` | `number`                  | | Confidence score [0.0, 1.0]                              |
 | `metadata`   | `Record<string, unknown>` |          | Extractor-specific context                               |
 
 **FeatureType enum (open):**
@@ -309,9 +309,9 @@ type FeatureValue =
 
 **Relationships:**
 
-- **Child of:** `Artifact` (via `artifactId`)
-- **Parent of:** `Behavior` (via `featureIds[]`)
-- **Peer of:** Other Features from the same Artifact
+- Child of: `Artifact` (via `artifactId`)
+- Parent of: `Behavior` (via `featureIds[]`)
+- Peer of: Other Features from the same Artifact
 
 **Lifecycle:**
 
@@ -327,7 +327,7 @@ type FeatureValue =
 
 ### 3.4 Behavior
 
-**Purpose:** A normalized, language-agnostic behavioral observation derived from one or more Features. Behaviors use the canonical taxonomy vocabulary — all language/format-specific details are abstracted away.
+**Purpose:** A normalized, language-agnostic behavioral observation derived from one or more Features. Behaviors use the canonical taxonomy vocabulary. All language/format-specific details are abstracted away.
 
 **Responsibilities:**
 
@@ -340,21 +340,21 @@ type FeatureValue =
 
 | Field        | Type                      | Required | Description                          |
 | ------------ | ------------------------- | -------- | ------------------------------------ |
-| `id`         | `BehaviorId`              | ✓        | Deterministic ID                     |
-| `artifactId` | `ArtifactId`              | ✓        | Source artifact                      |
-| `sessionId`  | `SessionId`               | ✓        | Owning session                       |
-| `taxonomyId` | `TaxonomyId`              | ✓        | Canonical taxonomy node identifier   |
-| `featureIds` | `FeatureId[]`             | ✓        | Features that produced this behavior |
-| `confidence` | `number`                  | ✓        | Combined confidence [0.0, 1.0]       |
+| `id`         | `BehaviorId`              | | Deterministic ID                     |
+| `artifactId` | `ArtifactId`              | | Source artifact                      |
+| `sessionId`  | `SessionId`               | | Owning session                       |
+| `taxonomyId` | `TaxonomyId`              | | Canonical taxonomy node identifier   |
+| `featureIds` | `FeatureId[]`             | | Features that produced this behavior |
+| `confidence` | `number`                  | | Combined confidence [0.0, 1.0]       |
 | `properties` | `Record<string, unknown>` |          | Behavior-specific properties         |
 | `metadata`   | `Record<string, unknown>` |          | Classifier metadata                  |
 
 **Relationships:**
 
-- **Child of:** `Artifact` (via `artifactId`)
-- **Derived from:** `Feature[]` (via `featureIds`)
-- **Parent of:** `Evidence` (via `behaviorId`)
-- **Consumed by:** `BehaviorChain` (via `behaviorIds[]`)
+- Child of: `Artifact` (via `artifactId`)
+- Derived from: `Feature[]` (via `featureIds`)
+- Parent of: `Evidence` (via `behaviorId`)
+- Consumed by: `BehaviorChain` (via `behaviorIds[]`)
 
 **Lifecycle:**
 
@@ -370,7 +370,7 @@ type FeatureValue =
 
 ### 3.5 Evidence
 
-**Purpose:** The binding between a Behavior and the specific Rule that matched it. Evidence is the "because" — the concrete proof that a rule triggered.
+**Purpose:** The binding between a Behavior and the specific Rule that matched it. Evidence is the "because", the concrete proof that a rule triggered.
 
 **Responsibilities:**
 
@@ -383,14 +383,14 @@ type FeatureValue =
 
 | Field               | Type                      | Required | Description                                                |
 | ------------------- | ------------------------- | -------- | ---------------------------------------------------------- |
-| `id`                | `EvidenceId`              | ✓        | Deterministic ID                                           |
-| `ruleId`            | `RuleId`                  | ✓        | The Rule that matched                                      |
-| `behaviorId`        | `BehaviorId`              | ✓        | The Behavior that was matched                              |
-| `findingId`         | `FindingId`               | ✓        | The Finding this evidence supports                         |
-| `sessionId`         | `SessionId`               | ✓        | Owning session                                             |
-| `matchedProperties` | `Record<string, unknown>` | ✓        | The subset of behavior properties that triggered the match |
-| `matchDetail`       | `MatchDetail`             | ✓        | How the rule matched (pattern, heuristic, composite)       |
-| `confidence`        | `number`                  | ✓        | Confidence contributed to the finding [0.0, 1.0]           |
+| `id`                | `EvidenceId`              | | Deterministic ID                                           |
+| `ruleId`            | `RuleId`                  | | The Rule that matched                                      |
+| `behaviorId`        | `BehaviorId`              | | The Behavior that was matched                              |
+| `findingId`         | `FindingId`               | | The Finding this evidence supports                         |
+| `sessionId`         | `SessionId`               | | Owning session                                             |
+| `matchedProperties` | `Record<string, unknown>` | | The subset of behavior properties that triggered the match |
+| `matchDetail`       | `MatchDetail`             | | How the rule matched (pattern, heuristic, composite)       |
+| `confidence`        | `number`                  | | Confidence contributed to the finding [0.0, 1.0]           |
 
 **MatchDetail (discriminated union):**
 
@@ -411,9 +411,9 @@ type MatchDetail =
 
 **Relationships:**
 
-- **Child of:** `Finding` (via `findingId`)
-- **References:** `Behavior` (via `behaviorId`) and `Rule` (via `ruleId`)
-- **Peer of:** Other Evidence under the same Finding
+- Child of: `Finding` (via `findingId`)
+- References: `Behavior` (via `behaviorId`) and `Rule` (via `ruleId`)
+- Peer of: Other Evidence under the same Finding
 
 **Lifecycle:**
 
@@ -440,14 +440,14 @@ type MatchDetail =
 
 | Field         | Type           | Required | Description                               |
 | ------------- | -------------- | -------- | ----------------------------------------- |
-| `id`          | `RuleId`       | ✓        | Unique, human-readable, stable identifier |
-| `packId`      | `string`       | ✓        | Rule pack it belongs to                   |
-| `version`     | `string`       | ✓        | Rule version (semver)                     |
-| `name`        | `string`       | ✓        | Human-readable name                       |
-| `description` | `string`       | ✓        | What this rule detects                    |
-| `severity`    | `Severity`     | ✓        | Severity level                            |
-| `taxonomyIds` | `TaxonomyId[]` | ✓        | Behavior taxonomy nodes this rule matches |
-| `matchLogic`  | `RuleLogic`    | ✓        | The matching logic                        |
+| `id`          | `RuleId`       | | Unique, human-readable, stable identifier |
+| `packId`      | `string`       | | Rule pack it belongs to                   |
+| `version`     | `string`       | | Rule version (semver)                     |
+| `name`        | `string`       | | Human-readable name                       |
+| `description` | `string`       | | What this rule detects                    |
+| `severity`    | `Severity`     | | Severity level                            |
+| `taxonomyIds` | `TaxonomyId[]` | | Behavior taxonomy nodes this rule matches |
+| `matchLogic`  | `RuleLogic`    | | The matching logic                        |
 | `metadata`    | `RuleMetadata` |          | Author, references, tags, CWE mappings    |
 
 **Severity:**
@@ -459,7 +459,7 @@ type Severity = {
 };
 ```
 
-**RuleLogic (discriminated union — declarative only):**
+**RuleLogic (discriminated union, declarative only):**
 
 ```typescript
 type RuleLogic =
@@ -487,9 +487,9 @@ type RuleLogic =
 
 **Relationships:**
 
-- **Referenced by:** `Evidence` (via `ruleId`)
-- **Owned by:** `RulePack`
-- **N/A:** Rules are not created during a scan session; they are loaded from rule packs
+- Referenced by: `Evidence` (via `ruleId`)
+- Owned by: `RulePack`
+- N/A: Rules are not created during a scan session; they are loaded from rule packs
 
 **Lifecycle:**
 
@@ -519,26 +519,26 @@ type RuleLogic =
 
 | Field             | Type                  | Required | Description                        |
 | ----------------- | --------------------- | -------- | ---------------------------------- |
-| `id`              | `RuleResultId`        | ✓        | Deterministic ID                   |
-| `ruleId`          | `RuleId`              | ✓        | The rule that was applied          |
-| `behaviorIds`     | `BehaviorId[]`        | ✓        | Behaviors involved in the match    |
-| `matched`         | `boolean`             | ✓        | Whether the rule matched           |
-| `confidence`      | `number`              | ✓        | Confidence in the match [0.0, 1.0] |
+| `id`              | `RuleResultId`        | | Deterministic ID                   |
+| `ruleId`          | `RuleId`              | | The rule that was applied          |
+| `behaviorIds`     | `BehaviorId[]`        | | Behaviors involved in the match    |
+| `matched`         | `boolean`             | | Whether the rule matched           |
+| `confidence`      | `number`              | | Confidence in the match [0.0, 1.0] |
 | `matchDetail`     | `MatchDetail \| null` |          | Match detail if matched            |
-| `executionTimeMs` | `number`              | ✓        | How long the rule took to execute  |
-| `sessionId`       | `SessionId`           | ✓        | Owning session                     |
+| `executionTimeMs` | `number`              | | How long the rule took to execute  |
+| `sessionId`       | `SessionId`           | | Owning session                     |
 
 **Relationships:**
 
-- **References:** `Rule` (via `ruleId`), `Behavior[]` (via `behaviorIds`)
-- **Consumed by:** Finding builder (matched results become Evidence)
+- References: `Rule` (via `ruleId`), `Behavior[]` (via `behaviorIds`)
+- Consumed by: Finding builder (matched results become Evidence)
 
 **Lifecycle:**
 
 1. Created when a rule is applied
 2. If matched, contributes to a Finding via Evidence
 3. If not matched, may be logged for debugging/auditing
-4. Short-lived intermediate object — not persisted in reports
+4. Short-lived intermediate object: not persisted in reports
 
 **Immutability:** Fully immutable.
 
@@ -546,7 +546,7 @@ type RuleLogic =
 
 ### 3.8 Finding
 
-**Purpose:** A completed analytical conclusion — a potential security concern with supporting evidence, severity, and traceability. Findings are the primary output consumers care about.
+**Purpose:** A completed analytical conclusion: a potential security concern with supporting evidence, severity, and traceability. Findings are the primary output consumers care about.
 
 **Responsibilities:**
 
@@ -560,20 +560,20 @@ type RuleLogic =
 
 | Field               | Type                      | Required | Description                            |
 | ------------------- | ------------------------- | -------- | -------------------------------------- |
-| `id`                | `FindingId`               | ✓        | Deterministic ID                       |
-| `sessionId`         | `SessionId`               | ✓        | Owning session                         |
-| `ruleId`            | `RuleId`                  | ✓        | The rule that produced this finding    |
+| `id`                | `FindingId`               | | Deterministic ID                       |
+| `sessionId`         | `SessionId`               | | Owning session                         |
+| `ruleId`            | `RuleId`                  | | The rule that produced this finding    |
 | `behaviorChainId`   | `BehaviorChainId \| null` |          | Associated behavior chain              |
-| `title`             | `string`                  | ✓        | Human-readable title                   |
-| `description`       | `string`                  | ✓        | Detailed description                   |
-| `severity`          | `Severity`                | ✓        | Severity level                         |
-| `confidence`        | `number`                  | ✓        | Overall confidence [0.0, 1.0]          |
-| `evidenceIds`       | `EvidenceId[]`            | ✓        | Supporting evidence                    |
-| `affectedArtifacts` | `ArtifactRef[]`           | ✓        | Artifacts involved                     |
+| `title`             | `string`                  | | Human-readable title                   |
+| `description`       | `string`                  | | Detailed description                   |
+| `severity`          | `Severity`                | | Severity level                         |
+| `confidence`        | `number`                  | | Overall confidence [0.0, 1.0]          |
+| `evidenceIds`       | `EvidenceId[]`            | | Supporting evidence                    |
+| `affectedArtifacts` | `ArtifactRef[]`           | | Artifacts involved                     |
 | `recommendationIds` | `RecommendationId[]`      |          | Remediation recommendations            |
-| `taxonomyIds`       | `TaxonomyId[]`            | ✓        | Taxonomy nodes this finding relates to |
+| `taxonomyIds`       | `TaxonomyId[]`            | | Taxonomy nodes this finding relates to |
 | `properties`        | `Record<string, unknown>` |          | Finding-specific properties            |
-| `createdAt`         | `ISO8601`                 | ✓        | When the finding was created           |
+| `createdAt`         | `ISO8601`                 | | When the finding was created           |
 
 **ArtifactRef:**
 
@@ -585,11 +585,11 @@ type RuleLogic =
 
 **Relationships:**
 
-- **Child of:** `ScanSession` (via `sessionId`)
-- **Contains:** `Evidence[]` (via `evidenceIds`)
-- **References:** `Rule` (via `ruleId`)
-- **Optionally in:** `BehaviorChain` (via `behaviorChainId`)
-- **May produce:** `Recommendation` (via `recommendationIds`)
+- Child of: `ScanSession` (via `sessionId`)
+- Contains: `Evidence[]` (via `evidenceIds`)
+- References: `Rule` (via `ruleId`)
+- Optionally in: `BehaviorChain` (via `behaviorChainId`)
+- May produce: `Recommendation` (via `recommendationIds`)
 
 **Lifecycle:**
 
@@ -606,7 +606,7 @@ type RuleLogic =
 
 ### 3.9 BehaviorChain
 
-**Purpose:** A sequence or graph of related Behaviors that, taken together, represent a multi-step pattern. Chains capture tactics — sequences of behaviors that are individually benign but collectively suspicious.
+**Purpose:** A sequence or graph of related Behaviors that, taken together, represent a multi-step pattern. Chains capture tactics, sequences of behaviors that are individually benign but collectively suspicious.
 
 **Responsibilities:**
 
@@ -619,10 +619,10 @@ type RuleLogic =
 
 | Field              | Type                      | Required | Description                             |
 | ------------------ | ------------------------- | -------- | --------------------------------------- |
-| `id`               | `BehaviorChainId`         | ✓        | Deterministic ID                        |
-| `sessionId`        | `SessionId`               | ✓        | Owning session                          |
-| `relationshipType` | `ChainRelationshipType`   | ✓        | How behaviors relate                    |
-| `behaviorIds`      | `BehaviorId[]`            | ✓        | Behaviors in the chain (ordered)        |
+| `id`               | `BehaviorChainId`         | | Deterministic ID                        |
+| `sessionId`        | `SessionId`               | | Owning session                          |
+| `relationshipType` | `ChainRelationshipType`   | | How behaviors relate                    |
+| `behaviorIds`      | `BehaviorId[]`            | | Behaviors in the chain (ordered)        |
 | `findingIds`       | `FindingId[]`             |          | Findings produced from this chain       |
 | `trustImpact`      | `number`                  |          | Impact on trust score [-1.0, 1.0]       |
 | `description`      | `string`                  |          | Human-readable description of the chain |
@@ -643,9 +643,9 @@ type ChainRelationshipType =
 
 **Relationships:**
 
-- **Contains:** `Behavior[]` (via `behaviorIds`)
-- **Contains:** `Finding[]` (via `findingIds`) — findings produced from chain analysis
-- **Consumed by:** TrustProfile builder
+- Contains: `Behavior[]` (via `behaviorIds`)
+- Contains: `Finding[]` (via `findingIds`): findings produced from chain analysis
+- Consumed by: TrustProfile builder
 
 **Lifecycle:**
 
@@ -672,16 +672,16 @@ type ChainRelationshipType =
 
 | Field                 | Type                            | Required | Description                                              |
 | --------------------- | ------------------------------- | -------- | -------------------------------------------------------- |
-| `id`                  | `TrustProfileId`                | ✓        | Deterministic ID                                         |
-| `sessionId`           | `SessionId`                     | ✓        | Owning session                                           |
-| `artifactId`          | `ArtifactId`                    | ✓        | The artifact this trust profile applies to               |
-| `trustScore`          | `number`                        | ✓        | Normalized trust score [0.0 (malicious) – 1.0 (trusted)] |
-| `findingDensity`      | `number`                        | ✓        | Findings per KB of analyzed content                      |
-| `severityBreakdown`   | `Record<SeverityLevel, number>` | ✓        | Count of findings per severity level                     |
+| `id`                  | `TrustProfileId`                | | Deterministic ID                                         |
+| `sessionId`           | `SessionId`                     | | Owning session                                           |
+| `artifactId`          | `ArtifactId`                    | | The artifact this trust profile applies to               |
+| `trustScore`          | `number`                        | | Normalized trust score [0.0 (malicious) – 1.0 (trusted)] |
+| `findingDensity`      | `number`                        | | Findings per KB of analyzed content                      |
+| `severityBreakdown`   | `Record<SeverityLevel, number>` | | Count of findings per severity level                     |
 | `taxonomyBreakdown`   | `Record<TaxonomyId, number>`    |          | Findings per taxonomy node                               |
 | `chainImpact`         | `number`                        |          | Impact of behavior chains on trust [-1.0, 1.0]           |
 | `contributingFactors` | `TrustFactor[]`                 |          | Factors that influenced the score                        |
-| `computedAt`          | `ISO8601`                       | ✓        | When the profile was computed                            |
+| `computedAt`          | `ISO8601`                       | | When the profile was computed                            |
 
 **TrustFactor:**
 
@@ -694,10 +694,10 @@ type ChainRelationshipType =
 
 **Relationships:**
 
-- **Child of:** `ScanSession`
-- **References:** `Artifact` (via `artifactId`)
-- **Derived from:** `Finding[]`, `BehaviorChain[]`
-- **Consumed by:** RiskProfile builder
+- Child of: `ScanSession`
+- References: `Artifact` (via `artifactId`)
+- Derived from: `Finding[]`, `BehaviorChain[]`
+- Consumed by: RiskProfile builder
 
 **Lifecycle:**
 
@@ -724,16 +724,16 @@ type ChainRelationshipType =
 
 | Field                      | Type                                                        | Required | Description                     |
 | -------------------------- | ----------------------------------------------------------- | -------- | ------------------------------- |
-| `id`                       | `RiskProfileId`                                             | ✓        | Deterministic ID                |
-| `sessionId`                | `SessionId`                                                 | ✓        | Owning session                  |
-| `trustProfileId`           | `TrustProfileId`                                            | ✓        | Source trust profile            |
-| `riskScore`                | `number`                                                    | ✓        | Overall risk score [0.0 – 10.0] |
-| `riskLevel`                | `"critical" \| "high" \| "medium" \| "low" \| "negligible"` | ✓        | Categorized risk level          |
-| `maxSeverity`              | `Severity`                                                  | ✓        | Highest severity finding        |
+| `id`                       | `RiskProfileId`                                             | | Deterministic ID                |
+| `sessionId`                | `SessionId`                                                 | | Owning session                  |
+| `trustProfileId`           | `TrustProfileId`                                            | | Source trust profile            |
+| `riskScore`                | `number`                                                    | | Overall risk score [0.0 – 10.0] |
+| `riskLevel`                | `"critical" \| "high" \| "medium" \| "low" \| "negligible"` | | Categorized risk level          |
+| `maxSeverity`              | `Severity`                                                  | | Highest severity finding        |
 | `topFindings`              | `FindingId[]`                                               |          | Highest-risk findings (top 10)  |
 | `riskDrivers`              | `RiskDriver[]`                                              |          | Factors driving the risk score  |
 | `recommendationPriorities` | `RecommendationId[]`                                        |          | Ordered recommendations         |
-| `computedAt`               | `ISO8601`                                                   | ✓        | When computed                   |
+| `computedAt`               | `ISO8601`                                                   | | When computed                   |
 
 **RiskDriver:**
 
@@ -745,10 +745,10 @@ type ChainRelationshipType =
 
 **Relationships:**
 
-- **Derived from:** `TrustProfile` (via `trustProfileId`)
-- **References:** `Finding[]` (via `topFindings`)
-- **References:** `Recommendation[]` (via `recommendationPriorities`)
-- **Consumed by:** CanonicalReport builder
+- Derived from: `TrustProfile` (via `trustProfileId`)
+- References: `Finding[]` (via `topFindings`)
+- References: `Recommendation[]` (via `recommendationPriorities`)
+- Consumed by: CanonicalReport builder
 
 **Lifecycle:**
 
@@ -775,13 +775,13 @@ type ChainRelationshipType =
 
 | Field              | Type                                        | Required | Description                            |
 | ------------------ | ------------------------------------------- | -------- | -------------------------------------- |
-| `id`               | `RecommendationId`                          | ✓        | Deterministic ID                       |
-| `sessionId`        | `SessionId`                                 | ✓        | Owning session                         |
-| `findingIds`       | `FindingId[]`                               | ✓        | Findings this recommendation addresses |
-| `title`            | `string`                                    | ✓        | Short action title                     |
-| `description`      | `string`                                    | ✓        | Steps to remediate                     |
-| `priority`         | `"critical" \| "high" \| "medium" \| "low"` | ✓        | Remediation priority                   |
-| `effort`           | `"minutes" \| "hours" \| "days"`            | ✓        | Estimated remediation effort           |
+| `id`               | `RecommendationId`                          | | Deterministic ID                       |
+| `sessionId`        | `SessionId`                                 | | Owning session                         |
+| `findingIds`       | `FindingId[]`                               | | Findings this recommendation addresses |
+| `title`            | `string`                                    | | Short action title                     |
+| `description`      | `string`                                    | | Steps to remediate                     |
+| `priority`         | `"critical" \| "high" \| "medium" \| "low"` | | Remediation priority                   |
+| `effort`           | `"minutes" \| "hours" \| "days"`            | | Estimated remediation effort           |
 | `autoFixAvailable` | `boolean`                                   |          | Whether an automated fix exists        |
 | `references`       | `ExternalReference[]`                       |          | CWE, OWASP, documentation links        |
 | `codeExamples`     | `CodeExample[]`                             |          | Before/after code examples             |
@@ -796,9 +796,9 @@ type ChainRelationshipType =
 
 **Relationships:**
 
-- **References:** `Finding[]` (via `findingIds`)
-- **Contained in:** `RiskProfile` (via `recommendationPriorities`)
-- **Contained in:** `CanonicalReport`
+- References: `Finding[]` (via `findingIds`)
+- Contained in: `RiskProfile` (via `recommendationPriorities`)
+- Contained in: `CanonicalReport`
 
 **Lifecycle:**
 
@@ -826,17 +826,17 @@ type ChainRelationshipType =
 
 | Field             | Type               | Required | Description                           |
 | ----------------- | ------------------ | -------- | ------------------------------------- |
-| `id`              | `ReportId`         | ✓        | Deterministic ID                      |
-| `session`         | `ScanSession`      | ✓        | Session metadata                      |
-| `artifacts`       | `Artifact[]`       | ✓        | All artifacts analyzed                |
-| `findings`        | `Finding[]`        | ✓        | All findings (with embedded evidence) |
+| `id`              | `ReportId`         | | Deterministic ID                      |
+| `session`         | `ScanSession`      | | Session metadata                      |
+| `artifacts`       | `Artifact[]`       | | All artifacts analyzed                |
+| `findings`        | `Finding[]`        | | All findings (with embedded evidence) |
 | `behaviorChains`  | `BehaviorChain[]`  |          | Detected behavior chains              |
-| `trustProfile`    | `TrustProfile`     | ✓        | Trust assessment                      |
-| `riskProfile`     | `RiskProfile`      | ✓        | Risk assessment                       |
+| `trustProfile`    | `TrustProfile`     | | Trust assessment                      |
+| `riskProfile`     | `RiskProfile`      | | Risk assessment                       |
 | `recommendations` | `Recommendation[]` |          | Remediation recommendations           |
-| `summary`         | `ReportSummary`    | ✓        | High-level summary                    |
+| `summary`         | `ReportSummary`    | | High-level summary                    |
 | `errors`          | `SessionError[]`   |          | Errors encountered during analysis    |
-| `generatedAt`     | `ISO8601`          | ✓        | Report generation timestamp           |
+| `generatedAt`     | `ISO8601`          | | Report generation timestamp           |
 
 **ReportSummary:**
 
@@ -854,15 +854,15 @@ type ChainRelationshipType =
 
 **Relationships:**
 
-- **Contains:** Everything (aggregate root)
-- **Consumed by:** All exporters and renderers
-- **Diffable with:** Another CanonicalReport (for incremental scans)
+- Contains: Everything (aggregate root)
+- Consumed by: All exporters and renderers
+- Diffable with: Another CanonicalReport (for incremental scans)
 
 **Lifecycle:**
 
 1. Created by ReportBuilder after all analysis stages complete
 2. Serialized by Exporters into target formats
-3. Immutable — diffs are computed between two reports, not within one
+3. Immutable: diffs are computed between two reports, not within one
 
 **Versioning:** The `session.schemaVersion` field dictates the schema version of the entire report.
 
@@ -885,13 +885,13 @@ type ChainRelationshipType =
 
 | Field        | Type                      | Required | Description                          |
 | ------------ | ------------------------- | -------- | ------------------------------------ |
-| `id`         | `CapabilityId`            | ✓        | Deterministic ID                     |
-| `artifactId` | `ArtifactId`              | ✓        | Source artifact                      |
-| `name`       | `string`                  | ✓        | Canonical capability name            |
-| `category`   | `CapabilityCategory`      | ✓        | Category of capability               |
+| `id`         | `CapabilityId`            | | Deterministic ID                     |
+| `artifactId` | `ArtifactId`              | | Source artifact                      |
+| `name`       | `string`                  | | Canonical capability name            |
+| `category`   | `CapabilityCategory`      | | Category of capability               |
 | `properties` | `Record<string, unknown>` |          | Capability-specific properties       |
-| `source`     | `SourceLocation`          | ✓        | Where in the artifact this was found |
-| `confidence` | `number`                  | ✓        | Confidence [0.0, 1.0]                |
+| `source`     | `SourceLocation`          | | Where in the artifact this was found |
+| `confidence` | `number`                  | | Confidence [0.0, 1.0]                |
 
 **CapabilityCategory (open):**
 
@@ -927,8 +927,8 @@ type CapabilityCategory =
 
 **Relationships:**
 
-- **Child of:** `Artifact` (via `artifactId`)
-- **Consumed by:** Behavior classifier (capabilities → behaviors)
+- Child of: `Artifact` (via `artifactId`)
+- Consumed by: Behavior classifier (capabilities → behaviors)
 
 **Lifecycle:**
 
@@ -940,19 +940,19 @@ type CapabilityCategory =
 
 ---
 
-## 4. Knowledge Taxonomy
+## 4. Knowledge taxonomy
 
-### 4.1 Design Principles
+### 4.1 Design principles
 
 The taxonomy is:
 
-- **Normalized** — Language/format/OS-specific details are abstracted away
-- **Hierarchical** — Categories have subcategories, max depth 3
-- **Open** — New nodes can be added without breaking existing ones
-- **Mapped** — Every node maps to CWE, OWASP, and/or NIST controls
-- **Stable** — Taxonomy node IDs are permanent; once assigned, never repurposed
+- Normalized: Language/format/OS-specific details are abstracted away
+- Hierarchical: Categories have subcategories, max depth 3
+- Open: New nodes can be added without breaking existing ones
+- Mapped: Every node maps to CWE, OWASP, and/or NIST controls
+- Stable: Taxonomy node IDs are permanent; once assigned, never repurposed
 
-### 4.2 Taxonomy Hierarchy
+### 4.2 Taxonomy hierarchy
 
 ```
 T1000 ── Execution
@@ -1080,7 +1080,7 @@ T90000 ── ── Informational
 │   └── T90990 ── Other Informational
 ```
 
-### 4.3 Taxonomy Node Specification
+### 4.3 Taxonomy node specification
 
 Each taxonomy node is defined as:
 
@@ -1105,7 +1105,7 @@ interface TaxonomyNode {
 }
 ```
 
-### 4.4 Language-Agnostic Normalization Rules
+### 4.4 Language-Agnostic normalization rules
 
 Every extractor maps language-specific constructs to the taxonomy:
 
@@ -1125,21 +1125,21 @@ Every extractor maps language-specific constructs to the taxonomy:
 
 **Invariant:** After normalization, downstream consumers (rules, behaviors, findings) operate exclusively on taxonomy IDs, never on language-specific names.
 
-### 4.5 CWE / OWASP / NIST Mappings
+### 4.5 CWE / OWASP / NIST mappings
 
 Each taxonomy node maps to:
 
-- **CWE:** Common Weakness Enumeration IDs (e.g., T6100 → CWE-73, CWE-22)
-- **OWASP:** OWASP Top 10 / ASVS categories (e.g., T5000 → OWASP-A2:2021)
-- **NIST:** NIST SP 800-53 controls (e.g., T12000 → SC-8, SC-12)
+- CWE: Common Weakness Enumeration IDs (e.g., T6100 → CWE-73, CWE-22)
+- OWASP: OWASP Top 10 / ASVS categories (e.g., T5000 → OWASP-A2:2021)
+- NIST: NIST SP 800-53 controls (e.g., T12000 → SC-8, SC-12)
 
 These mappings are stored in `@veris/knowledge` and are versioned independently.
 
 ---
 
-## 5. Object Relationships
+## 5. Object relationships
 
-### 5.1 Parent-Child Hierarchy
+### 5.1 Parent-Child hierarchy
 
 ```
 ScanSession
@@ -1151,7 +1151,7 @@ ScanSession
                 └── Finding (1)  [owning Finding]
 ```
 
-### 5.2 Reference Graph
+### 5.2 Reference graph
 
 ```
 ScanSession
@@ -1193,7 +1193,7 @@ CanonicalReport
   └── Contains all objects as value aggregates
 ```
 
-### 5.3 Lineage Chains
+### 5.3 Lineage chains
 
 **Finding Traceability (full chain):**
 
@@ -1229,9 +1229,9 @@ RiskProfile (riskScore)
 
 ---
 
-## 6. Object Identity
+## 6. Object identity
 
-### 6.1 Stable ID Strategy
+### 6.1 Stable ID strategy
 
 **Principle:** All IDs must be deterministic and reproducible from the same input. This enables:
 
@@ -1240,7 +1240,7 @@ RiskProfile (riskScore)
 - Incremental scanning (diffing)
 - Distributed analysis (sorted merge)
 
-### 6.2 ID Format
+### 6.2 ID format
 
 ```
 <ObjectPrefix>_<SHA256-of-canonical-content>
@@ -1270,7 +1270,7 @@ art_a1b2c3d4e5f6...
 feat_7890abcd...
 ```
 
-### 6.3 UUID vs Deterministic IDs
+### 6.3 UUID vs deterministic IDs
 
 | When to use UUID                  | When to use Deterministic Hash                  |
 | --------------------------------- | ----------------------------------------------- |
@@ -1282,35 +1282,35 @@ feat_7890abcd...
 
 **Rule:** Objects that should produce the same output on repeated analysis use deterministic IDs. Objects that are inherently one-per-session use UUIDs.
 
-### 6.4 Cross-Report References
+### 6.4 Cross-Report references
 
 - All deterministic IDs are stable across scan sessions on the same input.
 - A Finding ID is stable if the same artifact produces the same matching behaviors.
 - Cross-report references use the deterministic ID of the target object.
 - A cross-report reference map is computed during report diff.
 
-### 6.5 Merge Behavior
+### 6.5 Merge behavior
 
 When merging two reports from the same session or overlapping artifacts:
 
 | Scenario                                 | Strategy                                                     |
 | ---------------------------------------- | ------------------------------------------------------------ |
 | Same deterministic ID, same content      | Deduplicate (keep first)                                     |
-| Same deterministic ID, different content | Conflict — use most recent timestamp, flag as inconsistency  |
+| Same deterministic ID, different content | Conflict, use most recent timestamp, flag as inconsistency  |
 | Different IDs                            | Keep both                                                    |
 | Incremental scan                         | Old findings with no new evidence are marked as `"resolved"` |
 
-### 6.6 Replay Compatibility
+### 6.6 Replay compatibility
 
 A report produced by engine version X can be:
 
-- **Read by** engine version Y where Y >= X (same schema major version)
-- **Diffed against** any other report (IDs are deterministic, so matching IDs across versions is valid as long as the algorithm is stable)
-- **Upgraded** via a migration script if schema major version changes
+- Read by engine version Y where Y >= X (same schema major version)
+- Diffed against any other report (IDs are deterministic, so matching IDs across versions is valid as long as the algorithm is stable)
+- Upgraded via a migration script if schema major version changes
 
 ---
 
-## 7. Object Lifecycle
+## 7. Object lifecycle
 
 ```
                         ┌────────────┐
@@ -1373,46 +1373,46 @@ A report produced by engine version X can be:
 
 **Lifecycle principles:**
 
-1. **Forward flow only.** Once an object is produced, it is consumed by the next stage. No stage revisits previous objects.
-2. **All objects are immutable after creation.** No in-place modifications.
-3. **Stage boundaries are explicit.** Each stage has a well-defined input type and output type.
-4. **Errors are captured at stage boundaries.** If a stage fails, the error is recorded in the ScanSession, and analysis continues with available data.
-5. **Pipeline is cancellable.** A stage can be cancelled (via config or timeout) and downstream stages will operate on partial data.
+1. Forward flow only. Once an object is produced, it is consumed by the next stage. No stage revisits previous objects.
+2. All objects are immutable after creation. No in-place modifications.
+3. Stage boundaries are explicit. Each stage has a well-defined input type and output type.
+4. Errors are captured at stage boundaries. If a stage fails, the error is recorded in the ScanSession, and analysis continues with available data.
+5. Pipeline is cancellable. A stage can be cancelled (via config or timeout) and downstream stages will operate on partial data.
 
 ---
 
-## 8. Validation Rules
+## 8. Validation rules
 
-### 8.1 Object-Level Invariants
+### 8.1 Object-Level invariants
 
 | Object            | Invariant                                                                |
 | ----------------- | ------------------------------------------------------------------------ |
-| **All Objects**   | `id` must be non-empty and unique within its type for the session        |
-| **All Objects**   | `sessionId` must match the owning ScanSession                            |
-| **ScanSession**   | `completedAt >= startedAt`                                               |
-| **ScanSession**   | `durationMs === completedAt - startedAt`                                 |
-| **Artifact**      | `size >= 0`                                                              |
-| **Artifact**      | `contentHash` must be a valid hex string of the expected hash length     |
-| **Artifact**      | If `parentId` is set, the parent Artifact must exist in the same session |
-| **Feature**       | `confidence` must be in [0.0, 1.0]                                       |
-| **Feature**       | `location` must have valid line/column coordinates                       |
-| **Behavior**      | `confidence` must be in [0.0, 1.0]                                       |
-| **Behavior**      | `taxonomyId` must be a valid node in the loaded taxonomy                 |
-| **Behavior**      | `featureIds` must have at least 1 entry                                  |
-| **Evidence**      | `confidence` must be in [0.0, 1.0]                                       |
-| **Evidence**      | `ruleId` and `behaviorId` must reference existing objects                |
-| **Rule**          | `severity.score` must be in [0.0, 10.0]                                  |
-| **Rule**          | `version` must be valid semver                                           |
-| **Finding**       | `confidence` must be in [0.0, 1.0]                                       |
-| **Finding**       | `evidenceIds` must have at least 1 entry                                 |
-| **Finding**       | `severity.score` must be in [0.0, 10.0]                                  |
-| **BehaviorChain** | `behaviorIds` must have at least 2 entries                               |
-| **TrustProfile**  | `trustScore` must be in [0.0, 1.0]                                       |
-| **TrustProfile**  | `findingDensity >= 0`                                                    |
-| **RiskProfile**   | `riskScore` must be in [0.0, 10.0]                                       |
-| **Capability**    | `confidence` must be in [0.0, 1.0]                                       |
+| All Objects   | `id` must be non-empty and unique within its type for the session        |
+| All Objects   | `sessionId` must match the owning ScanSession                            |
+| ScanSession   | `completedAt >= startedAt`                                               |
+| ScanSession   | `durationMs === completedAt - startedAt`                                 |
+| Artifact      | `size >= 0`                                                              |
+| Artifact      | `contentHash` must be a valid hex string of the expected hash length     |
+| Artifact      | If `parentId` is set, the parent Artifact must exist in the same session |
+| Feature       | `confidence` must be in [0.0, 1.0]                                       |
+| Feature       | `location` must have valid line/column coordinates                       |
+| Behavior      | `confidence` must be in [0.0, 1.0]                                       |
+| Behavior      | `taxonomyId` must be a valid node in the loaded taxonomy                 |
+| Behavior      | `featureIds` must have at least 1 entry                                  |
+| Evidence      | `confidence` must be in [0.0, 1.0]                                       |
+| Evidence      | `ruleId` and `behaviorId` must reference existing objects                |
+| Rule          | `severity.score` must be in [0.0, 10.0]                                  |
+| Rule          | `version` must be valid semver                                           |
+| Finding       | `confidence` must be in [0.0, 1.0]                                       |
+| Finding       | `evidenceIds` must have at least 1 entry                                 |
+| Finding       | `severity.score` must be in [0.0, 10.0]                                  |
+| BehaviorChain | `behaviorIds` must have at least 2 entries                               |
+| TrustProfile  | `trustScore` must be in [0.0, 1.0]                                       |
+| TrustProfile  | `findingDensity >= 0`                                                    |
+| RiskProfile   | `riskScore` must be in [0.0, 10.0]                                       |
+| Capability    | `confidence` must be in [0.0, 1.0]                                       |
 
-### 8.2 Cross-Object Invariants
+### 8.2 Cross-Object invariants
 
 | #   | Invariant                                                                               | Rationale                                                          |
 | --- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
@@ -1431,7 +1431,7 @@ A report produced by engine version X can be:
 | I13 | All IDs in a Finding's evidenceIds must resolve to Evidence objects in the same session | No dangling references                                             |
 | I14 | Every artifact's contentHash must match a deterministic recomputation                   | Integrity guarantee                                                |
 
-### 8.3 Pipeline Invariants
+### 8.3 Pipeline invariants
 
 | #   | Invariant                                                                                                   | Enforcement                                                 |
 | --- | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
@@ -1448,28 +1448,28 @@ A report produced by engine version X can be:
 
 ---
 
-## 9. Versioning Strategy
+## 9. Versioning strategy
 
-### 9.1 Schema Versioning
+### 9.1 Schema versioning
 
 **Schema version format:** `MAJOR.MINOR.PATCH` (semver)
 
 | Component | Changes that increment it                                                                                                                             |
 | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Major** | Removing a field from a canonical object. Changing a field type incompatibly. Changing the pipeline ordering. Removing a taxonomy top-level category. |
-| **Minor** | Adding a new optional field. Adding a new taxonomy node. Adding a new ArtifactType. Adding a new FeatureType. Adding a new ChainRelationshipType.     |
-| **Patch** | Adding new validation rules. Relaxing existing validation. Adding new taxonomic mappings. Documentation clarifications.                               |
+| Major | Removing a field from a canonical object. Changing a field type incompatibly. Changing the pipeline ordering. Removing a taxonomy top-level category. |
+| Minor | Adding a new optional field. Adding a new taxonomy node. Adding a new ArtifactType. Adding a new FeatureType. Adding a new ChainRelationshipType.     |
+| Patch | Adding new validation rules. Relaxing existing validation. Adding new taxonomic mappings. Documentation clarifications.                               |
 
 **Current schema version:** `1.0.0`
 
-### 9.2 Forward/Backward Compatibility
+### 9.2 Forward/Backward compatibility
 
 | Scenario                      | Compatibility         | Strategy                                                                |
 | ----------------------------- | --------------------- | ----------------------------------------------------------------------- |
-| Engine v1.1 reads report v1.0 | ✅ Full backward      | Older schema is a subset of newer                                       |
-| Engine v1.0 reads report v1.1 | ✅ Forward (strict)   | New fields are optional; unknown fields are preserved but not processed |
-| Engine v2.0 reads report v1.x | ❌ Requires migration | Migration script converts v1 → v2                                       |
-| Engine v1.x reads report v2.0 | ❌ Not supported      | Engine refuses to load unknown major version                            |
+| Engine v1.1 reads report v1.0 | Full backward      | Older schema is a subset of newer                                       |
+| Engine v1.0 reads report v1.1 | Forward (strict)   | New fields are optional; unknown fields are preserved but not processed |
+| Engine v2.0 reads report v1.x | Requires migration | Migration script converts v1 → v2                                       |
+| Engine v1.x reads report v2.0 | Not supported      | Engine refuses to load unknown major version                            |
 
 **Forward compatibility rules:**
 
@@ -1478,11 +1478,11 @@ A report produced by engine version X can be:
 - New taxonomy nodes must not change the meaning of existing nodes.
 - The `schemaVersion` field is always the first field in every serialized object.
 
-### 9.3 Migration Strategy
+### 9.3 Migration strategy
 
 **Automatic migrations:**
 
-- Patch and minor version upgrades are transparent — no migration needed.
+- Patch and minor version upgrades are transparent. No migration needed.
 - Forward compatibility logic handles new optional fields.
 
 **Scripted migrations (major version bumps):**
@@ -1500,29 +1500,29 @@ A report produced by engine version X can be:
 
 ---
 
-## 10. Serialization Concerns
+## 10. Serialization concerns
 
-### 10.1 Format Strategy
+### 10.1 Format strategy
 
 | Concern                         | Decision                                                |
 | ------------------------------- | ------------------------------------------------------- |
-| **Primary canonical format**    | JSON (for debugging, interoperability)                  |
-| **Performance-critical format** | MessagePack (binary, faster, smaller)                   |
-| **Streaming format**            | JSON Lines (for large sessions with many artifacts)     |
-| **Storage format**              | SQLite (for workspace/database persistence)             |
-| **Schema enforcement**          | Zod (runtime validation on deserialization)             |
-| **Documentation**               | TypeScript types (compile-time) with JSON Schema export |
+| Primary canonical format    | JSON (for debugging, interoperability)                  |
+| Performance-critical format | MessagePack (binary, faster, smaller)                   |
+| Streaming format            | JSON Lines (for large sessions with many artifacts)     |
+| Storage format              | SQLite (for workspace/database persistence)             |
+| Schema enforcement          | Zod (runtime validation on deserialization)             |
+| Documentation               | TypeScript types (compile-time) with JSON Schema export |
 
-### 10.2 Serialization Rules
+### 10.2 Serialization rules
 
-1. **No circular references.** All relationships are forward-only ID references.
-2. **Dates as ISO 8601 strings.** Always in UTC with explicit `Z` suffix.
-3. **Hashes as lowercase hex strings.** No Base64 for hashes.
-4. **Enums as strings.** Open enums are serialized as plain strings, never integers.
-5. **Big numbers as strings.** Numbers > 2^53 are serialized as strings in JSON.
-6. **Binary data as base64** (JSON) or raw bytes (MessagePack).
-7. **Unknown fields preserved.** Deserializers preserve unrecognized fields for forward compatibility.
-8. **Schema version included.** Every serialized object includes `schemaVersion` at the top level.
+1. No circular references. All relationships are forward-only ID references.
+2. Dates as ISO 8601 strings. Always in UTC with explicit `Z` suffix.
+3. Hashes as lowercase hex strings. No Base64 for hashes.
+4. Enums as strings. Open enums are serialized as plain strings, never integers.
+5. Big numbers as strings. Numbers > 2^53 are serialized as strings in JSON.
+6. Binary data as base64 (JSON) or raw bytes (MessagePack).
+7. Unknown fields preserved. Deserializers preserve unrecognized fields for forward compatibility.
+8. Schema version included. Every serialized object includes `schemaVersion` at the top level.
 
 ### 10.3 Size Considerations
 
@@ -1540,7 +1540,7 @@ A report produced by engine version X can be:
 
 ---
 
-## 11. Engineering Tradeoffs
+## 11. Engineering tradeoffs
 
 ### 11.1 Deterministic IDs vs. UUIDs
 
@@ -1548,7 +1548,7 @@ A report produced by engine version X can be:
 
 **Decision:** Use deterministic IDs for content-derived objects (Artifact, Feature, Behavior, Evidence, Finding). Use UUIDs only for session-scoped objects (ScanSession, temporary intermediates).
 
-### 11.2 Deep Object Hierarchy vs. Flat Structure
+### 11.2 Deep object hierarchy vs. flat structure
 
 **Tradeoff:** A deep hierarchy (ScanSession → Artifact → Feature → Behavior → Evidence → Finding) provides clear boundaries and traceability but adds indirection and memory overhead.
 
@@ -1558,7 +1558,7 @@ A report produced by engine version X can be:
 - Batch loading in in-memory scenarios
 - Index maps for O(1) lookups
 
-### 11.3 Open Enums vs. Closed Enums
+### 11.3 Open enums vs. closed enums
 
 **Tradeoff:** Open enums (string unions + registries) are extensible but lose compile-time exhaustiveness checking. Closed enums (TypeScript union types) have full type safety but require code changes to extend.
 
@@ -1568,7 +1568,7 @@ A report produced by engine version X can be:
 - TypeScript branded types for type safety at compile time
 - Zod schemas for runtime validation
 
-### 11.4 Rich Objects vs. Lean Objects
+### 11.4 Rich objects vs. lean objects
 
 **Tradeoff:** Rich objects with embedded context reduce indirection (fewer lookups) but increase memory and serialization size. Lean objects with ID-based references are smaller but require more lookups.
 
@@ -1578,7 +1578,7 @@ A report produced by engine version X can be:
 - The line of sight up the parent chain via IDs
 - Batch resolvers that resolve multiple IDs in one pass
 
-### 11.5 Full Report vs. Incremental Report
+### 11.5 Full report vs. incremental report
 
 **Tradeoff:** Full reports are self-contained but large. Incremental reports are smaller but require a base report for context.
 
@@ -1586,9 +1586,9 @@ A report produced by engine version X can be:
 
 ---
 
-## 12. Common Mistakes to Avoid
+## 12. Common Mistakes to avoid
 
-### 12.1 Behaviors as Findings
+### 12.1 Behaviors as findings
 
 **Mistake:** Treating every Behavior as a Finding. Behaviors are normalized observations; Findings are analytical conclusions with evidence and severity.
 
@@ -1600,37 +1600,37 @@ A report produced by engine version X can be:
 
 **Prevention:** Max depth 3. Max ~100 nodes per category. A node should represent a meaningful behavioral category that rules map to. If a pattern is too specific, it belongs in a rule, not the taxonomy.
 
-### 12.3 Circular Object References
+### 12.3 Circular object references
 
 **Mistake:** Objects directly containing their parent objects (e.g., Feature containing an Artifact object), creating circular references during serialization.
 
 **Prevention:** All references are forward-only IDs. No object contains another object. The CanonicalReport is the single aggregate root.
 
-### 12.4 Inline Content in Artifacts
+### 12.4 Inline content in artifacts
 
 **Mistake:** Storing the full file content in every Artifact object, making reports enormous.
 
 **Prevention:** Artifacts store `contentHash` only. Actual content is stored separately (inline for small files in self-contained reports, referenced for large files).
 
-### 12.5 Mixing AI into Analysis Objects
+### 12.5 Mixing AI into analysis objects
 
 **Mistake:** Adding AI-specific fields to analysis objects (e.g., `aiConfidence`, `llmExplanation` on Findings), polluting the deterministic model.
 
 **Prevention:** AI outputs live in a separate parallel structure consumed by renderers, never in the canonical data model.
 
-### 12.6 Mutable Objects for Performance
+### 12.6 Mutable objects for performance
 
 **Mistake:** Making objects mutable to avoid allocation overhead, breaking traceability and replay.
 
 **Prevention:** All objects are immutable. Use builders/factories for construction. Memory is cheaper than debugging non-determinism.
 
-### 12.7 Taxonomy Inconsistency
+### 12.7 Taxonomy inconsistency
 
 **Mistake:** Different extractors mapping the same behavior to different taxonomy nodes, breaking cross-language analysis.
 
 **Prevention:** Every extractor implementation must include taxonomy mapping tests that assert the correct taxonomy ID for known patterns. These tests are run in CI.
 
-### 12.8 Ignoring Schema Version
+### 12.8 Ignoring schema version
 
 **Mistake:** Not including schema version in serialized objects, making future migrations impossible.
 
@@ -1638,28 +1638,28 @@ A report produced by engine version X can be:
 
 ---
 
-## 13. Final Recommendations
+## 13. Final recommendations
 
-### 13.1 Implementation Order
+### 13.1 Implementation order
 
 | Phase          | Objects                                                          | Rationale                                                 |
 | -------------- | ---------------------------------------------------------------- | --------------------------------------------------------- |
-| **Phase 1**    | `Artifact`, `Feature`, `Behavior`, `Capability`, `TaxonomyNode`  | Foundation — needed by extractors and behavior classifier |
-| **Phase 2**    | `Rule`, `RuleResult`, `Evidence`, `Finding`                      | Core analysis objects                                     |
-| **Phase 3**    | `BehaviorChain`, `TrustProfile`, `RiskProfile`, `Recommendation` | Higher-order analysis                                     |
-| **Phase 4**    | `ScanSession`, `CanonicalReport`                                 | Aggregation and serialization                             |
-| **Continuous** | Taxonomy updates, validation rules, migration scripts            | V1 refinement                                             |
+| Phase 1    | `Artifact`, `Feature`, `Behavior`, `Capability`, `TaxonomyNode`  | Foundation, needed by extractors and behavior classifier |
+| Phase 2    | `Rule`, `RuleResult`, `Evidence`, `Finding`                      | Core analysis objects                                     |
+| Phase 3    | `BehaviorChain`, `TrustProfile`, `RiskProfile`, `Recommendation` | Higher-order analysis                                     |
+| Phase 4    | `ScanSession`, `CanonicalReport`                                 | Aggregation and serialization                             |
+| Continuous | Taxonomy updates, validation rules, migration scripts            | V1 refinement                                             |
 
-### 13.2 Critical Success Factors
+### 13.2 Critical success factors
 
-1. **Factory functions first.** Before implementing any analysis logic, write factory functions for every canonical object with full validation. This catches design flaws early.
-2. **Taxonomy before extractors.** Finalize the taxonomy tree before writing any extractor. Extractors map to the taxonomy; if the taxonomy isn't stable, extractors will churn.
-3. **Test the complete chain.** End-to-end tests should exercise the full pipeline: artifact → feature → behavior → evidence → finding → report.
-4. **Immutable from day one.** Enforce immutability in TypeScript with `readonly` modifiers and `ReadonlyArray`. The performance cost is negligible.
-5. **Schema version on every object.** This is the single most important future-proofing decision in the data model.
-6. **Traceability is the killer feature.** Every design decision should be evaluated against "can we answer 'why was this flagged?' for every finding?"
+1. Factory functions first. Before implementing any analysis logic, write factory functions for every canonical object with full validation. This catches design flaws early.
+2. Taxonomy before extractors. Finalize the taxonomy tree before writing any extractor. Extractors map to the taxonomy; if the taxonomy isn't stable, extractors will churn.
+3. Test the complete chain. End-to-end tests should exercise the full pipeline: artifact → feature → behavior → evidence → finding → report.
+4. Immutable from day one. Enforce immutability in TypeScript with `readonly` modifiers and `ReadonlyArray`. The performance cost is negligible.
+5. Schema version on every object. This is the single most important future-proofing decision in the data model.
+6. Traceability is the killer feature. Every design decision should be evaluated against "can we answer 'why was this flagged?' for every finding?"
 
-### 13.3 Architectural Invariants
+### 13.3 Architectural invariants
 
 ```
 1. All objects are immutable after creation.

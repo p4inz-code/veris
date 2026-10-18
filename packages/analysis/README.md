@@ -1,4 +1,4 @@
-# @veris/analysis — VERIS Analysis Framework
+# @veris/analysis: VERIS Analysis Framework
 
 Converts normalized Features into structured Evidence.
 
@@ -21,17 +21,17 @@ The Analysis package **ONLY** produces evidence. It never:
 
 Each evidence item includes:
 
-- **Deterministic ID** (content-addressed, prefix: `ev_`)
-- **Artifact ID** — the source artifact
-- **Feature IDs** — features that produced this evidence
-- **Category** — high-level classification (executable, network, persistence, etc.)
-- **Type** — specific evidence type (pe-import, high-entropy, expired-certificate)
-- **Confidence** [0.0, 1.0]
-- **Source locations** — exact positions in the artifact
-- **Explanation** — human-readable WHY this evidence exists
-- **Machine-readable metadata**
+- Deterministic ID (content-addressed, prefix: `ev_`)
+- Artifact ID: the source artifact
+- Feature IDs: features that produced this evidence
+- Category: high-level classification (executable, network, persistence, etc.)
+- Type: specific evidence type (pe-import, high-entropy, expired-certificate)
+- Confidence [0.0, 1.0]
+- Source locations: exact positions in the artifact
+- Explanation: human-readable WHY this evidence exists
+- Machine-readable metadata
 
-## Built-in Analyzers
+## Built-in analyzers
 
 | Analyzer            | Type                | Description                             |
 | ------------------- | ------------------- | --------------------------------------- |

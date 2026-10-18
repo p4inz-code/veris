@@ -6,39 +6,39 @@ VERIS is an offline-first, deterministic, evidence-based security investigation 
 
 ---
 
-## What `@veris/plugin-sdk` Is
+## What `@veris/plugin-sdk` is
 
-- A **pure, lightweight developer kit** published to npm.
-- **ZERO runtime dependencies**.
+- A pure, lightweight developer kit published to npm.
+- ZERO runtime dependencies.
 - Type definitions, pure builders, constants, and contract interfaces for authoring plugins.
 - Guaranteed 100% offline and standalone.
 
-## What It Is NOT
+## What it is NOT
 
-- **Not the Plugin Host:** The SDK does NOT load, discover, or execute plugins at runtime. That is handled internally by `@veris/plugins`.
-- **Not a dynamic package loader:** Third-party plugins cannot execute arbitrary pipeline middleware or hijack scanning stages.
-- **Not a plugin marketplace/registry:** VERIS is a local CLI analysis tool.
+- Not the Plugin Host: The SDK does NOT load, discover, or execute plugins at runtime. That is handled internally by `@veris/plugins`.
+- Not a dynamic package loader: Third-party plugins cannot execute arbitrary pipeline middleware or hijack scanning stages.
+- Not a plugin marketplace/registry: VERIS is a local CLI analysis tool.
 
 ---
 
-## Supported Plugin Types in V2
+## Supported plugin types in V2
 
 | Plugin Type     | Output / Capability                                             | Execution Model                                                                 |
 | :-------------- | :-------------------------------------------------------------- | :------------------------------------------------------------------------------ |
-| **`extractor`** | Emits factual `PluginRawFeature[]` records.                     | Scoped in-process async (`extract()`).                                          |
-| **`rule-pack`** | Supplies declarative `RulePack` AST data matching raw features. | Evaluated deterministically by `@veris/rules-engine`. **Zero executable code.** |
+| `extractor` | Emits factual `PluginRawFeature[]` records.                     | Scoped in-process async (`extract()`).                                          |
+| `rule-pack` | Supplies declarative `RulePack` AST data matching raw features. | Evaluated deterministically by `@veris/rules-engine`. Zero executable code. |
 
 > [!IMPORTANT]
 > Other extension points (exporters, terminal renderers, AI models, pipeline interceptors) are **explicitly deferred** post-V2 to preserve engine determinism, terminal UI stability, and offline security.
 
 ---
 
-## Inviolable Core Invariants
+## Inviolable core invariants
 
-1. **Deterministic Scanning:** Plugins must never inject non-determinism (`Math.random()`, unseeded UUIDs, wall-clock timestamps into feature values, or unstable iteration orders).
-2. **Raw Features Only:** Extractor plugins observe facts only. Extractors **never** produce Findings, assign CVEs, or calculate Risk scores.
-3. **Pure Declarative Rules:** Rule packs are data only. Imperative code, callbacks, and lambdas inside rules are strictly forbidden and rejected at build/validation time.
-4. **Offline-First:** Network access and process execution are restricted and denied by default.
+1. Deterministic Scanning: Plugins must never inject non-determinism (`Math.random()`, unseeded UUIDs, wall-clock timestamps into feature values, or unstable iteration orders).
+2. Raw Features Only: Extractor plugins observe facts only. Extractors never produce Findings, assign CVEs, or calculate Risk scores.
+3. Pure Declarative Rules: Rule packs are data only. Imperative code, callbacks, and lambdas inside rules are strictly forbidden and rejected at build/validation time.
+4. Offline-First: Network access and process execution are restricted and denied by default.
 
 ---
 
@@ -52,9 +52,9 @@ npm install --save-dev @veris/plugin-sdk
 
 ---
 
-## Authoring Examples
+## Authoring examples
 
-### 1. Extractor Plugin
+### 1. Extractor plugin
 
 ```typescript
 import {
@@ -102,7 +102,7 @@ export const extractor: ExtractorPlugin = defineExtractorPlugin({
 });
 ```
 
-### 2. Declarative Rule Pack Plugin
+### 2. Declarative rule pack plugin
 
 ```typescript
 import { definePluginManifest, defineRulePackPlugin, type RulePlugin } from '@veris/plugin-sdk';
@@ -158,7 +158,7 @@ export const rulePackPlugin: RulePlugin = defineRulePackPlugin({
 
 ---
 
-## Declared Capabilities
+## Declared capabilities
 
 Plugins must declare their required capabilities in the manifest. All capabilities default to denied unless granted:
 
@@ -174,6 +174,6 @@ Plugins must declare their required capabilities in the manifest. All capabiliti
 
 ---
 
-## Architecture Reference
+## Architecture reference
 
 See [ADR-014: V2 Plugin Architecture Contract](../../docs/architecture/014-v2-plugin-architecture-contract.md) for full technical design details, lifecycle states, and security threat modeling.

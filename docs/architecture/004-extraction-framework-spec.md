@@ -1,4 +1,4 @@
-# VERIS Feature Extraction Framework & Artifact Analysis Pipeline — SPEC-004
+# VERIS feature extraction framework & artifact analysis pipeline: SPEC-004
 
 **Status:** Frozen  
 **Version:** 1.0  
@@ -7,7 +7,7 @@
 
 ---
 
-## Table of Contents
+## Table of contents
 
 1. [Extraction Pipeline Overview](#1-extraction-pipeline-overview)
 2. [Design Philosophy](#2-design-philosophy)
@@ -46,7 +46,7 @@
 
 ---
 
-## 1. Extraction Pipeline Overview
+## 1. Extraction pipeline overview
 
 The extraction pipeline is frozen as:
 
@@ -107,19 +107,19 @@ The extraction pipeline is frozen as:
 
 - No stage may be skipped.
 - Classification must use multiple signals.
-- Extractors emit Features only — never Findings, never Behaviors.
+- Extractors emit Features only: never Findings, never Behaviors.
 - The rest of the engine operates exclusively on normalized Features.
 - Partial extraction failure must not abort the pipeline.
 
 ---
 
-## 2. Design Philosophy
+## 2. Design philosophy
 
-### 2.1 Extractors Produce Features, Never Conclusions
+### 2.1 Extractors produce features, never conclusions
 
 An extractor observes and reports. It does not classify, score, or judge. A Feature says "this artifact contains a string `eval(` at line 42." It does not say "this is code injection." Classification belongs to the Knowledge Layer, judgment belongs to the Rule Engine.
 
-### 2.2 Multi-Signal Classification
+### 2.2 Multi-Signal classification
 
 Artifact type is determined by combining magic bytes, MIME detection, file signature analysis, extension heuristic, and content inspection. No single signal is trusted. Conflicts are resolved by weighted voting.
 
@@ -127,25 +127,25 @@ Artifact type is determined by combining magic bytes, MIME detection, file signa
 
 Extractors MUST handle malformed input gracefully. A syntax error in a Python script does not prevent extraction of the valid portions. Parser recovery is a first-class feature, not an afterthought.
 
-### 2.4 Boundary Enforcement
+### 2.4 Boundary enforcement
 
 Every extractor defines explicit boundaries: maximum file size, maximum nesting depth, maximum string length, maximum execution time. Exceeding any boundary produces a partial result (with a diagnostic flag), not a crash.
 
-### 2.5 Language Agnostic Output
+### 2.5 Language agnostic output
 
 After normalization, all language/format-specific details are removed. The Knowledge Layer and downstream engines see only canonical Feature types. The original language is recorded as metadata but never used for analysis.
 
-### 2.6 Deterministic Extraction
+### 2.6 Deterministic extraction
 
 Given the same file, the same extractor version must produce the same Features. No randomness, no network calls, no external state.
 
 ---
 
-## 3. Artifact Discovery
+## 3. Artifact discovery
 
 **Purpose:** Find all candidate artifacts from the scan target.
 
-**Input:** Scan target path(s) — file, directory, archive, repository, stdin stream.
+**Input:** Scan target path(s): file, directory, archive, repository, stdin stream.
 
 **Output:** Ordered list of `RawArtifact` references.
 
@@ -185,7 +185,7 @@ interface RawArtifact {
 
 ---
 
-## 4. Artifact Classification
+## 4. Artifact classification
 
 **Purpose:** Determine the type and subType of each artifact using multiple signals.
 
@@ -207,19 +207,19 @@ interface ClassifiedArtifact {
 }
 ```
 
-### 4.1 Signal Sources (Priority Order)
+### 4.1 Signal sources (priority order)
 
 | Priority    | Signal              | Source                                            | Strength                                  |
 | ----------- | ------------------- | ------------------------------------------------- | ----------------------------------------- |
-| 1 (highest) | Magic bytes         | First 16–64 bytes of file content                 | High — definitive for most binary formats |
+| 1 (highest) | Magic bytes         | First 16–64 bytes of file content                 | High, definitive for most binary formats |
 | 2           | File signature      | Known byte patterns at specific offsets           | High — PE `MZ`, ELF `\x7fELF`, ZIP `PK`   |
-| 3           | MIME type           | `file` magic database or pure-JS equivalent       | High — standardized                       |
-| 4           | Shebang             | First line for scripts (`#!/usr/bin/env python3`) | High — definitive for scripts             |
-| 5           | BOM                 | Byte Order Mark for text encoding                 | Medium — encoding only                    |
-| 6           | Extension heuristic | `.py`, `.js`, `.exe`, `.dll`                      | Medium — never trusted alone              |
-| 7           | Content sampling    | First N KB of text content                        | Low — fallback for unknown types          |
+| 3           | MIME type           | `file` magic database or pure-JS equivalent       | High, standardized                       |
+| 4           | Shebang             | First line for scripts (`#!/usr/bin/env python3`) | High, definitive for scripts             |
+| 5           | BOM                 | Byte Order Mark for text encoding                 | Medium, encoding only                    |
+| 6           | Extension heuristic | `.py`, `.js`, `.exe`, `.dll`                      | Medium, never trusted alone              |
+| 7           | Content sampling    | First N KB of text content                        | Low, fallback for unknown types          |
 
-### 4.2 Classification Matrix
+### 4.2 Classification matrix
 
 | Signature Match | Extension | MIME                | Shebang             | Classified Type                 |
 | --------------- | --------- | ------------------- | ------------------- | ------------------------------- |
@@ -249,15 +249,15 @@ interface ClassificationVote {
 - File has `PK` magic bytes (archive/ZIP) but `.exe` extension (executable/PE) → Magic bytes win (priority 1). Classified as `archive/ZIP` with a note about extension mismatch.
 - File has no magic bytes, no shebang, MIME says `text/plain`, extension `.py` → Extension + MIME → `script/Python` with `classificationConfidence: 0.7`.
 
-### 4.3 Classification Cache
+### 4.3 Classification cache
 
 Classification results are cached per (contentHash, size) pair. If the same artifact content is encountered again (e.g., duplicate files), the cached classification is used.
 
 ---
 
-## 5. Extractor Architecture
+## 5. Extractor architecture
 
-### 5.1 Extractor Interface (Canonical)
+### 5.1 Extractor interface (canonical)
 
 ```typescript
 interface Extractor {
@@ -330,7 +330,7 @@ interface ExtractorLimits {
 }
 ```
 
-### 5.2 Registration & Discovery
+### 5.2 Registration & discovery
 
 **Registration:**
 
@@ -357,15 +357,15 @@ interface ExtractorRegistry {
 }
 ```
 
-### 5.3 Extractor Versioning
+### 5.3 Extractor versioning
 
 **Version format:** `MAJOR.MINOR.PATCH` (semver)
 
 | Component | Change                                                                                                |
 | --------- | ----------------------------------------------------------------------------------------------------- |
-| **Major** | Changing emitted Feature types. Removing Feature categories. Breaking change to normalization output. |
-| **Minor** | Adding new Feature types. Adding new Capability categories. Adding new language constructs.           |
-| **Patch** | Fixing parser bugs. Improving error recovery. Adding new syntactic sugar patterns.                    |
+| Major | Changing emitted Feature types. Removing Feature categories. Breaking change to normalization output. |
+| Minor | Adding new Feature types. Adding new Capability categories. Adding new language constructs.           |
+| Patch | Fixing parser bugs. Improving error recovery. Adding new syntactic sugar patterns.                    |
 
 **Compatibility:**
 
@@ -387,7 +387,7 @@ interface ExtractorCapability {
 }
 ```
 
-**Example — Python Extractor capabilities:**
+**Example, Python Extractor capabilities:**
 
 ```typescript
 const pythonExtractorCapabilities = [
@@ -415,7 +415,7 @@ const pythonExtractorCapabilities = [
 ];
 ```
 
-### 5.5 Dependency Contracts
+### 5.5 Dependency contracts
 
 Extractors may declare dependencies on other extractors:
 
@@ -434,7 +434,7 @@ interface ExtractorDependency {
 - `archive-extractor` depends on format-specific decompressors.
 - A dependency failure → the dependent extractor runs with reduced capability (logged in diagnostics).
 
-### 5.6 Priorities & Selection Algorithm
+### 5.6 Priorities & selection algorithm
 
 **Extractor priority levels:**
 
@@ -463,7 +463,7 @@ For each ClassifiedArtifact:
      - If extractor fails → log error, try next in tier
 ```
 
-### 5.7 Fallback Extractors
+### 5.7 Fallback extractors
 
 **Text fallback:**
 
@@ -479,7 +479,7 @@ For each ClassifiedArtifact:
 
 - If the archive type is unknown but magic bytes suggest compression, the generic archive extractor attempts extraction with available decompressors.
 
-### 5.8 Composite Extractors
+### 5.8 Composite extractors
 
 Composite extractors delegate to sub-extractors and merge results:
 
@@ -493,7 +493,7 @@ interface CompositeExtractor extends Extractor {
 }
 ```
 
-**Example — Script Extractor Composite:**
+**Example, Script Extractor Composite:**
 
 ```
 ScriptExtractor (composite, mergeStrategy: "union")
@@ -504,7 +504,7 @@ ScriptExtractor (composite, mergeStrategy: "union")
   └── TextExtractor (generic, priority 100) → fallback
 ```
 
-### 5.9 Multi-Pass Extraction
+### 5.9 Multi-Pass extraction
 
 Some artifacts require multiple extraction passes:
 
@@ -531,9 +531,9 @@ Pass 3: Behavioral extraction (capability aggregation)
 
 ---
 
-## 6. Built-in Extractors
+## 6. Built-in extractors
 
-### 6.1 Script Extractors
+### 6.1 Script extractors
 
 | Extractor             | ID                     | Supported SubTypes               | Emitted Feature Categories                                                               |
 | --------------------- | ---------------------- | -------------------------------- | ---------------------------------------------------------------------------------------- |
@@ -555,7 +555,7 @@ Pass 3: Behavioral extraction (capability aggregation)
 | Batch      | Line-by-line cmdlet detection                      | Tokenizer            | Control flow limited                                        |
 | VBScript   | Tokenizer + regex patterns                         | Tokenizer            | Complex expressions partially supported                     |
 
-### 6.2 Executable Extractors
+### 6.2 Executable extractors
 
 | Extractor | ID                | Supported SubTypes        | Emitted Feature Categories                                               |
 | --------- | ----------------- | ------------------------- | ------------------------------------------------------------------------ |
@@ -581,7 +581,7 @@ Pass 3: Behavioral extraction (capability aggregation)
 - Extracts: imported functions, exported functions, segment/section info, linked frameworks, LC commands
 - Limitations: Fat binaries are split and analyzed per architecture.
 
-### 6.3 Archive Extractors
+### 6.3 Archive extractors
 
 | Extractor | ID                 | Supported SubTypes                      | Emitted Features                                    |
 | --------- | ------------------ | --------------------------------------- | --------------------------------------------------- |
@@ -604,7 +604,7 @@ Pass 3: Behavioral extraction (capability aggregation)
 | Max single extracted file | 100 MB  | Memory protection            |
 | Max archive size          | 1 GB    | Time protection              |
 
-### 6.4 Configuration Extractors
+### 6.4 Configuration extractors
 
 | Extractor   | ID                    | Supported SubTypes | Emitted Features                                                |
 | ----------- | --------------------- | ------------------ | --------------------------------------------------------------- |
@@ -616,14 +616,14 @@ Pass 3: Behavioral extraction (capability aggregation)
 | Environment | `env-extractor`       | ENV, env           | string-literal, url, file-path, identifier                      |
 | .gitignore  | `gitignore-extractor` | gitignore          | string-pattern, file-path                                       |
 
-### 6.5 Repository Extractors
+### 6.5 Repository extractors
 
 | Extractor            | ID                         | Extracted Data                                                                                    |
 | -------------------- | -------------------------- | ------------------------------------------------------------------------------------------------- |
 | Git Metadata         | `git-extractor`            | Commit history, branch structure, file change frequency, contributor analysis, gitignore patterns |
 | Repository Structure | `repo-structure-extractor` | Directory tree, file relationships, dependency files, CI configuration                            |
 
-### 6.6 Document Extractors
+### 6.6 Document extractors
 
 | Extractor       | ID                      | Extracted Data                                                      |
 | --------------- | ----------------------- | ------------------------------------------------------------------- |
@@ -631,7 +631,7 @@ Pass 3: Behavioral extraction (capability aggregation)
 | Office Document | `office-extractor`      | Macros, embedded objects, external references, metadata             |
 | Certificate     | `certificate-extractor` | Certificate chain, validity, issuer, subject, extensions, key usage |
 
-### 6.7 Certificate Extractors
+### 6.7 Certificate extractors
 
 | Extractor       | ID              | Supported SubTypes  | Emitted Features                                                                           |
 | --------------- | --------------- | ------------------- | ------------------------------------------------------------------------------------------ |
@@ -640,9 +640,9 @@ Pass 3: Behavioral extraction (capability aggregation)
 
 ---
 
-## 7. Feature Normalization
+## 7. Feature normalization
 
-### 7.1 Normalization Pipeline
+### 7.1 Normalization pipeline
 
 ```
   Raw Features (from extractor)
@@ -682,7 +682,7 @@ Pass 3: Behavioral extraction (capability aggregation)
   Normalized Feature[]
 ```
 
-### 7.2 Language-to-Feature Mapping Strategy
+### 7.2 Language-to-Feature mapping strategy
 
 The goal of normalization is to produce language-agnostic Features. The mapping is:
 
@@ -714,7 +714,7 @@ interface NormalizationRule {
 | Python          | `requests.get(url)`           | `url`                 | `network-connect`            |
 | JavaScript      | `fetch(url)`                  | `url`                 | `network-connect`            |
 
-### 7.3 Feature Canonicalization
+### 7.3 Feature canonicalization
 
 **Value canonicalization:**
 
@@ -742,7 +742,7 @@ interface SourceLocation {
 }
 ```
 
-### 7.4 Feature Enrichment
+### 7.4 Feature enrichment
 
 After canonicalization, features may be enriched with additional context:
 
@@ -759,9 +759,9 @@ Enrichment is optional and must not change the fundamental classification of the
 
 ---
 
-## 8. Feature Validation
+## 8. Feature validation
 
-### 8.1 Feature Schema Validation
+### 8.1 Feature schema validation
 
 Every Feature is validated against its schema:
 
@@ -787,7 +787,7 @@ interface FeatureValidationRule {
 | `location.startLine <= location.endLine` | Line order      | All Features |
 | `location.offset >= 0`                   | Offset validity | All Features |
 
-### 8.2 Duplicate Removal
+### 8.2 Duplicate removal
 
 **Duplicate detection:**
 
@@ -798,9 +798,9 @@ interface FeatureValidationRule {
 
 - First occurrence is kept.
 - Subsequent duplicates are discarded and counted in `diagnostics.featuresSkipped`.
-- Dedup is per-artifact, not per-session (same Feature in two artifacts is not a duplicate — they came from different sources).
+- Dedup is per-artifact, not per-session (same Feature in two artifacts is not a duplicate. They came from different sources).
 
-### 8.3 Invalid Feature Handling
+### 8.3 Invalid feature handling
 
 | Invalid Condition            | Action                                       |
 | ---------------------------- | -------------------------------------------- |
@@ -811,7 +811,7 @@ interface FeatureValidationRule {
 | `endLine < startLine`        | Swapped                                      |
 | Empty value string           | Allowed (empty strings are valid features)   |
 
-### 8.4 Partial Extraction
+### 8.4 Partial extraction
 
 If an extractor encounters errors mid-extraction:
 
@@ -820,7 +820,7 @@ If an extractor encounters errors mid-extraction:
 3. Extraction continues from the next valid position (if parser recovery is possible).
 4. The `ExtractionResult.diagnostics.truncated` flag is set if limits were exceeded.
 
-### 8.5 Parser Recovery
+### 8.5 Parser recovery
 
 **Recovery strategies by parser type:**
 
@@ -837,7 +837,7 @@ If an extractor encounters errors mid-extraction:
 - `parserRecoveryCount` in diagnostics tracks how many times recovery was attempted.
 - High recovery counts indicate malformed input.
 
-### 8.6 Malformed File Handling
+### 8.6 Malformed file handling
 
 | Scenario                                         | Action                                                |
 | ------------------------------------------------ | ----------------------------------------------------- |
@@ -849,9 +849,9 @@ If an extractor encounters errors mid-extraction:
 
 ---
 
-## 9. Extractor Diagnostics
+## 9. Extractor diagnostics
 
-### 9.1 Extractor Timing
+### 9.1 Extractor timing
 
 ```
 Extractor Timing Report:
@@ -870,7 +870,7 @@ Slowest extractors by average:
 3. powershell-extractor   avg: 8.9ms
 ```
 
-### 9.2 Selection Decisions
+### 9.2 Selection decisions
 
 ```
 Selection Decisions:
@@ -888,7 +888,7 @@ Selection Decisions:
     → Artifact skipped with diagnostic
 ```
 
-### 9.3 Fallback Usage
+### 9.3 Fallback usage
 
 ```
 Fallback Usage:
@@ -902,7 +902,7 @@ Fallback Usage:
     - binary-extractor: 8 artifacts
 ```
 
-### 9.4 Recovery Paths
+### 9.4 Recovery paths
 
 ```
 Parser Recovery Report:
@@ -925,7 +925,7 @@ Parser Recovery Report:
       - Invalid section alignment: 3
 ```
 
-### 9.5 Unsupported Syntax
+### 9.5 Unsupported syntax
 
 ```
 Unsupported Syntax Report:
@@ -940,7 +940,7 @@ Unsupported Syntax Report:
     top-level await: detected in 3 files, features emitted: partial
 ```
 
-### 9.6 Parser Failures
+### 9.6 Parser failures
 
 ```
 Parser Failure Report:
@@ -961,9 +961,9 @@ Parser Failure Report:
 
 ---
 
-## 10. Performance Strategy
+## 10. Performance strategy
 
-### 10.1 Performance Targets
+### 10.1 Performance targets
 
 | Metric                            | Target                          | Measurement |
 | --------------------------------- | ------------------------------- | ----------- |
@@ -974,7 +974,7 @@ Parser Failure Report:
 | P99 extraction time per file      | ≤ 500ms                         | Benchmark   |
 | Memory per extraction             | ≤ 10 MB per file                | Benchmark   |
 
-### 10.2 Optimization Techniques
+### 10.2 Optimization techniques
 
 | Technique                   | Applied To           | Expected Gain                                     |
 | --------------------------- | -------------------- | ------------------------------------------------- |
@@ -986,7 +986,7 @@ Parser Failure Report:
 | Regex compilation cache     | Tokenizer extractors | ~10x speedup for repeated patterns                |
 | Zero-copy string extraction | Binary extractors    | Avoid copying large string tables                 |
 
-### 10.3 Memory Budget
+### 10.3 Memory budget
 
 | Component                     | Budget      |
 | ----------------------------- | ----------- |
@@ -994,13 +994,13 @@ Parser Failure Report:
 | Loaded extractors (50)        | ~100 MB     |
 | Extraction working set        | ~200 MB     |
 | Feature buffer (per artifact) | ~50 MB      |
-| **Total active extraction**   | **~400 MB** |
+| Total active extraction   | ~400 MB |
 
 ---
 
-## 11. Future Compatibility
+## 11. Future compatibility
 
-### 11.1 Language Expansion (V2+)
+### 11.1 Language expansion (V2+)
 
 New languages are added as new extractors implementing the same `Extractor` interface:
 
@@ -1016,7 +1016,7 @@ New languages are added as new extractors implementing the same `Extractor` inte
 | Swift    | V3       | High       | AST-based                      |
 | Kotlin   | V3       | Medium     | AST-based                      |
 
-### 11.2 Infrastructure Expansion (V3+)
+### 11.2 Infrastructure expansion (V3+)
 
 | Format               | Complexity | Approach                               |
 | -------------------- | ---------- | -------------------------------------- |
@@ -1026,7 +1026,7 @@ New languages are added as new extractors implementing the same `Extractor` inte
 | Kubernetes manifests | Medium     | YAML parser with schema awareness      |
 | Helm charts          | Medium     | Template + values analysis             |
 
-### 11.3 Document & Media Expansion (V3+)
+### 11.3 Document & media expansion (V3+)
 
 | Format                           | Complexity | Approach                                  |
 | -------------------------------- | ---------- | ----------------------------------------- |
@@ -1036,42 +1036,42 @@ New languages are added as new extractors implementing the same `Extractor` inte
 | Mobile apps (APK/IPA)            | High       | Archive extraction + manifest analysis    |
 | Firmware (raw, UEFI)             | High       | Binary parser                             |
 
-### 11.4 Plugin Extractors (V2+)
+### 11.4 Plugin extractors (V2+)
 
 - Third-party extractors implement the same `Extractor` interface.
 - Loaded via `@veris/plugins` plugin host.
-- Sandboxed — no filesystem/network access unless explicitly granted via manifest.
+- Sandboxed: no filesystem/network access unless explicitly granted via manifest.
 - Plugin extractors declare `minEngineVersion` and are validated at load time.
 
 ---
 
-## 12. Engineering Tradeoffs
+## 12. Engineering tradeoffs
 
-### 12.1 AST Parsing vs. Regex-Based Extraction
+### 12.1 AST parsing vs. regex-based extraction
 
 **Tradeoff:** AST parsing is more accurate (understands syntax, resolves scope) but is slower, more complex, and language-specific. Regex-based extraction is fast and language-agnostic but produces lower-quality features (false positives, no scope resolution).
 
 **Decision:** Use AST parsing for primary languages (Python, JavaScript, TypeScript, Bash, PowerShell). Use tokenizer/regex for secondary languages (Batch, VBScript). Use heuristic pattern matching for the text fallback extractor.
 
-### 12.2 Streaming vs. Full-File Extraction
+### 12.2 Streaming vs. full-file extraction
 
 **Tradeoff:** Streaming extraction uses less memory and can start emitting features before the file is fully read. Full-file extraction gives the parser access to the complete file context for better analysis.
 
 **Decision:** Streaming for binary formats (PE, ELF, archive headers). Full-file for script formats (Python, JavaScript) where cross-line analysis is important. Both strategies produce the same `ExtractionResult` interface.
 
-### 12.3 Strict Parsing vs. Error-Tolerant Parsing
+### 12.3 Strict parsing vs. error-tolerant parsing
 
 **Tradeoff:** Strict parsing is faster and simpler but fails on the first syntax error. Error-tolerant parsing is slower and more complex but produces useful output from partially valid files.
 
 **Decision:** Error-tolerant parsing for all extractors. Strict mode is available as an opt-in configuration for users who need guaranteed correctness over completeness.
 
-### 12.4 Many Small Extractors vs. Few Large Extractors
+### 12.4 Many small extractors vs. few large extractors
 
 **Tradeoff:** Many small extractors (one per language/format) are independently testable and replaceable but create registry overhead. Few large extractors (multi-language) reduce registry overhead but increase coupling and testing complexity.
 
 **Decision:** One extractor per language/format. This aligns with the "replaceability" principle from SPEC-001. A new language = a new extractor, not a modification to an existing one.
 
-### 12.5 Built-in vs. Plugin Extraction Models
+### 12.5 Built-in vs. plugin extraction models
 
 **Tradeoff:** Built-in extractors are versioned with the engine and guaranteed compatible. Plugin extractors are independently versioned but require a host API stability commitment.
 
@@ -1079,34 +1079,34 @@ New languages are added as new extractors implementing the same `Extractor` inte
 
 ---
 
-## 13. Common Mistakes to Avoid
+## 13. Common Mistakes to avoid
 
-### 13.1 Extractors Producing Findings
+### 13.1 Extractors producing findings
 
 **Mistake:** An extractor that detects a "suspicious" pattern and flags it as a finding, bypassing the Knowledge Layer and Rule Engine.
 **Prevention:** Extractors produce Features only. The Rule Engine produces Findings. Enforce this at the type level: `extract()` returns `ExtractionResult`, not `Finding[]`.
 
-### 13.2 Single-Signal Classification
+### 13.2 Single-Signal classification
 
 **Mistake:** Classifying an artifact solely by its file extension, leading to misclassification of renamed files or extensionless binaries.
 **Prevention:** Always use multi-signal classification. Extension is a hint, never a conclusion.
 
-### 13.3 Brittle AST Parsing
+### 13.3 Brittle AST parsing
 
 **Mistake:** The Python extractor fails on the entire file because of one syntax error, producing zero features from a mostly valid file.
 **Prevention:** Error-tolerant parsing with recovery. A syntax error in one function should not prevent extracting features from the rest of the file.
 
-### 13.4 Ignoring Binary Safety
+### 13.4 Ignoring binary safety
 
 **Mistake:** A string-pattern extractor reads a binary file as text, producing millions of garbage features and depleting memory.
 **Prevention:** Binary detection before string extraction. Entropy and null-byte checks. Size limits on string tables.
 
-### 13.5 Inconsistent Normalization
+### 13.5 Inconsistent normalization
 
 **Mistake:** Two extractors emit the same logical feature with different `FeatureType` values (e.g., one emits `url` and another emits `string-literal` for the same URL pattern).
 **Prevention:** Normalization rules are shared across all extractors. A central mapping table ensures consistency. Integration tests verify cross-extractor normalization.
 
-### 13.6 Unbounded Extraction
+### 13.6 Unbounded extraction
 
 **Mistake:** No limits on extraction depth, file size, or string length, allowing a maliciously crafted file to exhaust system resources.
 **Prevention:** Every extractor declares explicit limits. The pipeline enforces these limits before calling `extract()`.
@@ -1116,51 +1116,51 @@ New languages are added as new extractors implementing the same `Extractor` inte
 **Mistake:** Extracting every possible feature from a file, producing thousands of low-value features that overwhelm the downstream analysis (needless behavior classification, rule matching).
 **Prevention:** Feature extraction is guided by the extractor's declared capabilities. Only features matching declared capability categories are retained. The text extractor, in particular, applies heuristics to avoid noise.
 
-### 13.8 Ignoring Encoding
+### 13.8 Ignoring encoding
 
 **Mistake:** Treating a UTF-16 file as ASCII, producing garbled features.
 **Prevention:** BOM detection at the classification stage. Encoding metadata is passed to the extractor. Extractors must handle at least: UTF-8, UTF-16 LE/BE, Latin-1, ASCII.
 
-### 13.9 Language-Specific Assumptions in Downstream Engines
+### 13.9 Language-Specific Assumptions in downstream engines
 
 **Mistake:** The Correlation Engine or Rule Engine checking the original language of an artifact to make decisions.
 **Prevention:** Language is metadata, not analysis input. The original language is recorded but never used for analysis. All analysis operates on canonical Features.
 
-### 13.10 No Extractor Diagnostics
+### 13.10 No extractor diagnostics
 
 **Mistake:** An extractor silently fails on a class of files, and developers don't notice until users report missing findings.
 **Prevention:** Every extractor produces diagnostics: timing, selection decisions, recovery counts, failures, unsupported syntax. These are surfaced in the diagnostic report and monitored in CI.
 
 ---
 
-## 14. Final Recommendations
+## 14. Final recommendations
 
-### 14.1 Implementation Order
+### 14.1 Implementation order
 
 | Phase        | Components                                                  | Rationale                                    |
 | ------------ | ----------------------------------------------------------- | -------------------------------------------- |
-| **Phase 1**  | Extractor interface, ExtractorRegistry, Artifact classifier | Foundation — needed before any extractors    |
-| **Phase 2**  | text-extractor, binary-extractor (fallbacks)                | Fallback coverage ensures no file is skipped |
-| **Phase 3**  | python-extractor, javascript-extractor, bash-extractor      | Primary script languages                     |
-| **Phase 4**  | pe-extractor, elf-extractor                                 | Binary executables                           |
-| **Phase 5**  | zip-extractor, tar-extractor                                | Archive handling                             |
-| **Phase 6**  | Feature normalization pipeline, validation, dedup           | Core pipeline                                |
-| **Phase 7**  | Configuration extractors, environment extractors            | Config analysis                              |
-| **Phase 8**  | powershell-extractor, batch-extractor, vbscript-extractor   | Secondary script languages                   |
-| **Phase 9**  | Repository extractors, certificate extractors               | Specialized extractors                       |
-| **Phase 10** | Diagnostic system, benchmarks                               | Quality assurance                            |
+| Phase 1  | Extractor interface, ExtractorRegistry, Artifact classifier | Foundation, needed before any extractors    |
+| Phase 2  | text-extractor, binary-extractor (fallbacks)                | Fallback coverage ensures no file is skipped |
+| Phase 3  | python-extractor, javascript-extractor, bash-extractor      | Primary script languages                     |
+| Phase 4  | pe-extractor, elf-extractor                                 | Binary executables                           |
+| Phase 5  | zip-extractor, tar-extractor                                | Archive handling                             |
+| Phase 6  | Feature normalization pipeline, validation, dedup           | Core pipeline                                |
+| Phase 7  | Configuration extractors, environment extractors            | Config analysis                              |
+| Phase 8  | powershell-extractor, batch-extractor, vbscript-extractor   | Secondary script languages                   |
+| Phase 9  | Repository extractors, certificate extractors               | Specialized extractors                       |
+| Phase 10 | Diagnostic system, benchmarks                               | Quality assurance                            |
 
-### 14.2 Critical Success Factors
+### 14.2 Critical success factors
 
-1. **Fallbacks first.** Before writing any language-specific extractor, write the text and binary fallbacks. This ensures every file produces at least some features from day one.
-2. **Normalization is the hard part.** The extractor itself is straightforward. The hard work is in the normalization rules that map language-specific constructs to canonical Features. Invest heavily in normalization tests.
-3. **Parser recovery is not optional.** Malformed files are the rule, not the exception. Every extractor must handle syntax errors gracefully.
-4. **Classification is multi-signal.** No single signal is trusted. Always combine magic bytes, MIME, shebang, and extension.
-5. **Limits protect everything.** Every extractor must have explicit, configurable limits. A malformed file should never crash the engine.
-6. **Test with real-world files.** Synthetic fixtures are useful for development, but real-world files from public repositories are essential for validation.
-7. **Diagnose everything.** The diagnostic system is critical for debugging extraction issues. Every decision (selection, fallback, recovery, skip) must be recorded.
+1. Fallbacks first. Before writing any language-specific extractor, write the text and binary fallbacks. This ensures every file produces at least some features from day one.
+2. Normalization is the hard part. The extractor itself is straightforward. The hard work is in the normalization rules that map language-specific constructs to canonical Features. Invest heavily in normalization tests.
+3. Parser recovery is not optional. Malformed files are the rule, not the exception. Every extractor must handle syntax errors gracefully.
+4. Classification is multi-signal. No single signal is trusted. Always combine magic bytes, MIME, shebang, and extension.
+5. Limits protect everything. Every extractor must have explicit, configurable limits. A malformed file should never crash the engine.
+6. Test with real-world files. Synthetic fixtures are useful for development, but real-world files from public repositories are essential for validation.
+7. Diagnose everything. The diagnostic system is critical for debugging extraction issues. Every decision (selection, fallback, recovery, skip) must be recorded.
 
-### 14.3 Architectural Invariants
+### 14.3 Architectural invariants
 
 ```
 1. Extractors emit Features only. Never Findings, never Behaviors.

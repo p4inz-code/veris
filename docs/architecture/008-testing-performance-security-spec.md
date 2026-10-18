@@ -1,4 +1,4 @@
-# VERIS Testing Strategy, Performance Architecture & Security Hardening — SPEC-008
+# VERIS testing strategy, performance architecture & security hardening: SPEC-008
 
 **Status:** Frozen  
 **Version:** 1.0  
@@ -7,7 +7,7 @@
 
 ---
 
-## Table of Contents
+## Table of contents
 
 1. [Testing Philosophy](#1-testing-philosophy)
 2. [Testing Pyramid Architecture](#2-testing-pyramid-architecture)
@@ -27,21 +27,21 @@
 
 ---
 
-## 1. Testing Philosophy
+## 1. Testing philosophy
 
-### 1.1 First Principles
+### 1.1 First principles
 
 VERIS is a **security product that analyzes untrusted input**. Its testing philosophy must reflect this reality:
 
-1. **Correctness over speed.** A fast wrong answer is worse than a slow correct answer. Tests must validate correctness before performance.
-2. **Determinism is non-negotiable.** Every test must be repeatable. Non-deterministic tests are bugs.
-3. **Regression resistance is the primary quality metric.** Every engine change must prove it hasn't broken existing analysis.
-4. **Adversarial testing is mandatory.** VERIS processes untrusted, potentially malicious files. The test suite must include adversarial inputs designed to exploit parser weaknesses.
-5. **Golden snapshots are the source of truth.** Expected outputs are committed to the repository and change only through explicit approval.
-6. **Offline testing.** All tests must run fully offline. Network-dependent tests are a separate category with explicit marking.
-7. **Reproducible from commit hash.** Given the same commit, the same test suite produces the same results on any platform.
+1. Correctness over speed. A fast wrong answer is worse than a slow correct answer. Tests must validate correctness before performance.
+2. Determinism is non-negotiable. Every test must be repeatable. Non-deterministic tests are bugs.
+3. Regression resistance is the primary quality metric. Every engine change must prove it hasn't broken existing analysis.
+4. Adversarial testing is mandatory. VERIS processes untrusted, potentially malicious files. The test suite must include adversarial inputs designed to exploit parser weaknesses.
+5. Golden snapshots are the source of truth. Expected outputs are committed to the repository and change only through explicit approval.
+6. Offline testing. All tests must run fully offline. Network-dependent tests are a separate category with explicit marking.
+7. Reproducible from commit hash. Given the same commit, the same test suite produces the same results on any platform.
 
-### 1.2 Testing vs. Verification
+### 1.2 Testing vs. verification
 
 | Property     | Testing                   | Verification                     | VERIS Approach                        |
 | ------------ | ------------------------- | -------------------------------- | ------------------------------------- |
@@ -52,7 +52,7 @@ VERIS is a **security product that analyzes untrusted input**. Its testing philo
 | Determinism  | Same input = same output? | Is there non-determinism?        | Double-run comparison in CI           |
 | Stability    | Does it crash?            | Is resource usage bounded?       | Stress tests + memory profiling       |
 
-### 1.3 Test Levels Responsibilities
+### 1.3 Test levels responsibilities
 
 | Level             | Owns                            | Validates                              | Runtime           | CI Frequency       |
 | ----------------- | ------------------------------- | -------------------------------------- | ----------------- | ------------------ |
@@ -71,9 +71,9 @@ VERIS is a **security product that analyzes untrusted input**. Its testing philo
 
 ---
 
-## 2. Testing Pyramid Architecture
+## 2. Testing pyramid architecture
 
-### 2.1 Complete Testing Architecture
+### 2.1 Complete testing architecture
 
 ```
                         ┌──────────────────────┐
@@ -127,7 +127,7 @@ Functional Track:                Non-Functional Track:
 └──────────────────────┘        └──────────────────────┘
 ```
 
-### 2.2 Test Directory Organization
+### 2.2 Test directory organization
 
 ```
 packages/
@@ -191,7 +191,7 @@ fixtures/
     └── encrypted.7z
 ```
 
-### 2.3 Unit Test Specifications
+### 2.3 Unit test specifications
 
 **Purpose:** Validate a single module, function, or class in complete isolation. All external dependencies are mocked via interfaces (as defined in SPEC-001 §6).
 
@@ -272,13 +272,13 @@ const mockConfig = createMockConfig({ extractors: { maxDepth: 10 } });
 const mockContext = createMockExtractorContext({ logger: mockLogger, config: mockConfig });
 ```
 
-### 2.4 Component Test Specifications
+### 2.4 Component test specifications
 
 **Purpose:** Validate a package's public API by testing interactions between its internal modules. External packages are mocked at the dependency boundary.
 
 **Scope:** One component test suite per package. Tests exercise the public API surface (from `index.ts` and `internal.ts`).
 
-**Example — Extractor Registry component test:**
+**Example, Extractor Registry component test:**
 
 ```typescript
 describe('@veris/extractors (component)', () => {
@@ -316,7 +316,7 @@ describe('@veris/extractors (component)', () => {
 | @veris/exporters    | Format serialization                    | Report builder output   |
 | @veris/cli          | Command dispatch, config loading        | Analyzer, renderers     |
 
-### 2.5 Integration Test Specifications
+### 2.5 Integration test specifications
 
 **Purpose:** Validate contracts between packages by testing actual cross-package interactions. Uses real implementations (no mocks) within the test scope.
 
@@ -350,7 +350,7 @@ interface IntegrationTest {
 }
 ```
 
-### 2.6 Pipeline Test Specifications
+### 2.6 Pipeline test specifications
 
 **Purpose:** Execute the full analysis pipeline from raw input to CanonicalReport, validating the end-to-end flow without CLI overhead.
 
@@ -390,7 +390,7 @@ describe('Analysis Pipeline (full flow)', () => {
 });
 ```
 
-### 2.7 End-to-End / Smoke Test Specifications
+### 2.7 End-to-End / smoke test specifications
 
 **Purpose:** Execute the full CLI application as a black box against known targets and validate exit codes, output files, and key properties.
 
@@ -434,7 +434,7 @@ interface E2EScenario {
 | Partial scan      | `scan --max-files 10 target/`            | Directory          | Limit enforcement  |
 | Cancellation      | `scan target` then Ctrl+C                | Large target       | Graceful shutdown  |
 
-### 2.8 Determinism Double-Run Validation
+### 2.8 Determinism Double-Run validation
 
 Every test that claims determinism must be validated by running twice and comparing:
 
@@ -459,9 +459,9 @@ it('produces deterministic extraction output (double-run validated)', async () =
 
 ---
 
-## 3. Security Corpus Design
+## 3. Security corpus design
 
-### 3.1 Corpus Architecture
+### 3.1 Corpus architecture
 
 ```
 tools/security/corpus/
@@ -540,7 +540,7 @@ tools/security/corpus/
     └── deep-tree/                     # 100+ level directory nesting
 ```
 
-### 3.2 Corpus Manifest
+### 3.2 Corpus manifest
 
 ```typescript
 interface CorpusManifest {
@@ -583,7 +583,7 @@ interface ExpectedFinding {
 }
 ```
 
-### 3.3 Corpus Licensing
+### 3.3 Corpus licensing
 
 | Category                    | License Strategy           | Source Attribution      |
 | --------------------------- | -------------------------- | ----------------------- |
@@ -601,7 +601,7 @@ interface ExpectedFinding {
 - Generated adversarial samples are owned by VERIS and licensed under MIT.
 - Large benchmark repos use synthetic content (no real code).
 
-### 3.4 Corpus Versioning
+### 3.4 Corpus versioning
 
 ```
 Corpus version format: YYYY-MM-DD-v{N}
@@ -617,7 +617,7 @@ v2025-01-01-v4: Major expansion to 10,000 samples
 - Engine version pins a minimum corpus version for regression tests.
 - Corpus additions are additive; old samples are never removed (only deprecated with `supersededBy`).
 
-### 3.5 Expected Outputs
+### 3.5 Expected outputs
 
 Every sample in the corpus has an `expected.json` file containing the expected analysis output:
 
@@ -660,17 +660,17 @@ For malicious samples:
 
 ---
 
-## 4. Golden Regression System
+## 4. Golden regression system
 
-### 4.1 Design Principles
+### 4.1 Design principles
 
-1. **Immutable expected outputs.** Golden files are committed to the repository and treated as source of truth.
-2. **Explicit approval only.** Golden updates require human review in a dedicated PR.
-3. **Granularity per engine component.** Each major component has its own golden file set.
-4. **Diffable format.** Golden files use structured formats (JSON, YAML) for meaningful diffs.
-5. **Intentional change tracking.** Every golden change links to a changelog entry explaining the behavioral change.
+1. Immutable expected outputs. Golden files are committed to the repository and treated as source of truth.
+2. Explicit approval only. Golden updates require human review in a dedicated PR.
+3. Granularity per engine component. Each major component has its own golden file set.
+4. Diffable format. Golden files use structured formats (JSON, YAML) for meaningful diffs.
+5. Intentional change tracking. Every golden change links to a changelog entry explaining the behavioral change.
 
-### 4.2 Golden File Organization
+### 4.2 Golden file organization
 
 ```
 packages/<package>/__tests__/golden/
@@ -693,7 +693,7 @@ tools/ci/golden/
     └── approve-golden.ts
 ```
 
-### 4.3 Golden Snapshot Types
+### 4.3 Golden snapshot types
 
 | Snapshot Type           | Scope                       | Format                         | Update Frequency        | Review Required |
 | ----------------------- | --------------------------- | ------------------------------ | ----------------------- | --------------- |
@@ -707,7 +707,7 @@ tools/ci/golden/
 | Full report             | Per-target                  | JSON (CanonicalReport)         | Per-major-change        | Yes             |
 | Export output           | Per-exporter per-report     | JSON/SARIF/MD/HTML/CSV         | Per-exporter change     | Yes             |
 
-### 4.4 Golden Comparison Workflow
+### 4.4 Golden comparison workflow
 
 ```mermaid
 Developer makes engine change
@@ -732,7 +732,7 @@ Run test suite (includes golden tests)
                    → All pass → PR proceeds
 ```
 
-### 4.5 Golden Update Command
+### 4.5 Golden update command
 
 ```bash
 # Update all golden files for current changes
@@ -748,7 +748,7 @@ pnpm golden:validate
 pnpm golden:compare --baseline=v1.0.0
 ```
 
-### 4.6 Golden Drift Detection
+### 4.6 Golden drift detection
 
 ```typescript
 interface GoldenDriftReport {
@@ -774,9 +774,9 @@ interface GoldenDrift {
 }
 ```
 
-### 4.7 Corpus Regression Tests
+### 4.7 Corpus regression tests
 
-**Purpose:** Validate that the engine produces expected findings against the known security corpus. Corpus regression tests ensure that engine changes do not introduce regressions in finding coverage — neither missing expected findings nor producing unexpected ones.
+**Purpose:** Validate that the engine produces expected findings against the known security corpus. Corpus regression tests ensure that engine changes do not introduce regressions in finding coverage, neither missing expected findings nor producing unexpected ones.
 
 **Mechanism:**
 
@@ -785,17 +785,17 @@ For every sample in the security corpus (Section 3), a corpus regression test:
 1. Runs the full analysis pipeline against the sample.
 2. Compares the resulting findings against `expected.json` (Section 3.5).
 3. Reports any discrepancies:
-   - **Missing finding:** A rule that should have matched but didn't.
-   - **Unexpected finding:** A rule that matched but shouldn't have.
-   - **Confidence regression:** A finding's confidence dropped below `minConfidence`.
-   - **Count mismatch:** The number of matches differs from `expectedCount`.
+   - Missing finding: A rule that should have matched but didn't.
+   - Unexpected finding: A rule that matched but shouldn't have.
+   - Confidence regression: A finding's confidence dropped below `minConfidence`.
+   - Count mismatch: The number of matches differs from `expectedCount`.
 
 **Tolerances:**
 
 | Dimension        | Tolerance                                                    | Rationale                                     |
 | ---------------- | ------------------------------------------------------------ | --------------------------------------------- |
-| Finding presence | Zero tolerance — every expected finding must be present      | Core correctness                              |
-| Finding absence  | Zero tolerance — no unexpected findings of severity ≥ medium | False positive control                        |
+| Finding presence | Zero tolerance, every expected finding must be present      | Core correctness                              |
+| Finding absence  | Zero tolerance, no unexpected findings of severity ≥ medium | False positive control                        |
 | Confidence       | ±0.1 of expected value                                       | Minor fluctuations from normalization changes |
 | Finding count    | Within expected range (`min`–`max` if specified, else exact) | Multi-match rules may vary                    |
 | Trust score      | ±0.05 of expected range                                      | Score recalculation differences               |
@@ -837,7 +837,7 @@ Failed samples:
     → Cause: Section parser recovery penalty increased
 ```
 
-### 4.8 Golden File Format
+### 4.8 Golden file format
 
     "engineVersion": "1.2.0",
     "corpusVersion": "2024-01-01-v1",
@@ -1387,7 +1387,7 @@ interface WorkerPoolStats {
 **Scheduling algorithm:**
 
 ```
-1. Tasks arrive with priority 0–100 (lower = higher priority)
+1. Tasks arrive with priority 0-100 (lower = higher priority)
 2. Priority queue maintained per-worker
 3. Default scheduling: FIFO within priority tier
 4. Starvation prevention: priority aging (task priority decreases by 1 every 10s in queue)
@@ -1631,7 +1631,7 @@ interface ScanProgress {
     | 'reporting'
     | 'complete'
     | 'cancelled';
-  percentComplete: number; // 0–100
+  percentComplete: number; // 0-100
   elapsedMs: number;
   estimatedRemainingMs: number;
 
@@ -2078,9 +2078,9 @@ Discovery             0.2s         0.4%    51,170
 Extraction           28.5s        63.1%   359
 Classification        2.1s         4.6%    4,873
 Rule Matching         9.8s         21.7%   1,044
-Correlation           1.2s         2.7%    —
-Scoring               0.8s         1.8%    —
-Reporting             0.3s         0.7%    —
+Correlation           1.2s         2.7%
+Scoring               0.8s         1.8%
+Reporting             0.3s         0.7%
 
 Bottleneck: Extraction (63.1%)
   Top extractors:
@@ -2094,7 +2094,7 @@ Cache Performance:
   RuleResult:     41.3% (3,211 / 4,567) ← LOW
 
 Recommendations:
-  ⚠ RuleResult cache ratio is low (41.3%). Consider:
+  RuleResult cache ratio is low (41.3%). Consider:
     - Increasing rule time windows
     - Reducing rule churn between sessions
 ```

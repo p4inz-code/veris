@@ -20,9 +20,9 @@
 
 VERIS is a **deterministic security analysis platform** that scans files and directories for security risks and produces reproducible, explainable reports.
 
-The entire analysis pipeline runs **100% offline**. No network calls, no telemetry, no cloud dependency. Identical inputs always produce identical analysis results — findings, evidence, ordering, and risk scores are byte-for-byte reproducible. Report files also record a run ID and timestamps as part of the report contract.
+The entire analysis pipeline runs **100% offline**. No network calls, no telemetry, no cloud dependency. Identical inputs always produce identical analysis results: findings, evidence, ordering, and risk scores are byte-for-byte reproducible. Report files also record a run ID and timestamps as part of the report contract.
 
-> **Status**: **PRODUCTION HOLD / MAINTENANCE ONLY** (v1.2.0 released). Offline-first, 100% deterministic analysis engine with
+> **Status**: PRODUCTION HOLD / MAINTENANCE ONLY (v1.2.0 released). Offline-first, 100% deterministic analysis engine with
 > interactive alternate-screen terminal session, visual investigation dashboard, CI security gates, and sandboxed plugin SDK.
 
 ```bash
@@ -33,14 +33,14 @@ npx veris-cli scan
 npm install -g veris-cli
 ```
 
-## Visual Showcase
+## Visual showcase
 
 <p align="center">
   <img src="assets/showcase/startup-animation.svg" alt="VERIS Interactive Scan" width="100%">
 </p>
 
 <details open>
-<summary><strong>📸 Terminal & Dashboard Visual Walkthrough</strong></summary>
+<summary><strong>Terminal & Dashboard Visual Walkthrough</strong></summary>
 <br>
 
 |                               Interactive Terminal Scan                                |                             Web Investigation Dashboard                             |
@@ -61,41 +61,41 @@ npm install -g veris-cli
 
 | Property      | VERIS                                      | Typical Tools               |
 | ------------- | ------------------------------------------ | --------------------------- |
-| Offline-first | ✅ Fully local                             | Usually require cloud       |
-| Deterministic | ✅ Same input → same analysis              | Non-deterministic           |
-| Explainable   | ✅ Every finding traces to evidence        | Opaque scores               |
-| AI-assisted   | ✅ AI explains results (consumer only)     | AI participates in analysis |
-| Open format   | ✅ JSON, Markdown, HTML, SARIF, CSV, JUnit | Proprietary formats         |
+| Offline-first | Fully local                             | Usually require cloud       |
+| Deterministic | Same input → same analysis              | Non-deterministic           |
+| Explainable   | Every finding traces to evidence        | Opaque scores               |
+| AI-assisted   | AI explains results (consumer only)     | AI participates in analysis |
+| Open format   | JSON, Markdown, HTML, SARIF, CSV, JUnit | Proprietary formats         |
 
 ## Features
 
-### Analysis Engine
+### Analysis engine
 
-- **20+ extractors** — PE, ELF, Mach-O, Office documents, archives, scripts, configuration files
-- **PE deep analysis** — section enumeration, import categorization, packer detection, compiler fingerprinting, TLS callbacks, resource analysis, Authenticode signatures, overlay detection, timestamp anomaly detection, entry point analysis
-- **20+ security rules** — 8 categories covering behavioral, structural, configuration, network, persistence, privilege, evasion, and reconnaissance patterns
-- **35+ correlation patterns** — behavioral chain detection across evidence types
+- 20+ extractors: PE, ELF, Mach-O, Office documents, archives, scripts, configuration files
+- PE deep analysis: section enumeration, import categorization, packer detection, compiler fingerprinting, TLS callbacks, resource analysis, Authenticode signatures, overlay detection, timestamp anomaly detection, entry point analysis
+- 20+ security rules: 8 categories covering behavioral, structural, configuration, network, persistence, privilege, evasion, and reconnaissance patterns
+- 35+ correlation patterns: behavioral chain detection across evidence types
 
 ### Determinism
 
-- Identical analysis results from identical input — findings, evidence, ordering, and risk scores are reproducible
-- No randomness in analysis — no `Math.random()`, no `crypto.randomUUID()`; a single run timestamp is captured at scan start and injected as report metadata
+- Identical analysis results from identical input: findings, evidence, ordering, and risk scores are reproducible
+- No randomness in analysis: no `Math.random()`, no `crypto.randomUUID()`; a single run timestamp is captured at scan start and injected as report metadata
 - Stable ordering across all collections
 - Immutable output objects (frozen at construction)
 
 ### Reports
 
-- **6 export formats**: JSON, Markdown, HTML, SARIF 2.1.0, CSV, JUnit
+- 6 export formats: JSON, Markdown, HTML, SARIF 2.1.0, CSV, JUnit
 - Structured findings with severity, confidence, and evidence traces
 - Risk scoring with full contribution analysis
 - Trust profiling per artifact
 
-### AI (Optional)
+### AI (optional)
 
 - Explain findings, behavioral chains, and risk dimensions
 - Modes: simple, technical, expert
 - Providers: OpenAI, Anthropic, Ollama
-- **AI is consumer only** — never participates in analysis
+- AI is consumer only: never participates in analysis
 
 ### Platform
 
@@ -125,7 +125,7 @@ npm install -g veris-cli
 
 Everything is deterministic, immutable, and auditable.
 
-## Quick Start
+## Quick start
 
 ```bash
 # Run without installing (recommended)
@@ -163,7 +163,7 @@ Example output:
   Output: /home/user/project/veris-output/
 ```
 
-## CLI Commands
+## CLI commands
 
 | Command            | Description                                           |
 | ------------------ | ----------------------------------------------------- |
@@ -189,7 +189,7 @@ veris explain --help
 veris --help
 ```
 
-## Output Formats
+## Output formats
 
 | Format   | Extension | Use Case                                       |
 | -------- | --------- | ---------------------------------------------- |
@@ -200,43 +200,43 @@ veris --help
 | CSV      | `.csv`    | Tabular findings, spreadsheets                 |
 | JUnit    | `.xml`    | CI pipeline integration                        |
 
-## Knowledge Packs
+## Knowledge packs
 
 VERIS ships with built-in knowledge packs that enrich analysis results with contextual information:
 
-- **MITRE ATT&CK mappings** — Map findings to adversary techniques
-- **CWE references** — Link findings to common weakness enumeration
-- **Remediation guidance** — Actionable remediation steps
-- **Behavioral context** — Understand why a finding matters
+- MITRE ATT&CK mappings: Map findings to adversary techniques
+- CWE references: Link findings to common weakness enumeration
+- Remediation guidance: Actionable remediation steps
+- Behavioral context: Understand why a finding matters
 
 Knowledge packs are loaded locally and require no network access.
 
-## PE Analysis
+## PE analysis
 
 VERIS performs deep static analysis of Portable Executable (PE/COFF) binaries:
 
-- **Header parsing** — DOS, COFF, optional header (PE32/PE32+)
-- **Section analysis** — Permissions, entropy, naming anomalies, RWX detection
-- **Import analysis** — DLL dependencies, API categorization, suspicious combinations
-- **Packer detection** — Multi-signal detection (UPX, Themida, VMProtect, and others)
-- **Compiler fingerprinting** — MSVC, MinGW, GCC, Clang, Rust, Go, Borland, Delphi
-- **TLS callbacks** — Detection and analysis of thread-local storage callbacks
-- **Resource analysis** — Version info, manifests, icons, embedded binaries
-- **Signature analysis** — Authenticode certificate parsing and validation
-- **Timestamp analysis** — Future timestamps, epoch values, anomaly detection
-- **Entry point analysis** — Suspicious entry points, packer sections
-- **Overlay detection** — Data appended after the PE structure
+- Header parsing: DOS, COFF, optional header (PE32/PE32+)
+- Section analysis: Permissions, entropy, naming anomalies, RWX detection
+- Import analysis: DLL dependencies, API categorization, suspicious combinations
+- Packer detection: Multi-signal detection (UPX, Themida, VMProtect, and others)
+- Compiler fingerprinting: MSVC, MinGW, GCC, Clang, Rust, Go, Borland, Delphi
+- TLS callbacks: Detection and analysis of thread-local storage callbacks
+- Resource analysis: Version info, manifests, icons, embedded binaries
+- Signature analysis: Authenticode certificate parsing and validation
+- Timestamp analysis: Future timestamps, epoch values, anomaly detection
+- Entry point analysis: Suspicious entry points, packer sections
+- Overlay detection: Data appended after the PE structure
 
-## Deterministic Philosophy
+## Deterministic philosophy
 
 VERIS is built on the principle that security analysis must be **reproducible**:
 
-1. **Same input, same analysis** — Findings, evidence, ordering, and risk scores are reproducible; reports also record run metadata (ID and timestamps) for traceability.
-2. **No randomness** — Analysis uses no random sources.
-3. **Offline-first** — Zero network calls during analysis. No telemetry.
-4. **Immutable outputs** — All results are frozen at construction time.
-5. **Explainable** — Every finding traces through evidence back to source features.
-6. **AI as consumer** — AI never participates in analysis; it only explains results.
+1. Same input, same analysis: Findings, evidence, ordering, and risk scores are reproducible; reports also record run metadata (ID and timestamps) for traceability.
+2. No randomness: Analysis uses no random sources.
+3. Offline-first: Zero network calls during analysis. No telemetry.
+4. Immutable outputs: All results are frozen at construction time.
+5. Explainable: Every finding traces through evidence back to source features.
+6. AI as consumer: AI never participates in analysis; it only explains results.
 
 ## Documentation
 
@@ -255,21 +255,21 @@ VERIS is built on the principle that security analysis must be **reproducible**:
 
 ## Requirements
 
-- **Node.js** 18 or later
-- **npm** (included with Node.js) or **pnpm**
+- Node.js 18 or later
+- npm (included with Node.js) or pnpm
 - No network access required for analysis
 
-Works on **Windows**, **macOS**, and **Linux**.
+Works on **Windows**, macOS, and Linux.
 
 ## Support
 
-- [Issues](https://github.com/p4inz-code/veris/issues) — Bug reports and feature requests
-- [Discussions](https://github.com/p4inz-code/veris/discussions) — Questions and ideas
-- [Security](SECURITY.md) — Vulnerability reporting
+- [Issues](https://github.com/p4inz-code/veris/issues): Bug reports and feature requests
+- [Discussions](https://github.com/p4inz-code/veris/discussions): Questions and ideas
+- [Security](SECURITY.md): Vulnerability reporting
 
 ## License
 
-UNLICENSED — Internal use. See [LICENSE](LICENSE) for details.
+UNLICENSED, Internal use. See [LICENSE](LICENSE) for details.
 
 ---
 

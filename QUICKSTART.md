@@ -1,6 +1,6 @@
 # Quickstart
 
-## Step 1: Install
+## Step 1: install
 
 ```
 npx veris-cli
@@ -63,9 +63,9 @@ veris scan --format html
 
 ## Next steps
 
-- `veris scan --help` — View all scan options
-- `veris init` — Create a configuration file
-- `veris --help` — List all commands
+- `veris scan --help`: View all scan options
+- `veris init`: Create a configuration file
+- `veris --help`: List all commands
 
 ## Requirements
 

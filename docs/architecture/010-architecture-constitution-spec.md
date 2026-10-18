@@ -1,13 +1,13 @@
-# VERIS Architecture Constitution, Production Readiness & Scope Freeze — SPEC-010
+# VERIS architecture constitution, production readiness & scope freeze: SPEC-010
 
-**Status:** Final — Constitutional Document  
+**Status:** Final, Constitutional Document  
 **Version:** 1.0  
 **Applies to:** Architecture governance, scope freeze, technical debt register, ADR/RFC policy, release readiness, success metrics, long-term evolution rules.  
 **Scope:** V1 through V4. This document is the single source of truth for what is and is not part of VERIS.
 
 ---
 
-## Table of Contents
+## Table of contents
 
 1. [Architecture Audit](#1-architecture-audit)
 2. [Cross-Spec Validation Matrix](#2-cross-spec-validation-matrix)
@@ -24,60 +24,60 @@
 
 ---
 
-## 1. Architecture Audit
+## 1. Architecture audit
 
-### 1.1 Audit Methodology
+### 1.1 Audit methodology
 
 Each of the 9 prior specifications (SPEC-001 through SPEC-009) was audited against 10 dimensions:
 
 | Dimension                  | Description                                                     |
 | -------------------------- | --------------------------------------------------------------- |
-| **Dependency consistency** | Do declared dependencies match actual usage across specs?       |
-| **Layer isolation**        | Are layer boundaries respected in all cross-package references? |
-| **Pipeline ordering**      | Does the analysis pipeline have a single, unambiguous order?    |
-| **Data flow**              | Is data flow unidirectional and typed at every stage?           |
-| **Object ownership**       | Does every canonical object have a clear owner?                 |
-| **Package boundaries**     | Are package responsibilities non-overlapping?                   |
-| **Plugin boundaries**      | What can and cannot plugins do? Is this unambiguous?            |
-| **Renderer boundaries**    | Do renderers only consume reports, never analyze?               |
-| **AI boundaries**          | Is AI strictly a consumer, never an analyst?                    |
-| **Determinism guarantees** | Are all sources of non-determinism identified and prohibited?   |
+| Dependency consistency | Do declared dependencies match actual usage across specs?       |
+| Layer isolation        | Are layer boundaries respected in all cross-package references? |
+| Pipeline ordering      | Does the analysis pipeline have a single, unambiguous order?    |
+| Data flow              | Is data flow unidirectional and typed at every stage?           |
+| Object ownership       | Does every canonical object have a clear owner?                 |
+| Package boundaries     | Are package responsibilities non-overlapping?                   |
+| Plugin boundaries      | What can and cannot plugins do? Is this unambiguous?            |
+| Renderer boundaries    | Do renderers only consume reports, never analyze?               |
+| AI boundaries          | Is AI strictly a consumer, never an analyst?                    |
+| Determinism guarantees | Are all sources of non-determinism identified and prohibited?   |
 
-### 1.2 Audit Results by Specification
+### 1.2 Audit results by specification
 
-#### SPEC-001 — Repository Architecture
+#### SPEC-001: repository architecture
 
 | Dimension              | Verdict | Issues                                                               |
 | ---------------------- | ------- | -------------------------------------------------------------------- |
-| Dependency consistency | ✅ PASS | All package dependency tables match the dependency diagram           |
-| Layer isolation        | ✅ PASS | L0–L7 layers are strictly defined with downward-only dependencies    |
-| Pipeline ordering      | ✅ PASS | Pipeline is abstract (not detailed) but references SPEC-002 ordering |
-| Data flow              | ✅ PASS | Interfaces at every boundary, DI at composition root                 |
-| Object ownership       | ✅ PASS | Every package owns its types and exports                             |
-| Package boundaries     | ✅ PASS | No overlapping responsibilities                                      |
-| Plugin boundaries      | ✅ PASS | Layer 7 is explicitly marked as "future" — thin V1 shell             |
-| Renderer boundaries    | ✅ PASS | Renderers are assigned to Layer 4 (Report & Output)                  |
-| AI boundaries          | ✅ PASS | AI is explicitly Layer 1 (Framework) — consumer only                 |
-| Determinism guarantees | ✅ PASS | Determinism is stated as a principle but enforced in SPEC-008        |
+| Dependency consistency | PASS | All package dependency tables match the dependency diagram           |
+| Layer isolation        | PASS | L0–L7 layers are strictly defined with downward-only dependencies    |
+| Pipeline ordering      | PASS | Pipeline is abstract (not detailed) but references SPEC-002 ordering |
+| Data flow              | PASS | Interfaces at every boundary, DI at composition root                 |
+| Object ownership       | PASS | Every package owns its types and exports                             |
+| Package boundaries     | PASS | No overlapping responsibilities                                      |
+| Plugin boundaries      | PASS | Layer 7 is explicitly marked as "future", thin V1 shell             |
+| Renderer boundaries    | PASS | Renderers are assigned to Layer 4 (Report & Output)                  |
+| AI boundaries          | PASS | AI is explicitly Layer 1 (Framework), consumer only                 |
+| Determinism guarantees | PASS | Determinism is stated as a principle but enforced in SPEC-008        |
 
 **Findings:** None. SPEC-001 is internally consistent.
 
 ---
 
-#### SPEC-002 — Canonical Data Model & Knowledge Taxonomy
+#### SPEC-002: canonical data model & knowledge taxonomy
 
 | Dimension              | Verdict  | Issues                                                                                                                            |
 | ---------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| Dependency consistency | ✅ PASS  | All 14 canonical objects reference each other via IDs only — no circular references                                               |
-| Layer isolation        | ✅ PASS  | Objects belong to data model layer; no leakage into analysis logic                                                                |
-| Pipeline ordering      | ✅ PASS  | Pipeline overview (§1) and lifecycle (§7) both show same order                                                                    |
-| Data flow              | ✅ PASS  | Unidirectional: ScanSession → Artifact → Feature → Behavior → Evidence → Finding → Chain → Trust → Risk → Recommendation → Report |
-| Object ownership       | ✅ PASS  | Every object has an owning package (core for types, analyzer for engines)                                                         |
-| Package boundaries     | ✅ PASS  | Data model is in core; engines are in analyzer                                                                                    |
-| Plugin boundaries      | ✅ PASS  | Objects are immutable — plugins cannot modify them                                                                                |
-| Renderer boundaries    | ✅ PASS  | Renderers consume CanonicalReport, never produce it                                                                               |
-| AI boundaries          | ✅ PASS  | §3.12 Recommendation and §3.13 Report explicitly exclude AI from canonical objects                                                |
-| Determinism guarantees | ⚠️ MINOR | §2.1 states determinism but §6.2 uses SHA-256 for IDs — hash choice should be documented as a permanent decision                  |
+| Dependency consistency | PASS  | All 14 canonical objects reference each other via IDs only, no circular references                                               |
+| Layer isolation        | PASS  | Objects belong to data model layer; no leakage into analysis logic                                                                |
+| Pipeline ordering      | PASS  | Pipeline overview (§1) and lifecycle (§7) both show same order                                                                    |
+| Data flow              | PASS  | Unidirectional: ScanSession → Artifact → Feature → Behavior → Evidence → Finding → Chain → Trust → Risk → Recommendation → Report |
+| Object ownership       | PASS  | Every object has an owning package (core for types, analyzer for engines)                                                         |
+| Package boundaries     | PASS  | Data model is in core; engines are in analyzer                                                                                    |
+| Plugin boundaries      | PASS  | Objects are immutable, plugins cannot modify them                                                                                |
+| Renderer boundaries    | PASS  | Renderers consume CanonicalReport, never produce it                                                                               |
+| AI boundaries          | PASS  | §3.12 Recommendation and §3.13 Report explicitly exclude AI from canonical objects                                                |
+| Determinism guarantees | MINOR | §2.1 states determinism but §6.2 uses SHA-256 for IDs, hash choice should be documented as a permanent decision                  |
 
 **Issue I-001:** Hash algorithm for deterministic IDs is not documented as a permanent choice. SPEC-002 §6.2 lists SHA-256 as the primary hash but doesn't specify whether this is frozen or subject to change (e.g., to BLAKE3).
 
@@ -85,39 +85,39 @@ Each of the 9 prior specifications (SPEC-001 through SPEC-009) was audited again
 
 ---
 
-#### SPEC-003 — Rule Engine, Correlation Engine & Reasoning Engine
+#### SPEC-003: rule engine, correlation engine & reasoning engine
 
 | Dimension              | Verdict | Issues                                                                            |
 | ---------------------- | ------- | --------------------------------------------------------------------------------- |
-| Dependency consistency | ✅ PASS | Rule engine depends on knowledge (types only), which aligns with SPEC-001         |
-| Layer isolation        | ✅ PASS | Rule engine is Layer 2, correlation/trust/risk are Layer 3 — clear separation     |
-| Pipeline ordering      | ✅ PASS | §1 pipeline diagram matches SPEC-002 ordering                                     |
-| Data flow              | ✅ PASS | Unidirectional: Behavior → Evidence → RuleResult → Finding → Chain                |
-| Object ownership       | ✅ PASS | Rule engine owns RuleResult; analyzer owns Finding construction                   |
-| Package boundaries     | ✅ PASS | `@veris/rules-engine` vs `@veris/rules` — engine vs content — correctly separated |
-| Plugin boundaries      | ✅ PASS | §8.4 packs are loadable; §12.1 plugin rules are future                            |
-| Renderer boundaries    | ✅ PASS | No renderer dependencies                                                          |
-| AI boundaries          | ✅ PASS | §7.7 AI consumers read `AIReadyContext` — never modify canonical objects          |
-| Determinism guarantees | ✅ PASS | §14.3 explicitly prohibits non-deterministic rules (random, time, network)        |
+| Dependency consistency | PASS | Rule engine depends on knowledge (types only), which aligns with SPEC-001         |
+| Layer isolation        | PASS | Rule engine is Layer 2, correlation/trust/risk are Layer 3, clear separation     |
+| Pipeline ordering      | PASS | §1 pipeline diagram matches SPEC-002 ordering                                     |
+| Data flow              | PASS | Unidirectional: Behavior → Evidence → RuleResult → Finding → Chain                |
+| Object ownership       | PASS | Rule engine owns RuleResult; analyzer owns Finding construction                   |
+| Package boundaries     | PASS | `@veris/rules-engine` vs `@veris/rules`, engine vs content, correctly separated |
+| Plugin boundaries      | PASS | §8.4 packs are loadable; §12.1 plugin rules are future                            |
+| Renderer boundaries    | PASS | No renderer dependencies                                                          |
+| AI boundaries          | PASS | §7.7 AI consumers read `AIReadyContext`, never modify canonical objects          |
+| Determinism guarantees | PASS | §14.3 explicitly prohibits non-deterministic rules (random, time, network)        |
 
 **Findings:** None. SPEC-003 is internally consistent. The rule logic discriminated union (§3.3) is comprehensive and declarative.
 
 ---
 
-#### SPEC-004 — Extraction Framework
+#### SPEC-004: extraction framework
 
 | Dimension              | Verdict | Issues                                                                                      |
 | ---------------------- | ------- | ------------------------------------------------------------------------------------------- |
-| Dependency consistency | ✅ PASS | Extractors depend on core, shared, logger, config — per SPEC-001                            |
-| Layer isolation        | ✅ PASS | Extractors are Layer 2; they produce Features, never Findings                               |
-| Pipeline ordering      | ✅ PASS | §1 pipeline matches SPEC-002 ordering                                                       |
-| Data flow              | ✅ PASS | Unidirectional: RawArtifact → ClassifiedArtifact → ExtractionResult → Feature[]             |
-| Object ownership       | ✅ PASS | ExtractorRegistry owns extractor lifecycle; ExtractionResult is per-extractor               |
-| Package boundaries     | ✅ PASS | Built-in extractors are flat under `builtins/`; each extractor is independently replaceable |
-| Plugin boundaries      | ✅ PASS | §11.4 plugin extractors follow same `Extractor` interface                                   |
-| Renderer boundaries    | ✅ PASS | No renderer dependencies                                                                    |
-| AI boundaries          | ✅ PASS | No AI references                                                                            |
-| Determinism guarantees | ✅ PASS | §2.6 explicitly states determinism: "same file, same extractor version = same Features"     |
+| Dependency consistency | PASS | Extractors depend on core, shared, logger, config, per SPEC-001                            |
+| Layer isolation        | PASS | Extractors are Layer 2; they produce Features, never Findings                               |
+| Pipeline ordering      | PASS | §1 pipeline matches SPEC-002 ordering                                                       |
+| Data flow              | PASS | Unidirectional: RawArtifact → ClassifiedArtifact → ExtractionResult → Feature[]             |
+| Object ownership       | PASS | ExtractorRegistry owns extractor lifecycle; ExtractionResult is per-extractor               |
+| Package boundaries     | PASS | Built-in extractors are flat under `builtins/`; each extractor is independently replaceable |
+| Plugin boundaries      | PASS | §11.4 plugin extractors follow same `Extractor` interface                                   |
+| Renderer boundaries    | PASS | No renderer dependencies                                                                    |
+| AI boundaries          | PASS | No AI references                                                                            |
+| Determinism guarantees | PASS | §2.6 explicitly states determinism: "same file, same extractor version = same Features"     |
 
 **Finding I-002:** SPEC-004 §6.1 lists supported script extractors (Python, JS, TS, PowerShell, Bash, Batch, VBScript) but §11.1 (Future Compatibility) adds Rust, Go, Java, C#, C++, Lua, Ruby, Swift, Kotlin. There is no explicit guidance on how to prioritize which language extractors to build first after V1.
 
@@ -125,39 +125,39 @@ Each of the 9 prior specifications (SPEC-001 through SPEC-009) was audited again
 
 ---
 
-#### SPEC-005 — Risk, Trust & Confidence Model
+#### SPEC-005: risk, trust & confidence model
 
 | Dimension              | Verdict | Issues                                                                       |
 | ---------------------- | ------- | ---------------------------------------------------------------------------- |
-| Dependency consistency | ✅ PASS | Risk engine builds on trust engine, which builds on findings — correct       |
-| Layer isolation        | ✅ PASS | All scoring engines are within `@veris/analyzer` — Layer 3                   |
-| Pipeline ordering      | ✅ PASS | Confidence → Risk → Trust order from SPEC-003 §1 confirmed                   |
-| Data flow              | ✅ PASS | Evidence → Confidence → Risk → Trust — unidirectional                        |
-| Object ownership       | ✅ PASS | RiskProfile, TrustProfile, ConfidenceExplanation are owned by analyzer       |
-| Package boundaries     | ✅ PASS | Scoring is in analyzer, not a separate package — correct for V1              |
-| Plugin boundaries      | ✅ PASS | §12.2 Policy modifiers adjust presentation, never base scores                |
-| Renderer boundaries    | ✅ PASS | Renderers consume scores as part of CanonicalReport                          |
-| AI boundaries          | ✅ PASS | §1.2 explicitly: "VERIS does not use AI for scoring"                         |
-| Determinism guarantees | ✅ PASS | §2.4 "If input A == input B, then score(A) == score(B)" — explicit guarantee |
+| Dependency consistency | PASS | Risk engine builds on trust engine, which builds on findings, correct       |
+| Layer isolation        | PASS | All scoring engines are within `@veris/analyzer` — Layer 3                   |
+| Pipeline ordering      | PASS | Confidence → Risk → Trust order from SPEC-003 §1 confirmed                   |
+| Data flow              | PASS | Evidence → Confidence → Risk → Trust, unidirectional                        |
+| Object ownership       | PASS | RiskProfile, TrustProfile, ConfidenceExplanation are owned by analyzer       |
+| Package boundaries     | PASS | Scoring is in analyzer, not a separate package, correct for V1              |
+| Plugin boundaries      | PASS | §12.2 Policy modifiers adjust presentation, never base scores                |
+| Renderer boundaries    | PASS | Renderers consume scores as part of CanonicalReport                          |
+| AI boundaries          | PASS | §1.2 explicitly: "VERIS does not use AI for scoring"                         |
+| Determinism guarantees | PASS | §2.4 "If input A == input B, then score(A) == score(B)", explicit guarantee |
 
 **Findings:** None. SPEC-005 is the most mathematically rigorous spec. The multiplicative confidence formula, tanh saturation, and risk density model are all well-specified.
 
 ---
 
-#### SPEC-006 — Terminal UX, Rendering & Report System
+#### SPEC-006: terminal UX, rendering & report system
 
 | Dimension              | Verdict  | Issues                                                                                                                                                               |
 | ---------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Dependency consistency | ✅ PASS  | Renderers depend on report model, core types — per SPEC-001                                                                                                          |
-| Layer isolation        | ✅ PASS  | Renderers are cross-cutting; they consume CanonicalReport                                                                                                            |
-| Pipeline ordering      | ✅ PASS  | Rendering is the final stage — after report construction                                                                                                             |
-| Data flow              | ✅ PASS  | Unidirectional: CanonicalReport → Renderer → Output                                                                                                                  |
-| Object ownership       | ✅ PASS  | `@veris/renderers` owns all renderer implementations                                                                                                                 |
-| Package boundaries     | ✅ PASS  | Renderers are separate from exporters; renderers produce visual output, exporters produce data interchange formats                                                   |
-| Plugin boundaries      | ✅ PASS  | §4.5 renderer plugins implement same `Renderer` interface                                                                                                            |
-| Renderer boundaries    | ✅ PASS  | SPEC-006 §1.3: "Renderers consume the Canonical Report only. No renderer performs analysis." — explicit                                                              |
-| AI boundaries          | ✅ PASS  | §14 AI Context Export is read-only for AI services                                                                                                                   |
-| Determinism guarantees | ⚠️ MINOR | §16 performance budgets reference frame rates and render times, but the spec doesn't explicitly state that visual output must be deterministic given the same report |
+| Dependency consistency | PASS  | Renderers depend on report model, core types, per SPEC-001                                                                                                          |
+| Layer isolation        | PASS  | Renderers are cross-cutting; they consume CanonicalReport                                                                                                            |
+| Pipeline ordering      | PASS  | Rendering is the final stage, after report construction                                                                                                             |
+| Data flow              | PASS  | Unidirectional: CanonicalReport → Renderer → Output                                                                                                                  |
+| Object ownership       | PASS  | `@veris/renderers` owns all renderer implementations                                                                                                                 |
+| Package boundaries     | PASS  | Renderers are separate from exporters; renderers produce visual output, exporters produce data interchange formats                                                   |
+| Plugin boundaries      | PASS  | §4.5 renderer plugins implement same `Renderer` interface                                                                                                            |
+| Renderer boundaries    | PASS  | SPEC-006 §1.3: "Renderers consume the Canonical Report only. No renderer performs analysis.", explicit                                                              |
+| AI boundaries          | PASS  | §14 AI Context Export is read-only for AI services                                                                                                                   |
+| Determinism guarantees | MINOR | §16 performance budgets reference frame rates and render times, but the spec doesn't explicitly state that visual output must be deterministic given the same report |
 
 **Issue I-003:** SPEC-006 does not explicitly guarantee that the same CanonicalReport produces identical visual output. While the spec implies determinism (no randomness), it's not stated as an invariant.
 
@@ -165,20 +165,20 @@ Each of the 9 prior specifications (SPEC-001 through SPEC-009) was audited again
 
 ---
 
-#### SPEC-007 — Plugin SDK, Configuration & Extension Architecture
+#### SPEC-007: plugin SDK, configuration & extension architecture
 
 | Dimension              | Verdict | Issues                                                                              |
 | ---------------------- | ------- | ----------------------------------------------------------------------------------- |
-| Dependency consistency | ✅ PASS | Plugin host depends on core, shared, logger, config — per SPEC-001                  |
-| Layer isolation        | ✅ PASS | Plugins are Layer 7 — above all core layers                                         |
-| Pipeline ordering      | ✅ PASS | Plugins hook into pipeline via approved extension points, never reorder stages      |
-| Data flow              | ✅ PASS | Plugins read canonical objects, never write them                                    |
-| Object ownership       | ✅ PASS | `@veris/plugins` owns plugin lifecycle; `@veris/plugin-sdk` is published separately |
-| Package boundaries     | ✅ PASS | Plugin host is separate from plugin SDK — clear boundary                            |
-| Plugin boundaries      | ✅ PASS | §1.1: "The Core is Inviolable" — explicit list of what plugins cannot do            |
-| Renderer boundaries    | ✅ PASS | §4.5 renderer plugins implement `Renderer` interface                                |
-| AI boundaries          | ✅ PASS | §4.6 AI Consumer plugins consume `AIReadyContext` — never produce it                |
-| Determinism guarantees | ✅ PASS | §1.3 "Plugins must not introduce non-determinism" — explicit                        |
+| Dependency consistency | PASS | Plugin host depends on core, shared, logger, config, per SPEC-001                  |
+| Layer isolation        | PASS | Plugins are Layer 7, above all core layers                                         |
+| Pipeline ordering      | PASS | Plugins hook into pipeline via approved extension points, never reorder stages      |
+| Data flow              | PASS | Plugins read canonical objects, never write them                                    |
+| Object ownership       | PASS | `@veris/plugins` owns plugin lifecycle; `@veris/plugin-sdk` is published separately |
+| Package boundaries     | PASS | Plugin host is separate from plugin SDK, clear boundary                            |
+| Plugin boundaries      | PASS | §1.1: "The Core is Inviolable", explicit list of what plugins cannot do            |
+| Renderer boundaries    | PASS | §4.5 renderer plugins implement `Renderer` interface                                |
+| AI boundaries          | PASS | §4.6 AI Consumer plugins consume `AIReadyContext`, never produce it                |
+| Determinism guarantees | PASS | §1.3 "Plugins must not introduce non-determinism", explicit                        |
 
 **Finding I-004:** SPEC-007 §3.2 defines `PluginLifecycle` but does not define what happens when a plugin is installed mid-scan (hot-reload). The spec assumes plugins are loaded at startup only.
 
@@ -186,63 +186,63 @@ Each of the 9 prior specifications (SPEC-001 through SPEC-009) was audited again
 
 ---
 
-#### SPEC-008 — Testing, Performance & Security Hardening
+#### SPEC-008: testing, performance & security hardening
 
 | Dimension              | Verdict | Issues                                                                 |
 | ---------------------- | ------- | ---------------------------------------------------------------------- |
-| Dependency consistency | ✅ PASS | Testing infra depends on all packages — correct                        |
-| Layer isolation        | ✅ PASS | Testing is infrastructure, not part of the production dependency graph |
-| Pipeline ordering      | ✅ PASS | Tests follow the pipeline order for integration tests                  |
-| Data flow              | ✅ PASS | Tests validate data flow, they don't participate in it                 |
-| Object ownership       | ✅ PASS | Testing infrastructure is in `tools/`, not in `packages/`              |
-| Package boundaries     | ✅ PASS | Tests are colocated with packages (`__tests__/`)                       |
-| Plugin boundaries      | ✅ PASS | §6.1.13 includes plugin abuse hardening                                |
-| Renderer boundaries    | ✅ PASS | Hardening §6.1.9 covers terminal escape injection                      |
-| AI boundaries          | ✅ PASS | No AI references in testing                                            |
-| Determinism guarantees | ✅ PASS | §2.8 double-run validation is explicit and thorough                    |
+| Dependency consistency | PASS | Testing infra depends on all packages, correct                        |
+| Layer isolation        | PASS | Testing is infrastructure, not part of the production dependency graph |
+| Pipeline ordering      | PASS | Tests follow the pipeline order for integration tests                  |
+| Data flow              | PASS | Tests validate data flow, they don't participate in it                 |
+| Object ownership       | PASS | Testing infrastructure is in `tools/`, not in `packages/`              |
+| Package boundaries     | PASS | Tests are colocated with packages (`__tests__/`)                       |
+| Plugin boundaries      | PASS | §6.1.13 includes plugin abuse hardening                                |
+| Renderer boundaries    | PASS | Hardening §6.1.9 covers terminal escape injection                      |
+| AI boundaries          | PASS | No AI references in testing                                            |
+| Determinism guarantees | PASS | §2.8 double-run validation is explicit and thorough                    |
 
 **Findings:** None. SPEC-008 is comprehensive. The hardening specifications (§6.1) covering zip bombs, tar bombs, billion laughs, symlink loops, infinite recursion, malformed headers, path traversal, resource exhaustion, terminal escape injection, and unicode spoofing are thorough and well-structured.
 
 ---
 
-#### SPEC-009 — Implementation Blueprint
+#### SPEC-009: implementation blueprint
 
 | Dimension              | Verdict | Issues                                                                  |
 | ---------------------- | ------- | ----------------------------------------------------------------------- |
-| Dependency consistency | ✅ PASS | Sprint plan respects package dependency order                           |
-| Layer isolation        | ✅ PASS | Sprints build layers in order (L0 → L1 → L2 → L3 → L4 → L5 → L6 → L7)   |
-| Pipeline ordering      | ✅ PASS | Pipeline is built as a whole entity in Sprint 7                         |
-| Data flow              | ✅ PASS | Sprint plan builds components in data-flow order                        |
-| Object ownership       | ✅ PASS | Package responsibilities are preserved from SPEC-001                    |
-| Package boundaries     | ✅ PASS | Each sprint builds specific packages — no boundary violations           |
-| Plugin boundaries      | ✅ PASS | Plugins are Sprint 12 (thin V1 shell) — correct prioritization          |
-| Renderer boundaries    | ✅ PASS | Renderers are Sprint 10 — after report/export (Sprint 9)                |
-| AI boundaries          | ✅ PASS | AI is listed as Continuous (throughout) after analysis stable — correct |
-| Determinism guarantees | ✅ PASS | Every sprint includes determinism validation gates                      |
+| Dependency consistency | PASS | Sprint plan respects package dependency order                           |
+| Layer isolation        | PASS | Sprints build layers in order (L0 → L1 → L2 → L3 → L4 → L5 → L6 → L7)   |
+| Pipeline ordering      | PASS | Pipeline is built as a whole entity in Sprint 7                         |
+| Data flow              | PASS | Sprint plan builds components in data-flow order                        |
+| Object ownership       | PASS | Package responsibilities are preserved from SPEC-001                    |
+| Package boundaries     | PASS | Each sprint builds specific packages, no boundary violations           |
+| Plugin boundaries      | PASS | Plugins are Sprint 12 (thin V1 shell), correct prioritization          |
+| Renderer boundaries    | PASS | Renderers are Sprint 10, after report/export (Sprint 9)                |
+| AI boundaries          | PASS | AI is listed as Continuous (throughout) after analysis stable, correct |
+| Determinism guarantees | PASS | Every sprint includes determinism validation gates                      |
 
 **Findings:** None. SPEC-009 is consistent with all prior specs.
 
-### 1.3 Audit Summary
+### 1.3 Audit summary
 
 | Spec                                  | Result  | Issues Found                    |
 | ------------------------------------- | ------- | ------------------------------- |
-| SPEC-001 — Repository Architecture    | ✅ PASS | 0                               |
-| SPEC-002 — Data Model & Taxonomy      | ✅ PASS | 1 (I-001: hash algorithm)       |
-| SPEC-003 — Rule Engine & Correlation  | ✅ PASS | 0                               |
-| SPEC-004 — Extraction Framework       | ✅ PASS | 1 (I-002: extractor priority)   |
-| SPEC-005 — Risk, Trust & Confidence   | ✅ PASS | 0                               |
-| SPEC-006 — Terminal UX & Rendering    | ✅ PASS | 1 (I-003: renderer determinism) |
-| SPEC-007 — Plugin SDK & Configuration | ✅ PASS | 1 (I-004: hot-reload)           |
-| SPEC-008 — Testing & Security         | ✅ PASS | 0                               |
-| SPEC-009 — Implementation Blueprint   | ✅ PASS | 0                               |
+| SPEC-001 — Repository Architecture    | PASS | 0                               |
+| SPEC-002 — Data Model & Taxonomy      | PASS | 1 (I-001: hash algorithm)       |
+| SPEC-003 — Rule Engine & Correlation  | PASS | 0                               |
+| SPEC-004 — Extraction Framework       | PASS | 1 (I-002: extractor priority)   |
+| SPEC-005 — Risk, Trust & Confidence   | PASS | 0                               |
+| SPEC-006 — Terminal UX & Rendering    | PASS | 1 (I-003: renderer determinism) |
+| SPEC-007 — Plugin SDK & Configuration | PASS | 1 (I-004: hot-reload)           |
+| SPEC-008 — Testing & Security         | PASS | 0                               |
+| SPEC-009 — Implementation Blueprint   | PASS | 0                               |
 
 **Total Issues:** 4 (all minor, all resolved in this document)
 
 ---
 
-## 2. Cross-Spec Validation Matrix
+## 2. Cross-Spec validation matrix
 
-### 2.1 Spec Dependency Graph
+### 2.1 Spec dependency graph
 
 ```
 SPEC-001 (Repo Architecture)
@@ -266,7 +266,7 @@ SPEC-001 (Repo Architecture)
   └── SPEC-010 (Constitution) ── governs all specs
 ```
 
-### 2.2 Full Cross-Spec Validation Matrix
+### 2.2 Full Cross-Spec validation matrix
 
 | #   | Contract / Object                         | Defined In                                           | Used By                                      | Validated In | Extension Point                 |
 | --- | ----------------------------------------- | ---------------------------------------------------- | -------------------------------------------- | ------------ | ------------------------------- |
@@ -280,14 +280,14 @@ SPEC-001 (Repo Architecture)
 | C08 | Extractor interface                       | SPEC-004 §5                                          | SPEC-003 (via Features), SPEC-007 (plugins)  | SPEC-008 §2  | New extractor types             |
 | C09 | RuleDefinition                            | SPEC-003 §3                                          | SPEC-005 (scoring), SPEC-007 (plugins)       | SPEC-008 §4  | New matcher types               |
 | C10 | RuleMatcher                               | SPEC-003 §9                                          | SPEC-003 engine                              | SPEC-008 §2  | New matcher implementations     |
-| C11 | Evaluation sandbox                        | SPEC-003 §10                                         | SPEC-003 engine                              | SPEC-008 §5  | Restricted — no extension       |
+| C11 | Evaluation sandbox                        | SPEC-003 §10                                         | SPEC-003 engine                              | SPEC-008 §5  | Restricted, no extension       |
 | C12 | RuleScheduler                             | SPEC-003 §11                                         | SPEC-003 engine                              | SPEC-008 §2  | Configurable priority           |
 | C13 | CorrelationEngine                         | SPEC-003 §4                                          | SPEC-005 (scoring)                           | SPEC-008 §2  | New correlation strategies      |
 | C14 | TrustEngine                               | SPEC-005 §5                                          | SPEC-005 (Risk)                              | SPEC-008 §2  | New trust dimensions            |
 | C15 | RiskEngine                                | SPEC-005 §4                                          | SPEC-006 (report)                            | SPEC-008 §2  | New risk dimensions             |
-| C16 | ConfidenceEngine                          | SPEC-005 §3                                          | SPEC-005 (Risk, Trust)                       | SPEC-008 §2  | None — frozen formula           |
+| C16 | ConfidenceEngine                          | SPEC-005 §3                                          | SPEC-005 (Risk, Trust)                       | SPEC-008 §2  | None, frozen formula           |
 | C17 | CanonicalReport                           | SPEC-002 §3                                          | SPEC-006 (all renderers), SPEC-007 (plugins) | SPEC-008 §4  | New optional fields             |
-| C18 | ReportBuilder                             | SPEC-001 §3 (sketch) / SPEC-006 §12                  | SPEC-006 (exporters)                         | SPEC-008 §2  | None — internal                 |
+| C18 | ReportBuilder                             | SPEC-001 §3 (sketch) / SPEC-006 §12                  | SPEC-006 (exporters)                         | SPEC-008 §2  | None, internal                 |
 | C19 | Renderer interface                        | SPEC-006 §2                                          | SPEC-007 (plugins)                           | SPEC-008 §2  | New renderer types              |
 | C20 | Exporter interface                        | SPEC-006 §13                                         | SPEC-007 (plugins)                           | SPEC-008 §2  | New export formats              |
 | C21 | Plugin interface                          | SPEC-007 §4                                          | Plugin host                                  | SPEC-008 §2  | New plugin types (V2+)          |
@@ -296,7 +296,7 @@ SPEC-001 (Repo Architecture)
 | C24 | Policy engine                             | SPEC-007 §9                                          | CLI                                          | SPEC-008 §2  | New policy rules                |
 | C25 | ScanProfile                               | SPEC-007 §8                                          | CLI                                          | SPEC-008 §2  | New profiles                    |
 | C26 | Permission model                          | SPEC-007 §10                                         | Plugin host                                  | SPEC-008 §2  | New permission IDs              |
-| C27 | Pipeline stages                           | SPEC-002 §1, SPEC-003 §1, SPEC-004 §1, SPEC-009 §4.4 | All analysis                                 | SPEC-008 §2  | None — frozen order             |
+| C27 | Pipeline stages                           | SPEC-002 §1, SPEC-003 §1, SPEC-004 §1, SPEC-009 §4.4 | All analysis                                 | SPEC-008 §2  | None, frozen order             |
 | C28 | Thread model                              | SPEC-008 §7                                          | Analyzer                                     | SPEC-008 §8  | Configurable pool size          |
 
 ### 2.3 Invariant Cross-References
@@ -314,7 +314,7 @@ SPEC-001 (Repo Architecture)
 | Every finding must be explainable          | SPEC-002 §2.2  | SPEC-003 §2.2                                    | SPEC-008 §2.6 |
 | Every score must be reproducible           | SPEC-005 §1.1  | SPEC-005 §2.4                                    | SPEC-008 §2.8 |
 
-### 2.4 Forbidden Dependencies
+### 2.4 Forbidden dependencies
 
 | Forbidden Pattern                            | Source         | Enforcement                         |
 | -------------------------------------------- | -------------- | ----------------------------------- |
@@ -330,29 +330,29 @@ SPEC-001 (Repo Architecture)
 
 ---
 
-## 3. Permanent Architectural Invariants
+## 3. Permanent architectural invariants
 
-### 3.1 The Constitution of VERIS
+### 3.1 The constitution of VERIS
 
 The following invariants are **permanent**. They cannot be changed without a new major architecture specification. They apply to V1 through V4.
 
-### 3.2 Invariant Categories
+### 3.2 Invariant categories
 
 | Category               | Count | Scope                              |
 | ---------------------- | ----- | ---------------------------------- |
-| **Foundation**         | 5     | Core properties of the system      |
-| **Data Model**         | 5     | Object lifecycle and relationships |
-| **Analysis**           | 5     | Pipeline behavior                  |
-| **Extraction**         | 3     | Extractor boundaries               |
-| **Scoring**            | 5     | Risk, Trust, Confidence            |
-| **UX & Rendering**     | 3     | Output boundaries                  |
-| **Plugins**            | 3     | Extension boundaries               |
-| **Testing & Security** | 3     | Quality enforcement                |
-| **Evolution**          | 3     | How VERIS may change               |
+| Foundation         | 5     | Core properties of the system      |
+| Data Model         | 5     | Object lifecycle and relationships |
+| Analysis           | 5     | Pipeline behavior                  |
+| Extraction         | 3     | Extractor boundaries               |
+| Scoring            | 5     | Risk, Trust, Confidence            |
+| UX & Rendering     | 3     | Output boundaries                  |
+| Plugins            | 3     | Extension boundaries               |
+| Testing & Security | 3     | Quality enforcement                |
+| Evolution          | 3     | How VERIS may change               |
 
-### 3.3 Definitive Invariant List
+### 3.3 Definitive invariant list
 
-#### FOUNDATION — Core Properties
+#### FOUNDATION: core properties
 
 ```
 F1. @veris/core imports nothing from the monorepo. It has zero production dependencies.
@@ -380,7 +380,7 @@ F5. Everything works fully offline. All core analysis paths must function withou
     a reliability liability. Offline-first is non-negotiable.
 ```
 
-#### DATA MODEL — Object Lifecycle and Relationships
+#### DATA MODEL: object lifecycle and relationships
 
 ```
 D1. Canonical objects are immutable after creation. No object may be modified after it is produced.
@@ -409,7 +409,7 @@ D5. Every serialized object includes schemaVersion as its first field. Schema ve
     migration between engine versions is impossible.
 ```
 
-#### ANALYSIS — Pipeline Behavior
+#### ANALYSIS: pipeline behavior
 
 ```
 A1. The analysis pipeline has a frozen order:
@@ -439,7 +439,7 @@ A5. The pipeline is resilient to partial failure. A failure in extraction does n
     the first error are unusable in production.
 ```
 
-#### EXTRACTION — Extractor Boundaries
+#### EXTRACTION: extractor boundaries
 
 ```
 E1. Every extractor declares explicit boundaries: max file size, max nesting depth, max string length,
@@ -458,7 +458,7 @@ E3. Artifact classification uses ≥ 3 signals. Extension alone is insufficient.
     classification provides defense-in-depth against misclassification.
 ```
 
-#### SCORING — Risk, Trust, Confidence
+#### SCORING: risk, trust, confidence
 
 ```
 S1. Confidence is multiplicative. Every factor (extraction quality, match precision, behavior confidence)
@@ -489,7 +489,7 @@ S5. Repository scoring uses risk density (mean artifact risk), not risk volume (
     A 10,000-file repo with 10 risky files should not score higher than a 10-file repo with 5 risky files.
 ```
 
-#### UX & RENDERING — Output Boundaries
+#### UX & RENDERING: output boundaries
 
 ```
 U1. Renderers consume the Canonical Report only. No renderer performs analysis, accesses the pipeline,
@@ -507,7 +507,7 @@ U3. Every interactive element is keyboard-reachable. Mouse is optional. All glob
     and accessibility.
 ```
 
-#### PLUGINS — Extension Boundaries
+#### PLUGINS: extension boundaries
 
 ```
 P1. The core engine is inviolable. Plugins cannot modify the analysis pipeline order, canonical data model,
@@ -529,7 +529,7 @@ P3. Plugin crash isolation. A plugin crash must never crash the host process. Pl
     that a buggy or malicious plugin cannot take down the entire analysis.
 ```
 
-#### TESTING & SECURITY — Quality Enforcement
+#### TESTING & SECURITY: quality enforcement
 
 ```
 T1. Every test that claims determinism must be validated by double-run comparison. A single run is
@@ -548,7 +548,7 @@ T3. Every hardening measure (zip bomb, path traversal, terminal escape, etc.) ha
     mitigation, or mitigation without recovery, is incomplete.
 ```
 
-#### EVOLUTION — How VERIS May Change
+#### EVOLUTION: how VERIS may change
 
 ```
 V1. Backward compatibility is the default. Breaking changes require a major version bump (for packages)
@@ -572,15 +572,15 @@ V3. The data model evolves through additive schema changes. New fields are optio
 
 ---
 
-## 4. Scope Freeze
+## 4. Scope freeze
 
-### 4.1 V1.0 — Must Ship
+### 4.1 V1.0: must ship
 
 The following capabilities are required for V1.0 stable release. No V1.0 release without all of these.
 
 | Package / Capability                                              | Spec Reference    | Priority | Rationale                               |
 | ----------------------------------------------------------------- | ----------------- | -------- | --------------------------------------- |
-| `@veris/core` — All canonical types                               | SPEC-002 §3       | P0       | Foundation — everything depends on this |
+| `@veris/core` — All canonical types                               | SPEC-002 §3       | P0       | Foundation, everything depends on this |
 | `@veris/shared` — Utilities, Result monad                         | SPEC-001 §7       | P0       | Required by all packages                |
 | `@veris/logger` — Structured logging                              | SPEC-001 §3       | P0       | Observability                           |
 | `@veris/config` — Hierarchical config                             | SPEC-007 §7       | P0       | Required by CLI and all packages        |
@@ -592,7 +592,7 @@ The following capabilities are required for V1.0 stable release. No V1.0 release
 | `@veris/report` — Report builder, diff, summary                   | SPEC-006 §12      | P0       | Output construction                     |
 | `@veris/exporters` — JSON, SARIF, Markdown, CSV                   | SPEC-006 §13      | P0       | Data export                             |
 | `@veris/renderers` — HTML, AI Context                             | SPEC-006 §13–14   | P0       | Visual output                           |
-| `@veris/cli` — scan, report, init commands + TUI                  | SPEC-006 §1–11    | P0       | Primary user interface                  |
+| `@veris/cli`, scan, report, init commands + TUI                  | SPEC-006 §1–11    | P0       | Primary user interface                  |
 | `@veris/api` — Programmatic API                                   | SPEC-001 §2       | P0       | Integration interface                   |
 | `@veris/runners` — Local runner, CI runner                        | SPEC-001 §2       | P0       | Execution modes                         |
 | `@veris/plugins` — Thin host shell (process isolation only)       | SPEC-007 §2–3     | P0       | Extension foundation                    |
@@ -602,7 +602,7 @@ The following capabilities are required for V1.0 stable release. No V1.0 release
 | Documentation — Architecture, API, CLI, guides                    | SPEC-009 §8       | P0       | Developer experience                    |
 | CI/CD — GitHub Actions (Gates 1–7)                                | SPEC-008 §10      | P0       | Quality enforcement                     |
 
-### 4.2 V1.x — Should Ship
+### 4.2 V1.x: should ship
 
 These capabilities should ship in V1.x (first year after V1.0) but are not required for V1.0.
 
@@ -616,7 +616,7 @@ These capabilities should ship in V1.x (first year after V1.0) but are not requi
 | Report baselines                                         | SPEC-006 §19.3 | P1       | Incremental analysis               |
 | Enterprise rule packs                                    | SPEC-003 §8.1  | P1       | Enterprise requirements            |
 
-### 4.3 V2 — Could Ship
+### 4.3 V2: could ship
 
 These capabilities are planned for V2 but are not committed.
 
@@ -635,7 +635,7 @@ These capabilities are planned for V2 but are not committed.
 | SBOM analysis                            | SPEC-005 §12.4     | P2       | Supply chain visibility      |
 | Remote sessions                          | SPEC-006 §19.5     | P2       | Distributed analysis         |
 
-### 4.4 V3+ — Deferred
+### 4.4 V3+: deferred
 
 These capabilities are deferred to V3 or later. They require significant architecture or infrastructure investment.
 
@@ -644,38 +644,38 @@ These capabilities are deferred to V3 or later. They require significant archite
 | C++, Swift, Kotlin extractors                   | V3     | Parser complexity is very high                                         |
 | Firmware analysis                               | V3     | Specialized domain requiring binary reverse engineering expertise      |
 | Full document analysis (PDF OLE, Office macros) | V3     | Requires deep format-specific parser investment                        |
-| Process monitoring (runtime analysis)           | V4     | Requires OS-level hooks — fundamentally different from static analysis |
-| Memory inspection                               | V4     | Runtime analysis — outside VERIS's static analysis scope               |
+| Process monitoring (runtime analysis)           | V4     | Requires OS-level hooks, fundamentally different from static analysis |
+| Memory inspection                               | V4     | Runtime analysis, outside VERIS's static analysis scope               |
 | Enterprise dashboard                            | V4     | Requires server infrastructure and user management                     |
 | SaaS / Cloud offering                           | V4     | Requires server infrastructure, multi-tenancy, billing                 |
 
-### 4.5 Rejected (Will Never Ship)
+### 4.5 Rejected (will never ship)
 
 These capabilities are explicitly rejected from VERIS's scope. No amount of community demand will change this.
 
 | Capability                               | Rationale                                                                                                                                  |
 | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| **AI in the analysis pipeline**          | Violates determinism, explainability, and reproducibility — VERIS's core value proposition. AI is strictly a consumer of analysis results. |
-| **Dynamic analysis / Malware execution** | Requires sandboxed execution environment — fundamentally different problem from static analysis. Out of scope.                             |
-| **Reputation-based scoring**             | Introduces non-determinism (reputation data changes over time) and network dependency. Optional add-on only, never core.                   |
-| **Automatic vulnerability remediation**  | Safety and liability risk. VERIS recommends, never modifies code automatically.                                                            |
-| **Malware attribution**                  | Requires threat intelligence beyond VERIS's scope. Attribution is a function of threat intelligence platforms, not static analysis tools.  |
-| **Network monitoring / IDS**             | VERIS analyzes stored artifacts, not network traffic. Different product category.                                                          |
-| **Cloud-based analysis (SaaS-only)**     | VERIS must remain usable offline. Cloud features may be added as optional enhancements but the core must always work locally.              |
+| AI in the analysis pipeline          | Violates determinism, explainability, and reproducibility — VERIS's core value proposition. AI is strictly a consumer of analysis results. |
+| Dynamic analysis / Malware execution | Requires sandboxed execution environment, fundamentally different problem from static analysis. Out of scope.                             |
+| Reputation-based scoring             | Introduces non-determinism (reputation data changes over time) and network dependency. Optional add-on only, never core.                   |
+| Automatic vulnerability remediation  | Safety and liability risk. VERIS recommends, never modifies code automatically.                                                            |
+| Malware attribution                  | Requires threat intelligence beyond VERIS's scope. Attribution is a function of threat intelligence platforms, not static analysis tools.  |
+| Network monitoring / IDS             | VERIS analyzes stored artifacts, not network traffic. Different product category.                                                          |
+| Cloud-based analysis (SaaS-only)     | VERIS must remain usable offline. Cloud features may be added as optional enhancements but the core must always work locally.              |
 
 ---
 
-## 5. Technical Debt Register
+## 5. Technical debt register
 
-### 5.1 Intentional Technical Debt for V1
+### 5.1 Intentional technical debt for V1
 
 The following items are intentionally deferred from V1 to enable faster delivery. Each item is documented with its reason, impact, mitigation, target release, and priority.
 
 | ID    | Item                                                                     | Reason                                                                                         | Impact                                                                                      | Mitigation                                                                               | Target  | Priority |
 | ----- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ------- | -------- |
-| TD-01 | Plugin sandbox uses child process isolation (not VM-level)               | VM-level isolation (Firecracker, gVisor) adds significant infrastructure complexity            | Plugin isolation is weaker — malicious plugin may leak memory or use more CPU than declared | Per-plugin resource limits (128MB memory, 30s timeout), crash quarantine after 3 crashes | V2      | High     |
-| TD-02 | Only 3 script extractors (Python, JS, Bash) + 2 binary (PE, ELF)         | Building all promised extractors would triple Sprint 4                                         | Limited language coverage — some files fall back to text/binary extractors                  | Text and binary fallbacks provide basic extraction for unsupported languages             | V1.x    | Medium   |
-| TD-03 | TUI uses Ink (React) — higher memory profile than raw terminal control   | Ink accelerates development; raw terminal control would require building all UI infrastructure | Higher memory usage (~50MB vs ~10MB for raw terminal)                                       | Virtual scrolling, memoization, lazy component loading                                   | Ongoing | Medium   |
+| TD-01 | Plugin sandbox uses child process isolation (not VM-level)               | VM-level isolation (Firecracker, gVisor) adds significant infrastructure complexity            | Plugin isolation is weaker, malicious plugin may leak memory or use more CPU than declared | Per-plugin resource limits (128MB memory, 30s timeout), crash quarantine after 3 crashes | V2      | High     |
+| TD-02 | Only 3 script extractors (Python, JS, Bash) + 2 binary (PE, ELF)         | Building all promised extractors would triple Sprint 4                                         | Limited language coverage, some files fall back to text/binary extractors                  | Text and binary fallbacks provide basic extraction for unsupported languages             | V1.x    | Medium   |
+| TD-03 | TUI uses Ink (React), higher memory profile than raw terminal control   | Ink accelerates development; raw terminal control would require building all UI infrastructure | Higher memory usage (~50MB vs ~10MB for raw terminal)                                       | Virtual scrolling, memoization, lazy component loading                                   | Ongoing | Medium   |
 | TD-04 | Golden snapshot coverage starts with core components, not all edge cases | Full golden coverage would delay release by 2+ sprints                                         | Some behavioral changes may go undetected for edge cases                                    | Prioritize golden tests for: (1) all extractors, (2) all rules, (3) all export formats   | V1.x    | Medium   |
 | TD-05 | Security corpus starts at 1,000 samples (not 10,000)                     | Curating 10,000 samples with expected.json is a months-long effort                             | Reduced regression detection for rare file types                                            | Corpus grows organically with each reported false positive; aim for 5,000 by V1.x        | V1.x    | Medium   |
 | TD-06 | AI Consumer plugins marked as optional in V1                             | AI provider integration is premature until core analysis is proven                             | Users cannot use AI-assisted explanations                                                   | Core reasoning engine produces deterministic explanations; AI is additive                | V1.x    | Low      |
@@ -686,85 +686,85 @@ The following items are intentionally deferred from V1 to enable faster delivery
 | TD-11 | No BLAKE3 hash support (SHA-256 only)                                    | SHA-256 is sufficient for V1; BLAKE3 adds implementation complexity                            | Slightly slower hashing for large files                                                     | SHA-256 is frozen as canonical; BLAKE3 may be added as optional in V2                    | V2      | Low      |
 | TD-12 | Batch/VBScript extractors use tokenizer (not AST)                        | Full AST parsing for these languages requires parser libraries that don't exist                | Lower extraction quality for Batch/VBScript files                                           | Tokenizer covers the most common patterns; AST support if demand justifies               | V2      | Low      |
 
-### 5.2 Debt Management Policy
+### 5.2 Debt management policy
 
 | Policy                       | Rule                                                                                                                   |
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| **Maximum debt per release** | No more than 5 new TD items per release                                                                                |
-| **Debt aging**               | Any TD item unresolved for 3 releases is escalated to P1                                                               |
-| **Debt repayment**           | Each minor release must resolve at least 2 TD items                                                                    |
-| **Critical debt**            | TD items with "High" priority must be resolved within 2 releases                                                       |
-| **New debt approval**        | New TD items require maintainer approval and must document all 5 fields (reason, impact, mitigation, target, priority) |
+| Maximum debt per release | No more than 5 new TD items per release                                                                                |
+| Debt aging               | Any TD item unresolved for 3 releases is escalated to P1                                                               |
+| Debt repayment           | Each minor release must resolve at least 2 TD items                                                                    |
+| Critical debt            | TD items with "High" priority must be resolved within 2 releases                                                       |
+| New debt approval        | New TD items require maintainer approval and must document all 5 fields (reason, impact, mitigation, target, priority) |
 
 ---
 
-## 6. Known Limitations
+## 6. Known limitations
 
-### 6.1 V1 Limitations
+### 6.1 V1 limitations
 
-The following are expected limitations of VERIS V1. They are not bugs — they are deliberate scope boundaries.
+The following are expected limitations of VERIS V1. They are not bugs, they are deliberate scope boundaries.
 
 | Limitation                          | Explanation                                                                                                                                                                                                        | Future Direction                        |
 | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------- |
-| **No dynamic analysis**             | VERIS is a static analysis platform. It does not execute or sandbox files to observe runtime behavior. Dynamic analysis is a fundamentally different problem that requires OS-level hooks and execution sandboxes. | V4+ with process monitoring (if at all) |
-| **No memory inspection**            | VERIS analyzes file content, not memory. Memory analysis requires runtime access to process address space, which VERIS does not have.                                                                              | V4+ (deferred indefinitely)             |
-| **No reputation services**          | VERIS does not maintain or query reputation databases (VirusTotal, AbuseIPDB, etc.). Reputation data introduces non-determinism and network dependency.                                                            | Optional plugin in V2+                  |
-| **No cloud analysis**               | All analysis runs locally on the user's machine. No data is sent to external servers. Cloud-based analysis is an optional enhancement, never the primary mode.                                                     | Optional SaaS offering in V4            |
-| **No automatic remediation**        | VERIS recommends fixes (via the Reasoning Engine) but never modifies code automatically. Automatic remediation is a safety and liability risk.                                                                     | Will never ship                         |
-| **No malware attribution**          | VERIS reports observed behaviors and their risk. It does not attribute malware to actors, families, or campaigns. Attribution is a function of threat intelligence.                                                | Will never ship                         |
-| **No network traffic analysis**     | VERIS analyzes stored files and artifacts. It does not capture or analyze network traffic.                                                                                                                         | Will never ship                         |
-| **Limited language coverage (V1)**  | V1 ships extractors for Python, JavaScript/TypeScript, Bash, PE executables, ELF executables. Rust, Go, Java, C#, C++, and other languages are V2+.                                                                | V2+                                     |
-| **No incremental scan persistence** | Incremental scans work within a session but the diff state is not persisted. Re-running a scan re-analyzes all files. Persistent diff storage is V2.                                                               | V2                                      |
-| **Plugin hot-reload not supported** | Plugin changes require a restart of the scan session. Hot-reload is V2+.                                                                                                                                           | V2                                      |
-| **No browser-based UI**             | The primary UI is the terminal (Ink-based TUI). HTML reports are static. No browser-based interactive dashboard exists in V1.                                                                                      | V4 (Enterprise dashboard)               |
-| **No multi-user support**           | VERIS is a single-user CLI tool. Multi-user features (RBAC, audit logging, organizational reporting) are not supported.                                                                                            | V4 (Enterprise)                         |
-| **No SBOM analysis**                | Software Bill of Materials analysis is not included in V1.                                                                                                                                                         | V2                                      |
-| **No compliance reporting**         | Compliance frameworks (PCI-DSS, SOC2, HIPAA) are not mapped in V1.                                                                                                                                                 | V1.x                                    |
-| **Limited archive format support**  | V1 supports ZIP, TAR, GZip, BZip2. RAR, 7z, ISO support is V2+.                                                                                                                                                    | V2                                      |
-| **No streaming of stdin archives**  | V1 reads archives from filesystem only. Streaming archive detection from stdin is V2+.                                                                                                                             | V2                                      |
+| No dynamic analysis             | VERIS is a static analysis platform. It does not execute or sandbox files to observe runtime behavior. Dynamic analysis is a fundamentally different problem that requires OS-level hooks and execution sandboxes. | V4+ with process monitoring (if at all) |
+| No memory inspection            | VERIS analyzes file content, not memory. Memory analysis requires runtime access to process address space, which VERIS does not have.                                                                              | V4+ (deferred indefinitely)             |
+| No reputation services          | VERIS does not maintain or query reputation databases (VirusTotal, AbuseIPDB, etc.). Reputation data introduces non-determinism and network dependency.                                                            | Optional plugin in V2+                  |
+| No cloud analysis               | All analysis runs locally on the user's machine. No data is sent to external servers. Cloud-based analysis is an optional enhancement, never the primary mode.                                                     | Optional SaaS offering in V4            |
+| No automatic remediation        | VERIS recommends fixes (via the Reasoning Engine) but never modifies code automatically. Automatic remediation is a safety and liability risk.                                                                     | Will never ship                         |
+| No malware attribution          | VERIS reports observed behaviors and their risk. It does not attribute malware to actors, families, or campaigns. Attribution is a function of threat intelligence.                                                | Will never ship                         |
+| No network traffic analysis     | VERIS analyzes stored files and artifacts. It does not capture or analyze network traffic.                                                                                                                         | Will never ship                         |
+| Limited language coverage (V1)  | V1 ships extractors for Python, JavaScript/TypeScript, Bash, PE executables, ELF executables. Rust, Go, Java, C#, C++, and other languages are V2+.                                                                | V2+                                     |
+| No incremental scan persistence | Incremental scans work within a session but the diff state is not persisted. Re-running a scan re-analyzes all files. Persistent diff storage is V2.                                                               | V2                                      |
+| Plugin hot-reload not supported | Plugin changes require a restart of the scan session. Hot-reload is V2+.                                                                                                                                           | V2                                      |
+| No browser-based UI             | The primary UI is the terminal (Ink-based TUI). HTML reports are static. No browser-based interactive dashboard exists in V1.                                                                                      | V4 (Enterprise dashboard)               |
+| No multi-user support           | VERIS is a single-user CLI tool. Multi-user features (RBAC, audit logging, organizational reporting) are not supported.                                                                                            | V4 (Enterprise)                         |
+| No SBOM analysis                | Software Bill of Materials analysis is not included in V1.                                                                                                                                                         | V2                                      |
+| No compliance reporting         | Compliance frameworks (PCI-DSS, SOC2, HIPAA) are not mapped in V1.                                                                                                                                                 | V1.x                                    |
+| Limited archive format support  | V1 supports ZIP, TAR, GZip, BZip2. RAR, 7z, ISO support is V2+.                                                                                                                                                    | V2                                      |
+| No streaming of stdin archives  | V1 reads archives from filesystem only. Streaming archive detection from stdin is V2+.                                                                                                                             | V2                                      |
 
-### 6.2 Non-Limitations (What VERIS V1 Does Well)
+### 6.2 Non-Limitations (what VERIS V1 does well)
 
 | Capability                                                              | V1 Status                |
 | ----------------------------------------------------------------------- | ------------------------ |
-| Static analysis of scripts (Python, JS, TS, Bash)                       | ✅ Full support          |
-| Static analysis of executables (PE, ELF)                                | ✅ Full support          |
-| Archive extraction and analysis (ZIP, TAR, GZip)                        | ✅ Full support          |
-| Secret detection (AWS keys, GitHub tokens, private keys, API keys)      | ✅ Full support          |
-| Configuration misconfiguration detection                                | ✅ Full support          |
-| Script behavioral analysis (eval, shell exec, obfuscation)              | ✅ Full support          |
-| Deterministic analysis — same input always produces same output         | ✅ Guaranteed            |
-| Explainable findings — every finding traces to specific evidence        | ✅ Built into data model |
-| Offline operation — all analysis works without network                  | ✅ Guaranteed            |
-| Interactive TUI with keyboard navigation                                | ✅ Full support          |
-| Multiple export formats (JSON, SARIF, HTML, Markdown, CSV)              | ✅ Full support          |
-| Rule pack system with enable/disable/override                           | ✅ Full support          |
-| Plugin system for third-party extensions (extractors, rules, renderers) | ✅ Thin V1 shell         |
-| Multi-signal artifact classification                                    | ✅ Full support          |
-| Error-tolerant parsing with recovery                                    | ✅ Built into extractors |
-| Risk-based scoring with explanation                                     | ✅ Full support          |
-| Trust-based assessment with independent scoring                         | ✅ Full support          |
+| Static analysis of scripts (Python, JS, TS, Bash)                       | Full support          |
+| Static analysis of executables (PE, ELF)                                | Full support          |
+| Archive extraction and analysis (ZIP, TAR, GZip)                        | Full support          |
+| Secret detection (AWS keys, GitHub tokens, private keys, API keys)      | Full support          |
+| Configuration misconfiguration detection                                | Full support          |
+| Script behavioral analysis (eval, shell exec, obfuscation)              | Full support          |
+| Deterministic analysis, same input always produces same output         | Guaranteed            |
+| Explainable findings, every finding traces to specific evidence        | Built into data model |
+| Offline operation, all analysis works without network                  | Guaranteed            |
+| Interactive TUI with keyboard navigation                                | Full support          |
+| Multiple export formats (JSON, SARIF, HTML, Markdown, CSV)              | Full support          |
+| Rule pack system with enable/disable/override                           | Full support          |
+| Plugin system for third-party extensions (extractors, rules, renderers) | Thin V1 shell         |
+| Multi-signal artifact classification                                    | Full support          |
+| Error-tolerant parsing with recovery                                    | Built into extractors |
+| Risk-based scoring with explanation                                     | Full support          |
+| Trust-based assessment with independent scoring                         | Full support          |
 
 ---
 
-## 7. Architecture Decision Record (ADR) Policy
+## 7. Architecture decision record (ADR) policy
 
-### 7.1 When an ADR is Required
+### 7.1 When an ADR is required
 
 An ADR is required when:
 
 | Trigger                           | Examples                                                             |
 | --------------------------------- | -------------------------------------------------------------------- |
-| **New architecture dependency**   | Adding a new package dependency, introducing a new external service  |
-| **Cross-package boundary change** | Changing a public interface in a way that affects other packages     |
-| **Data model change**             | Adding, removing, or changing a canonical object field               |
-| **Pipeline change**               | Adding, removing, or reordering pipeline stages                      |
-| **Scoring formula change**        | Changing the risk, trust, or confidence calculation                  |
-| **Plugin contract change**        | Changing a plugin interface or the plugin lifecycle                  |
-| **Build system change**           | Changing the build toolchain, CI/CD architecture, or release process |
-| **Policy change**                 | Changing the invariants listed in Section 3 of this document         |
-| **Technical debt approval**       | Adding a new item to the technical debt register                     |
-| **Scope decision**                | Adding or removing a feature from the scope freeze                   |
+| New architecture dependency   | Adding a new package dependency, introducing a new external service  |
+| Cross-package boundary change | Changing a public interface in a way that affects other packages     |
+| Data model change             | Adding, removing, or changing a canonical object field               |
+| Pipeline change               | Adding, removing, or reordering pipeline stages                      |
+| Scoring formula change        | Changing the risk, trust, or confidence calculation                  |
+| Plugin contract change        | Changing a plugin interface or the plugin lifecycle                  |
+| Build system change           | Changing the build toolchain, CI/CD architecture, or release process |
+| Policy change                 | Changing the invariants listed in Section 3 of this document         |
+| Technical debt approval       | Adding a new item to the technical debt register                     |
+| Scope decision                | Adding or removing a feature from the scope freeze                   |
 
 An ADR is **not** required for:
 
@@ -776,7 +776,7 @@ An ADR is **not** required for:
 - Test additions
 - Refactoring within a package (no public API change)
 
-### 7.2 ADR Lifecycle
+### 7.2 ADR lifecycle
 
 ```
   ┌─────────────────────────────────────────────┐
@@ -806,7 +806,7 @@ An ADR is **not** required for:
   └──────────────┘
 ```
 
-### 7.3 ADR Format
+### 7.3 ADR format
 
 Every ADR follows this template:
 
@@ -848,7 +848,7 @@ Include at least 2 alternatives with brief rationale for rejection.}
 {Link to related ADRs, spec sections, or external resources.}
 ```
 
-### 7.4 ADR Directory Structure
+### 7.4 ADR directory structure
 
 ```
 docs/architecture/
@@ -866,7 +866,7 @@ docs/architecture/
 └── ...
 ```
 
-### 7.5 Approval Process
+### 7.5 Approval process
 
 | Scope                           | Reviewers                   | Approval Required           | Min Period |
 | ------------------------------- | --------------------------- | --------------------------- | ---------- |
@@ -881,10 +881,10 @@ docs/architecture/
 
 - A superseding ADR must reference the ADR it supersedes.
 - The superseded ADR is marked with `Superseded by: ADR-NNN`.
-- Superseded ADRs are not deleted — they remain in the repository for history.
+- Superseded ADRs are not deleted. They remain in the repository for history.
 - Superseding requires the same approval process as the original.
 
-### 7.7 Emergency Decisions
+### 7.7 Emergency decisions
 
 In critical situations (security vulnerability, blocking bug, production outage), an ADR may be fast-tracked:
 
@@ -895,23 +895,23 @@ In critical situations (security vulnerability, blocking bug, production outage)
 
 ---
 
-## 8. RFC Process
+## 8. RFC process
 
-### 8.1 When an RFC is Required
+### 8.1 When an RFC is required
 
 An RFC is required for changes that are too large for an ADR:
 
 | Trigger                             | Examples                                                                             |
 | ----------------------------------- | ------------------------------------------------------------------------------------ |
-| **New major feature**               | Adding a new analysis pipeline stage, new type of analysis (e.g., SBOM)              |
-| **New plugin type**                 | Adding a plugin type not previously defined (e.g., PanelPlugin)                      |
-| **New extractor category**          | Adding a fundamentally new category of extractor (e.g., runtime analysis)            |
-| **New export format category**      | Adding a new category of export format (e.g., streaming protocol)                    |
-| **Architecture change**             | Changing layer architecture, dependency rules, or pipeline ordering                  |
-| **New external dependency**         | Adding a significant external dependency (database, message queue, external service) |
-| **Deprecation of major capability** | Removing a major capability from the scope                                           |
+| New major feature               | Adding a new analysis pipeline stage, new type of analysis (e.g., SBOM)              |
+| New plugin type                 | Adding a plugin type not previously defined (e.g., PanelPlugin)                      |
+| New extractor category          | Adding a fundamentally new category of extractor (e.g., runtime analysis)            |
+| New export format category      | Adding a new category of export format (e.g., streaming protocol)                    |
+| Architecture change             | Changing layer architecture, dependency rules, or pipeline ordering                  |
+| New external dependency         | Adding a significant external dependency (database, message queue, external service) |
+| Deprecation of major capability | Removing a major capability from the scope                                           |
 
-### 8.2 RFC Lifecycle
+### 8.2 RFC lifecycle
 
 ```
   ┌──────────────────────────────────────────────────────┐
@@ -936,7 +936,7 @@ An RFC is required for changes that are too large for an ADR:
   └────────────────────┘
 ```
 
-### 8.3 RFC Template
+### 8.3 RFC template
 
 ```markdown
 # RFC-{NNN}: {Title}
@@ -1009,32 +1009,32 @@ Include:
 {What questions are still open? What needs further investigation?}
 ```
 
-### 8.4 RFC Review Stages
+### 8.4 RFC review stages
 
 | Stage              | Duration        | Activity                                         |
 | ------------------ | --------------- | ------------------------------------------------ |
-| **Draft**          | Author-defined  | Author writes and refines the RFC                |
-| **Review**         | Minimum 2 weeks | Architecture team reviews; public comment period |
-| **Decision**       | 1 week          | Architecture team votes; decision documented     |
-| **Implementation** | Per milestone   | RFC is assigned to a milestone and tracked       |
+| Draft          | Author-defined  | Author writes and refines the RFC                |
+| Review         | Minimum 2 weeks | Architecture team reviews; public comment period |
+| Decision       | 1 week          | Architecture team votes; decision documented     |
+| Implementation | Per milestone   | RFC is assigned to a milestone and tracked       |
 
-### 8.5 Acceptance Criteria
+### 8.5 Acceptance criteria
 
 An RFC is accepted when:
 
-1. **Architecture compliance** — The proposal does not violate any permanent invariant (Section 3).
-2. **Compatibility** — The proposal includes a clear migration strategy.
-3. **Implementation feasibility** — The proposal can be implemented within the target version's timeline.
-4. **Consensus** — The architecture team has reached consensus (not necessarily unanimity, but no blocking objections).
-5. **Documentation** — The proposal includes documentation for the change.
+1. Architecture compliance: The proposal does not violate any permanent invariant (Section 3).
+2. Compatibility: The proposal includes a clear migration strategy.
+3. Implementation feasibility: The proposal can be implemented within the target version's timeline.
+4. Consensus: The architecture team has reached consensus (not necessarily unanimity, but no blocking objections).
+5. Documentation: The proposal includes documentation for the change.
 
-### 8.6 RFC Numbering
+### 8.6 RFC numbering
 
 RFCs are numbered sequentially: RFC-001, RFC-002, etc.
 
 The number is assigned when the RFC enters the Review stage.
 
-### 8.7 RFC Directory
+### 8.7 RFC directory
 
 ```
 docs/rfcs/
@@ -1046,13 +1046,13 @@ docs/rfcs/
 
 ---
 
-## 9. Release Readiness Checklist
+## 9. Release readiness checklist
 
-### 9.1 Production Readiness Gates
+### 9.1 Production readiness gates
 
 Each gate must pass before a V1.0 release candidate can be cut.
 
-#### Architecture Readiness
+#### Architecture readiness
 
 | #   | Check                                               | Verification      | Pass/Fail |
 | --- | --------------------------------------------------- | ----------------- | --------- |
@@ -1067,7 +1067,7 @@ Each gate must pass before a V1.0 release candidate can be cut.
 | A9  | Configuration hierarchy is deterministic            | Unit tests        |
 | A10 | All 9 architecture specs are internally consistent  | Audit (Section 1) |
 
-#### Implementation Readiness
+#### Implementation readiness
 
 | #   | Check                                                                   | Verification      | Pass/Fail |
 | --- | ----------------------------------------------------------------------- | ----------------- | --------- |
@@ -1082,7 +1082,7 @@ Each gate must pass before a V1.0 release candidate can be cut.
 | I9  | All export flags produce correct output                                 | E2E tests         |
 | I10 | `veris scan .` works end-to-end                                         | E2E tests         |
 
-#### Testing Readiness
+#### Testing readiness
 
 | #   | Check                                                  | Verification        | Pass/Fail |
 | --- | ------------------------------------------------------ | ------------------- | --------- |
@@ -1097,7 +1097,7 @@ Each gate must pass before a V1.0 release candidate can be cut.
 | T9  | Corpus regression tests pass (≥ 99%)                   | CI nightly gate     |
 | T10 | All adversarial tests pass                             | CI nightly gate     |
 
-#### Security Readiness
+#### Security readiness
 
 | #   | Check                                                            | Verification      | Pass/Fail |
 | --- | ---------------------------------------------------------------- | ----------------- | --------- |
@@ -1112,7 +1112,7 @@ Each gate must pass before a V1.0 release candidate can be cut.
 | S9  | Permission model enforces all permission IDs                     | Unit tests        |
 | S10 | No `eval()` or `new Function()` in production code               | Code audit        |
 
-#### Performance Readiness
+#### Performance readiness
 
 | #   | Check                                                            | Verification      | Pass/Fail |
 | --- | ---------------------------------------------------------------- | ----------------- | --------- |
@@ -1127,7 +1127,7 @@ Each gate must pass before a V1.0 release candidate can be cut.
 | P9  | No memory leaks (3 consecutive scans without monotonic increase) | Memory regression |
 | P10 | Total plugin overhead ≤ 10% of scan time                         | Benchmark         |
 
-#### Documentation Readiness
+#### Documentation readiness
 
 | #   | Check                                                      | Verification    | Pass/Fail |
 | --- | ---------------------------------------------------------- | --------------- | --------- |
@@ -1142,7 +1142,7 @@ Each gate must pass before a V1.0 release candidate can be cut.
 | D9  | Changelog is complete for all packages                     | Changelog audit |
 | D10 | README with quick-start example is accurate                | Manual review   |
 
-#### UX Readiness
+#### UX readiness
 
 | #   | Check                                                               | Verification   | Pass/Fail |
 | --- | ------------------------------------------------------------------- | -------------- | --------- |
@@ -1155,7 +1155,7 @@ Each gate must pass before a V1.0 release candidate can be cut.
 | U7  | Loading states display correctly                                    | Unit tests     |
 | U8  | Scan cancellation produces partial report                           | E2E test       |
 
-#### Accessibility Readiness
+#### Accessibility readiness
 
 | #   | Check                                                              | Verification      | Pass/Fail |
 | --- | ------------------------------------------------------------------ | ----------------- | --------- |
@@ -1167,7 +1167,7 @@ Each gate must pass before a V1.0 release candidate can be cut.
 | AC6 | All animations respect `prefers-reduced-motion`                    | Integration test  |
 | AC7 | `--no-animation` flag disables all animations                      | Integration test  |
 
-#### Packaging Readiness
+#### Packaging readiness
 
 | #   | Check                                                             | Verification     | Pass/Fail |
 | --- | ----------------------------------------------------------------- | ---------------- | --------- |
@@ -1179,7 +1179,7 @@ Each gate must pass before a V1.0 release candidate can be cut.
 | PK6 | No dependency has known critical vulnerabilities                  | `pnpm audit`     |
 | PK7 | Package licenses are compatible with MIT                          | License audit    |
 
-#### Cross-Platform Readiness
+#### Cross-Platform readiness
 
 | #   | Check                                              | Verification           | Pass/Fail |
 | --- | -------------------------------------------------- | ---------------------- | --------- |
@@ -1190,7 +1190,7 @@ Each gate must pass before a V1.0 release candidate can be cut.
 | CP5 | Archive extraction works on all platforms          | Integration tests      |
 | CP6 | TUI renders correctly on all platforms             | Manual testing         |
 
-#### CI/CD Readiness
+#### CI/CD readiness
 
 | #   | Check                                         | Verification      | Pass/Fail |
 | --- | --------------------------------------------- | ----------------- | --------- |
@@ -1202,7 +1202,7 @@ Each gate must pass before a V1.0 release candidate can be cut.
 | CI6 | Code coverage reporting works                 | CI coverage gate  |
 | CI7 | All CI secrets are properly configured        | Security audit    |
 
-### 9.2 Release Criteria Summary
+### 9.2 Release criteria summary
 
 | Category       | Total Checks | Must Pass (V1.0)                   |
 | -------------- | ------------ | ---------------------------------- |
@@ -1217,11 +1217,11 @@ Each gate must pass before a V1.0 release candidate can be cut.
 | Packaging      | 7            | 7                                  |
 | Cross-Platform | 6            | 6                                  |
 | CI/CD          | 7            | 7                                  |
-| **Total**      | **95**       | **91 (96%)**                       |
+| Total      | 95       | 91 (96%)                       |
 
 ---
 
-## 10. Success Metrics
+## 10. Success metrics
 
 ### 10.1 Determinism
 
@@ -1231,7 +1231,7 @@ Each gate must pass before a V1.0 release candidate can be cut.
 | Non-deterministic test count | 0      | Count of NonDeterminismError failures                  | Every PR  |
 | Cross-platform determinism   | 100%   | Same input on Linux/macOS/Windows produces same output | Weekly    |
 
-### 10.2 False Positive Rate
+### 10.2 False positive rate
 
 | Metric                                | Target                | Measurement                                               | Frequency  |
 | ------------------------------------- | --------------------- | --------------------------------------------------------- | ---------- |
@@ -1240,7 +1240,7 @@ Each gate must pass before a V1.0 release candidate can be cut.
 | User-reported FP resolution time      | ≤ 7 days              | Time from FP report to fix or documented known limitation | Per-ticket |
 | FP regression test coverage           | ≥ 95% of reported FPs | Known FPs have regression tests                           | Per-FP     |
 
-### 10.3 Crash Rate
+### 10.3 Crash rate
 
 | Metric                      | Target                  | Measurement                             | Frequency         |
 | --------------------------- | ----------------------- | --------------------------------------- | ----------------- |
@@ -1265,7 +1265,7 @@ Each gate must pass before a V1.0 release candidate can be cut.
 | Classification cache hit ratio | ≥ 80%              | Cache statistics             | Weekly    |
 | HTML export (10K findings)     | ≤ 5s               | Wall clock                   | Weekly    |
 
-### 10.5 Memory Usage
+### 10.5 Memory usage
 
 | Metric                               | Target                | Measurement             | Frequency |
 | ------------------------------------ | --------------------- | ----------------------- | --------- |
@@ -1275,7 +1275,7 @@ Each gate must pass before a V1.0 release candidate can be cut.
 | Plugin memory (per plugin)           | ≤ 128 MB              | Per-process tracking    | Weekly    |
 | Cache memory                         | ≤ 100 MB              | Cache statistics        | Weekly    |
 
-### 10.6 Startup Time
+### 10.6 Startup time
 
 | Metric                | Target          | Measurement           | Frequency |
 | --------------------- | --------------- | --------------------- | --------- |
@@ -1284,7 +1284,7 @@ Each gate must pass before a V1.0 release candidate can be cut.
 | First scan warmup     | ≤ 5s            | First file extraction | Weekly    |
 | Plugin load time      | ≤ 1s per plugin | Plugin host timing    | Weekly    |
 
-### 10.7 Report Quality
+### 10.7 Report quality
 
 | Metric                            | Target | Measurement                                                         | Frequency |
 | --------------------------------- | ------ | ------------------------------------------------------------------- | --------- |
@@ -1294,7 +1294,7 @@ Each gate must pass before a V1.0 release candidate can be cut.
 | Report schema conformance         | 100%   | All reports validate against canonical schema                       | Nightly   |
 | SARIF spec compliance             | 100%   | SARIF output passes Microsoft validator                             | Nightly   |
 
-### 10.8 Documentation Coverage
+### 10.8 Documentation coverage
 
 | Metric                    | Target                     | Measurement                                                  | Frequency |
 | ------------------------- | -------------------------- | ------------------------------------------------------------ | --------- |
@@ -1304,7 +1304,7 @@ Each gate must pass before a V1.0 release candidate can be cut.
 | Getting started tutorial  | 100%                       | Tutorial exists and is accurate                              | Release   |
 | ADR coverage              | 100% of required decisions | ADR inventory matches decision log                           | Quarterly |
 
-### 10.9 Test Coverage
+### 10.9 Test coverage
 
 | Metric                                 | Target             | Measurement                      | Frequency |
 | -------------------------------------- | ------------------ | -------------------------------- | --------- |
@@ -1315,7 +1315,7 @@ Each gate must pass before a V1.0 release candidate can be cut.
 | Integration test coverage              | 100% of contracts  | All IT-001 through IT-010 pass   | PR gate   |
 | Golden snapshot coverage               | 100% of components | All components have golden tests | PR gate   |
 
-### 10.10 User Experience
+### 10.10 User experience
 
 | Metric                           | Target                   | Measurement                              | Frequency   |
 | -------------------------------- | ------------------------ | ---------------------------------------- | ----------- |
@@ -1325,38 +1325,38 @@ Each gate must pass before a V1.0 release candidate can be cut.
 | Error state coverage             | 100% of screens          | All screens handle error data            | Unit test   |
 | Loading state coverage           | 100% of async operations | All async ops have loading state         | Unit test   |
 
-### 10.11 Plugin Compatibility
+### 10.11 Plugin compatibility
 
 | Metric                           | Target                                            | Measurement              | Frequency |
 | -------------------------------- | ------------------------------------------------- | ------------------------ | --------- |
 | Plugin API compatibility         | 100% backward compatible within major version     | Plugin integration tests | PR gate   |
-| Plugin crash isolation           | 100% — no plugin crash affects host               | Integration tests        | PR gate   |
-| Plugin permission enforcement    | 100% — all permission checks pass                 | Unit tests               | PR gate   |
+| Plugin crash isolation           | 100%, no plugin crash affects host               | Integration tests        | PR gate   |
+| Plugin permission enforcement    | 100%, all permission checks pass                 | Unit tests               | PR gate   |
 | Plugin SDK version compatibility | Manifest validation catches all incompatibilities | Manifest validator tests | PR gate   |
 
 ---
 
-## 11. Long-Term Evolution Rules
+## 11. Long-Term evolution rules
 
-### 11.1 Allowed Extension Mechanisms
+### 11.1 Allowed extension mechanisms
 
 | Mechanism                      | Description                                                         | Version |
 | ------------------------------ | ------------------------------------------------------------------- | ------- |
-| **New extractors**             | Implement `Extractor` interface, register in `ExtractorRegistry`    | Any     |
-| **New rule packs**             | Create new pack directory in `@veris/rules` with manifest and rules | Any     |
-| **New rules**                  | Add to existing rule packs                                          | Any     |
-| **New matcher types**          | Implement `RuleMatcher` interface, register in matcher registry     | Any     |
-| **New export formats**         | Implement `Renderer` interface, register in `RendererRegistry`      | Any     |
-| **New taxonomy nodes**         | Add to taxonomy tree (additive only, never modify existing)         | Any     |
-| **New correlation strategies** | Implement new `CorrelationStrategy` in `CorrelationEngine`          | Any     |
-| **New trust dimensions**       | Add to trust engine dimension registry                              | Any     |
-| **New risk dimensions**        | Add to risk engine dimension registry                               | Any     |
-| **New plugin types**           | Define new plugin interface extending base `Plugin`                 | V2+     |
-| **New renderer types**         | Implement `Renderer` interface                                      | Any     |
-| **New configuration loaders**  | Implement config loader, register in config system                  | Any     |
-| **New scan profiles**          | Create profile JSON files                                           | Any     |
+| New extractors             | Implement `Extractor` interface, register in `ExtractorRegistry`    | Any     |
+| New rule packs             | Create new pack directory in `@veris/rules` with manifest and rules | Any     |
+| New rules                  | Add to existing rule packs                                          | Any     |
+| New matcher types          | Implement `RuleMatcher` interface, register in matcher registry     | Any     |
+| New export formats         | Implement `Renderer` interface, register in `RendererRegistry`      | Any     |
+| New taxonomy nodes         | Add to taxonomy tree (additive only, never modify existing)         | Any     |
+| New correlation strategies | Implement new `CorrelationStrategy` in `CorrelationEngine`          | Any     |
+| New trust dimensions       | Add to trust engine dimension registry                              | Any     |
+| New risk dimensions        | Add to risk engine dimension registry                               | Any     |
+| New plugin types           | Define new plugin interface extending base `Plugin`                 | V2+     |
+| New renderer types         | Implement `Renderer` interface                                      | Any     |
+| New configuration loaders  | Implement config loader, register in config system                  | Any     |
+| New scan profiles          | Create profile JSON files                                           | Any     |
 
-### 11.2 Backward Compatibility Rules
+### 11.2 Backward compatibility rules
 
 | Component                              | Compatibility Guarantee                               | Breaking Change Policy                                           |
 | -------------------------------------- | ----------------------------------------------------- | ---------------------------------------------------------------- |
@@ -1371,14 +1371,14 @@ Each gate must pass before a V1.0 release candidate can be cut.
 | CLI flags                              | Full backward compatibility within major version      | Deprecate in minor with warning. Remove in major.                |
 | Configuration schema                   | Forward compatibility (new sections are optional)     | Backward incompatible changes require new config schema version. |
 
-### 11.3 Deprecation Policy
+### 11.3 Deprecation policy
 
 | Phase            | Action                                              | Duration                           |
 | ---------------- | --------------------------------------------------- | ---------------------------------- |
-| **Announcement** | Deprecation notice in changelog and console warning | At start of deprecation            |
-| **Warning**      | Console warning on every use of deprecated feature  | 1 minor version                    |
-| **Soft removal** | Feature hidden from documentation, not recommended  | 1 minor version                    |
-| **Hard removal** | Feature removed, migration script provided          | 1 major version after announcement |
+| Announcement | Deprecation notice in changelog and console warning | At start of deprecation            |
+| Warning      | Console warning on every use of deprecated feature  | 1 minor version                    |
+| Soft removal | Feature hidden from documentation, not recommended  | 1 minor version                    |
+| Hard removal | Feature removed, migration script provided          | 1 major version after announcement |
 
 **Example timeline:**
 
@@ -1388,11 +1388,11 @@ Each gate must pass before a V1.0 release candidate can be cut.
 - V1.3: Feature hidden from docs, still functional
 - V2.0: Feature removed, migration script provided
 
-### 11.4 Semantic Versioning Rules
+### 11.4 Semantic versioning rules
 
 | Package               | Starting Version | Versioning Strategy                                                             |
 | --------------------- | ---------------- | ------------------------------------------------------------------------------- |
-| `@veris/core`         | `1.0.0`          | Conservative — major bumps require architecture review                          |
+| `@veris/core`         | `1.0.0`          | Conservative, major bumps require architecture review                          |
 | `@veris/shared`       | `1.0.0`          | Utility additions are minor; breaking changes are major                         |
 | `@veris/logger`       | `0.1.0`          | Stabilizes at 1.0.0 alongside V1 stable                                         |
 | `@veris/config`       | `0.1.0`          | Stabilizes at 1.0.0 alongside V1 stable                                         |
@@ -1410,7 +1410,7 @@ Each gate must pass before a V1.0 release candidate can be cut.
 | `@veris/plugins`      | `0.1.0`          | Plugin type additions are minor; lifecycle changes are major                    |
 | `@veris/plugin-sdk`   | `0.1.0`          | Independently versioned; new plugin types are minor; contract changes are major |
 
-### 11.5 Plugin Compatibility Guarantees
+### 11.5 Plugin compatibility guarantees
 
 | Guarantee              | Period                   | Details                                                              |
 | ---------------------- | ------------------------ | -------------------------------------------------------------------- |
@@ -1419,7 +1419,7 @@ Each gate must pass before a V1.0 release candidate can be cut.
 | Deprecation window     | 2 minor versions         | Deprecated API continues to work for 2 minor versions                |
 | Manifest pinning       | Required                 | Plugin manifest declares `sdkVersion` range; host validates at load  |
 
-### 11.6 Schema Evolution Strategy
+### 11.6 Schema evolution strategy
 
 | Schema                 | Evolution Strategy                                     | Breaking Change Threshold                                   |
 | ---------------------- | ------------------------------------------------------ | ----------------------------------------------------------- |
@@ -1431,89 +1431,89 @@ Each gate must pass before a V1.0 release candidate can be cut.
 
 ---
 
-## 12. Final Principal Engineer Assessment
+## 12. Final Principal engineer assessment
 
-### 12.1 Architecture Strengths
+### 12.1 Architecture strengths
 
 | Strength                                | Assessment                                                                                                                                                                                                                                                |
 | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Determinism-first design**            | Every component is designed for determinism. The multiplicative confidence model, immutable objects, deterministic IDs, and per-session caching all reinforce each other. This is the single strongest architectural property.                            |
-| **Clear layer isolation**               | The L0–L7 layer architecture with downward-only dependencies is well-defined and enforceable. TypeScript project references and `madge` CI checks ensure the architecture is enforced at compile time, not just in design documents.                      |
-| **Immutability as a first principle**   | All canonical objects are immutable. This enables caching, replay, diffing, distributed analysis, and thread safety. The performance cost is negligible compared to the reliability gain.                                                                 |
-| **Comprehensive hardening**             | SPEC-008's coverage of zip bombs, path traversal, terminal escape, Unicode spoofing, and plugin abuse is thorough and well-structured. Every hardening measure has detection, mitigation, diagnostics, and recovery — the four-part pattern is excellent. |
-| **Plugin architecture is future-proof** | The plugin system is designed for V2 maturity but the V1 thin shell validates the architecture. Process isolation, permission model, and manifest-based loading are the right foundations.                                                                |
-| **Testing pyramid is well-designed**    | The separation into unit → component → integration → pipeline → E2E with appropriate CI frequency (PR vs nightly vs weekly) is practical and avoids the common trap of making every test run on every commit.                                             |
+| Determinism-first design            | Every component is designed for determinism. The multiplicative confidence model, immutable objects, deterministic IDs, and per-session caching all reinforce each other. This is the single strongest architectural property.                            |
+| Clear layer isolation               | The L0–L7 layer architecture with downward-only dependencies is well-defined and enforceable. TypeScript project references and `madge` CI checks ensure the architecture is enforced at compile time, not just in design documents.                      |
+| Immutability as a first principle   | All canonical objects are immutable. This enables caching, replay, diffing, distributed analysis, and thread safety. The performance cost is negligible compared to the reliability gain.                                                                 |
+| Comprehensive hardening             | SPEC-008's coverage of zip bombs, path traversal, terminal escape, Unicode spoofing, and plugin abuse is thorough and well-structured. Every hardening measure has detection, mitigation, diagnostics, and recovery, the four-part pattern is excellent. |
+| Plugin architecture is future-proof | The plugin system is designed for V2 maturity but the V1 thin shell validates the architecture. Process isolation, permission model, and manifest-based loading are the right foundations.                                                                |
+| Testing pyramid is well-designed    | The separation into unit → component → integration → pipeline → E2E with appropriate CI frequency (PR vs nightly vs weekly) is practical and avoids the common trap of making every test run on every commit.                                             |
 
-### 12.2 Architecture Weaknesses
+### 12.2 Architecture weaknesses
 
 | Weakness                                         | Assessment                                                                                                                                                                                                                                                                                                                                            | Mitigation                                                                                                                                                                                                                         |
 | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **TypeScript as the implementation language**    | TypeScript is not the optimal language for a security analysis tool. Memory safety is provided by the runtime (V8), not the language. Parser performance may be constrained by the garbage collector. However, the monorepo tooling (pnpm, TypeScript project references) and ecosystem (parser libraries, Ink for TUI) are significant accelerators. | Accept the tradeoff. The development speed advantage outweighs the runtime performance limitations for V1. If performance becomes critical, hot paths can be migrated to native modules (Rust via napi-rs) in V2+.                 |
-| **React Ink for TUI**                            | Ink provides excellent developer experience but has a higher memory footprint than raw terminal control. For very large finding sets (100K+), virtual scrolling performance may be a concern.                                                                                                                                                         | Virtual scrolling, memoization, and bin-based aggregation should handle 100K findings. If performance is inadequate, consider a hybrid approach: Ink for interactive screens, raw terminal for live scan dashboard.                |
-| **Plugin sandbox uses child process isolation**  | Child process isolation (fork) is weaker than VM-level isolation (Firecracker, gVisor). A malicious plugin can still consume resources or leak memory within its process limits.                                                                                                                                                                      | Per-plugin resource limits (128MB, 30s timeout) and crash quarantine (3 strikes) provide adequate protection for V1. VM-level isolation is a V2 enhancement.                                                                       |
-| **Single-threaded event loop for orchestration** | The main event loop handles pipeline orchestration. While extraction and rule matching are offloaded to worker threads, the orchestration layer is single-threaded. This could become a bottleneck for very large scans with thousands of artifacts.                                                                                                  | The bottleneck is extraction (53.5%) and rule matching (21.7%), both of which are worker-threaded. The orchestration overhead is minimal (< 5%). If orchestration becomes a bottleneck, it can be parallelized per-artifact in V2. |
-| **No persistent state**                          | VERIS has no database. All state is in-memory per scan. This simplifies the architecture but prevents historical comparison, trend analysis, and scan result persistence without explicit export.                                                                                                                                                     | SQLite-based scan history is a V2 enhancement. For V1, users export reports for archival. In-memory diff works within a session.                                                                                                   |
+| TypeScript as the implementation language    | TypeScript is not the optimal language for a security analysis tool. Memory safety is provided by the runtime (V8), not the language. Parser performance may be constrained by the garbage collector. However, the monorepo tooling (pnpm, TypeScript project references) and ecosystem (parser libraries, Ink for TUI) are significant accelerators. | Accept the tradeoff. The development speed advantage outweighs the runtime performance limitations for V1. If performance becomes critical, hot paths can be migrated to native modules (Rust via napi-rs) in V2+.                 |
+| React Ink for TUI                            | Ink provides excellent developer experience but has a higher memory footprint than raw terminal control. For very large finding sets (100K+), virtual scrolling performance may be a concern.                                                                                                                                                         | Virtual scrolling, memoization, and bin-based aggregation should handle 100K findings. If performance is inadequate, consider a hybrid approach: Ink for interactive screens, raw terminal for live scan dashboard.                |
+| Plugin sandbox uses child process isolation  | Child process isolation (fork) is weaker than VM-level isolation (Firecracker, gVisor). A malicious plugin can still consume resources or leak memory within its process limits.                                                                                                                                                                      | Per-plugin resource limits (128MB, 30s timeout) and crash quarantine (3 strikes) provide adequate protection for V1. VM-level isolation is a V2 enhancement.                                                                       |
+| Single-threaded event loop for orchestration | The main event loop handles pipeline orchestration. While extraction and rule matching are offloaded to worker threads, the orchestration layer is single-threaded. This could become a bottleneck for very large scans with thousands of artifacts.                                                                                                  | The bottleneck is extraction (53.5%) and rule matching (21.7%), both of which are worker-threaded. The orchestration overhead is minimal (< 5%). If orchestration becomes a bottleneck, it can be parallelized per-artifact in V2. |
+| No persistent state                          | VERIS has no database. All state is in-memory per scan. This simplifies the architecture but prevents historical comparison, trend analysis, and scan result persistence without explicit export.                                                                                                                                                     | SQLite-based scan history is a V2 enhancement. For V1, users export reports for archival. In-memory diff works within a session.                                                                                                   |
 
 ### 12.3 Highest-Risk Areas
 
 | Risk Area                                       | Severity | Rationale                                                                                                                                                       | Mitigation                                                                                                                                                               |
 | ----------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Parser robustness against adversarial input** | Critical | VERIS analyzes untrusted files. A parser vulnerability could lead to RCE, data leaks, or denial of service. This is the highest-risk area of the entire system. | Fuzzing every parser (60 min per target), error-tolerant parsing, memory limits, timeouts, and input validation before parsing. All hardening measures are tested.       |
-| **False positive rate in rule packs**           | High     | Users will abandon VERIS if it produces too many false positives. The first user experience is the most important.                                              | Aggressive FP regression tests, confidence thresholds, user-configurable severity overrides. Every user-reported FP gets a regression test.                              |
-| **Plugin security**                             | High     | Third-party plugins are a supply chain risk. A malicious plugin could exfiltrate scan data, modify files, or use the host as a bot.                             | Permission model, process isolation, network off by default, crash quarantine. Plugin manifest signing is V2 but the permission model works in V1.                       |
-| **Determinism across platforms**                | Medium   | Floating-point operations can produce slightly different results on different platforms (x64 vs arm64, Linux vs Windows).                                       | Fixed-precision arithmetic, deterministic accumulation order (sorted), double-run validation. Scores are reported to 1 decimal place — small differences are acceptable. |
-| **TUI performance with large findings**         | Medium   | The Ink-based TUI may become sluggish with 100K+ findings.                                                                                                      | Virtual scrolling, pagination, bin-based aggregation. Performance budgets are tested in CI.                                                                              |
+| Parser robustness against adversarial input | Critical | VERIS analyzes untrusted files. A parser vulnerability could lead to RCE, data leaks, or denial of service. This is the highest-risk area of the entire system. | Fuzzing every parser (60 min per target), error-tolerant parsing, memory limits, timeouts, and input validation before parsing. All hardening measures are tested.       |
+| False positive rate in rule packs           | High     | Users will abandon VERIS if it produces too many false positives. The first user experience is the most important.                                              | Aggressive FP regression tests, confidence thresholds, user-configurable severity overrides. Every user-reported FP gets a regression test.                              |
+| Plugin security                             | High     | Third-party plugins are a supply chain risk. A malicious plugin could exfiltrate scan data, modify files, or use the host as a bot.                             | Permission model, process isolation, network off by default, crash quarantine. Plugin manifest signing is V2 but the permission model works in V1.                       |
+| Determinism across platforms                | Medium   | Floating-point operations can produce slightly different results on different platforms (x64 vs arm64, Linux vs Windows).                                       | Fixed-precision arithmetic, deterministic accumulation order (sorted), double-run validation. Scores are reported to 1 decimal place, small differences are acceptable. |
+| TUI performance with large findings         | Medium   | The Ink-based TUI may become sluggish with 100K+ findings.                                                                                                      | Virtual scrolling, pagination, bin-based aggregation. Performance budgets are tested in CI.                                                                              |
 
-### 12.4 Highest-Value Future Improvements
+### 12.4 Highest-Value future improvements
 
 | Improvement                                  | Value                                                          | Effort    | Target |
 | -------------------------------------------- | -------------------------------------------------------------- | --------- | ------ |
-| **Persistent scan history (SQLite)**         | High — enables trend analysis, regression detection, baselines | Medium    | V2     |
-| **Compliance scoring (PCI, SOC2, HIPAA)**    | High — enterprise adoption requires compliance reporting       | Medium    | V1.x   |
-| **Incremental scanning (content-addressed)** | High — reduces scan time by 10–100x for repeated scans         | Medium    | V2     |
-| **SBOM analysis**                            | High — supply chain security is a growing need                 | High      | V2     |
-| **AI-assisted explanation generation**       | Medium — improves report readability but is non-deterministic  | Low       | V1.x   |
-| **Remote sessions (TUI over SSH/WebSocket)** | Medium — enables server-side scanning with local viewing       | High      | V3     |
-| **Marketplace for plugins**                  | Medium — drives ecosystem growth                               | High      | V3     |
-| **Enterprise dashboard**                     | Medium — multi-repo aggregation                                | Very High | V4     |
+| Persistent scan history (SQLite)         | High, enables trend analysis, regression detection, baselines | Medium    | V2     |
+| Compliance scoring (PCI, SOC2, HIPAA)    | High, enterprise adoption requires compliance reporting       | Medium    | V1.x   |
+| Incremental scanning (content-addressed) | High, reduces scan time by 10–100x for repeated scans         | Medium    | V2     |
+| SBOM analysis                            | High, supply chain security is a growing need                 | High      | V2     |
+| AI-assisted explanation generation       | Medium, improves report readability but is non-deterministic  | Low       | V1.x   |
+| Remote sessions (TUI over SSH/WebSocket) | Medium, enables server-side scanning with local viewing       | High      | V3     |
+| Marketplace for plugins                  | Medium, drives ecosystem growth                               | High      | V3     |
+| Enterprise dashboard                     | Medium, multi-repo aggregation                                | Very High | V4     |
 
-### 12.5 Architectural Maturity Assessment
+### 12.5 Architectural maturity assessment
 
 | Dimension                      | Maturity Level      | Assessment                                                                                                                                                         |
 | ------------------------------ | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Requirements clarity**       | 5/5 — Frozen        | All 9 specs are frozen. No ambiguity in requirements.                                                                                                              |
-| **Architecture documentation** | 5/5 — Complete      | All architecture decisions are documented with rationale, consequences, and alternatives.                                                                          |
-| **Interface contracts**        | 5/5 — Defined       | All cross-package interfaces are defined in frozen specs. TypeScript project references enforce at compile time.                                                   |
-| **Data model**                 | 5/5 — Frozen        | All 14 canonical objects are defined with fields, validation rules, and lifecycle.                                                                                 |
-| **Pipeline ordering**          | 5/5 — Fixed         | Pipeline order is unambiguous and cross-referenced across 3 specs.                                                                                                 |
-| **Testing strategy**           | 5/5 — Comprehensive | Multi-level testing pyramid with determinism double-run validation.                                                                                                |
-| **Security hardening**         | 5/5 — Thorough      | 13 threat models with detection, mitigation, diagnostics, and recovery.                                                                                            |
-| **Performance architecture**   | 4/5 — Well-Designed | Worker pool, streaming, caching, and backpressure are designed. Some implementation details (worker count tuning, cache sizing) will require empirical validation. |
-| **Plugin architecture**        | 4/5 — Well-Designed | V1 thin shell is appropriate. Full sandboxing, marketplace, and signing are deferred to V2+. The permission model is well-designed.                                |
-| **Evolution rules**            | 5/5 — Defined       | Extension mechanisms, backward compatibility, deprecation policy, and schema evolution are all documented.                                                         |
+| Requirements clarity       | 5/5 — Frozen        | All 9 specs are frozen. No ambiguity in requirements.                                                                                                              |
+| Architecture documentation | 5/5 — Complete      | All architecture decisions are documented with rationale, consequences, and alternatives.                                                                          |
+| Interface contracts        | 5/5 — Defined       | All cross-package interfaces are defined in frozen specs. TypeScript project references enforce at compile time.                                                   |
+| Data model                 | 5/5 — Frozen        | All 14 canonical objects are defined with fields, validation rules, and lifecycle.                                                                                 |
+| Pipeline ordering          | 5/5 — Fixed         | Pipeline order is unambiguous and cross-referenced across 3 specs.                                                                                                 |
+| Testing strategy           | 5/5 — Comprehensive | Multi-level testing pyramid with determinism double-run validation.                                                                                                |
+| Security hardening         | 5/5 — Thorough      | 13 threat models with detection, mitigation, diagnostics, and recovery.                                                                                            |
+| Performance architecture   | 4/5 — Well-Designed | Worker pool, streaming, caching, and backpressure are designed. Some implementation details (worker count tuning, cache sizing) will require empirical validation. |
+| Plugin architecture        | 4/5 — Well-Designed | V1 thin shell is appropriate. Full sandboxing, marketplace, and signing are deferred to V2+. The permission model is well-designed.                                |
+| Evolution rules            | 5/5 — Defined       | Extension mechanisms, backward compatibility, deprecation policy, and schema evolution are all documented.                                                         |
 
 **Overall Architectural Maturity: 4.8 / 5.0**
 
-### 12.6 Production Readiness Assessment
+### 12.6 Production readiness assessment
 
 | Criterion                             | Status | Assessment                                                                  |
 | ------------------------------------- | ------ | --------------------------------------------------------------------------- |
-| **Architecture frozen?**              | ✅ Yes | All 10 specs (SPEC-001 through SPEC-010) are complete                       |
-| **All invariants documented?**        | ✅ Yes | 35 permanent invariants in Section 3                                        |
-| **Scope frozen?**                     | ✅ Yes | V1.0, V1.x, V2, V3, V4 scope defined; rejected features documented          |
-| **Known limitations documented?**     | ✅ Yes | 16 known V1 limitations with explanations                                   |
-| **Technical debt tracked?**           | ✅ Yes | 12 intentional debt items with mitigation plans                             |
-| **ADR process defined?**              | ✅ Yes | When ADRs are required, lifecycle, format, approval process                 |
-| **RFC process defined?**              | ✅ Yes | RFC lifecycle, template, review stages, acceptance criteria                 |
-| **Release checklist defined?**        | ✅ Yes | 95 production readiness checks across 11 categories                         |
-| **Success metrics defined?**          | ✅ Yes | 70+ metrics across 12 dimensions                                            |
-| **Evolution rules defined?**          | ✅ Yes | Extension mechanisms, backward compatibility, deprecation, schema evolution |
-| **Cross-spec audit complete?**        | ✅ Yes | All 9 specs audited; 4 minor issues found and resolved                      |
-| **Architecture assessment complete?** | ✅ Yes | Strengths, weaknesses, risks, and improvements documented                   |
+| Architecture frozen?              | Yes | All 10 specs (SPEC-001 through SPEC-010) are complete                       |
+| All invariants documented?        | Yes | 35 permanent invariants in Section 3                                        |
+| Scope frozen?                     | Yes | V1.0, V1.x, V2, V3, V4 scope defined; rejected features documented          |
+| Known limitations documented?     | Yes | 16 known V1 limitations with explanations                                   |
+| Technical debt tracked?           | Yes | 12 intentional debt items with mitigation plans                             |
+| ADR process defined?              | Yes | When ADRs are required, lifecycle, format, approval process                 |
+| RFC process defined?              | Yes | RFC lifecycle, template, review stages, acceptance criteria                 |
+| Release checklist defined?        | Yes | 95 production readiness checks across 11 categories                         |
+| Success metrics defined?          | Yes | 70+ metrics across 12 dimensions                                            |
+| Evolution rules defined?          | Yes | Extension mechanisms, backward compatibility, deprecation, schema evolution |
+| Cross-spec audit complete?        | Yes | All 9 specs audited; 4 minor issues found and resolved                      |
+| Architecture assessment complete? | Yes | Strengths, weaknesses, risks, and improvements documented                   |
 
 **Overall Production Readiness: READY FOR IMPLEMENTATION**
 
-### 12.7 Final Assessment
+### 12.7 Final assessment
 
 The VERIS architecture is mature, well-documented, and internally consistent. The frozen specs (SPEC-001 through SPEC-009) together with this constitutional document (SPEC-010) provide a complete foundation for V1 implementation through V4 evolution.
 
@@ -1523,18 +1523,18 @@ The VERIS architecture is mature, well-documented, and internally consistent. Th
 
 **Key recommendations for implementation:**
 
-1. **Build the thin version first.** The architecture is comprehensive. The implementation must resist over-engineering. Build the simplest version that validates the contracts, then extend.
+1. Build the thin version first. The architecture is comprehensive. The implementation must resist over-engineering. Build the simplest version that validates the contracts, then extend.
 
-2. **Fuzz every parser from day one.** Parser vulnerabilities are the highest-risk area. Fuzzing should start as soon as the first extractor is implemented, not at Sprint 13.
+2. Fuzz every parser from day one. Parser vulnerabilities are the highest-risk area. Fuzzing should start as soon as the first extractor is implemented, not at Sprint 13.
 
-3. **Golden snapshots are not optional.** Capture expected outputs as soon as a component produces output. Golden drift detection is the most effective regression prevention mechanism in the entire testing strategy.
+3. Golden snapshots are not optional. Capture expected outputs as soon as a component produces output. Golden drift detection is the most effective regression prevention mechanism in the entire testing strategy.
 
-4. **Invest in FP regression tests.** The first user experience is dominated by false positives. Every sprint should add FP regression tests. A rule with high FP rate should have its confidence reduced or be demoted to "experimental."
+4. Invest in FP regression tests. The first user experience is dominated by false positives. Every sprint should add FP regression tests. A rule with high FP rate should have its confidence reduced or be demoted to "experimental."
 
-5. **The architecture is designed to evolve, not to be perfect.** Accept the technical debt in Section 5. Ship V1 with the thin plugin shell, limited language coverage, and in-memory-only diffing. The architecture will support V2 improvement.
+5. The architecture is designed to evolve, not to be perfect. Accept the technical debt in Section 5. Ship V1 with the thin plugin shell, limited language coverage, and in-memory-only diffing. The architecture will support V2 improvement.
 
 **Verdict:** VERIS is ready for production implementation. The architecture is sound, the risks are understood and mitigated, and the evolution path is clear. The 14-sprint roadmap (30 weeks) is achievable with a disciplined team.
 
 ---
 
-_End of SPEC-010. This constitutional document governs VERIS through V4 and serves as the single source of truth for architectural decisions, scope boundaries, invariants, and evolution rules. It supersedes all conflicting prior specifications and is itself permanent — changeable only through a new major architecture specification._
+_End of SPEC-010. This constitutional document governs VERIS through V4 and serves as the single source of truth for architectural decisions, scope boundaries, invariants, and evolution rules. It supersedes all conflicting prior specifications and is itself permanent, changeable only through a new major architecture specification._

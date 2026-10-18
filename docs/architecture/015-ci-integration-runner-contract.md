@@ -1,4 +1,4 @@
-# VERIS Architecture Decision Record (ADR) 015: CI Integration Runner & Security Gates Contract
+# VERIS architecture decision record (ADR) 015: CI integration runner & security gates contract
 
 **Status:** Accepted / Foundational  
 **Date:** 2026-09-23  
@@ -9,46 +9,46 @@
 
 ---
 
-## 1. Executive Summary & Purpose
+## 1. Executive summary & purpose
 
 VERIS was released at `v1.0.0` as an offline-first, deterministic, evidence-based security investigation and malware analysis platform, and hardened at `v1.1.0` with the plugin foundation. Both releases are permanently immutable.
 
 Modern DevSecOps workflows require security scanners to execute inside continuous integration (CI) pipelines (GitHub Actions, GitLab CI, Jenkins, Azure Pipelines, Tekton, Woodpecker, and local pre-commit hooks). However, naive scanner integration in CI typically introduces several critical failure modes:
 
-1. **Flaky builds caused by volatile IDs:** Finding identifiers generated with random seeds or timestamps break run-to-run comparisons.
-2. **All-or-nothing failures:** Scanners fail builds on any finding, preventing gradual adoption in legacy codebases.
-3. **Silent security regressions:** Existing codebases cannot prevent _new_ vulnerabilities from landing while existing technical debt is tracked.
-4. **Cloud-dependent gatekeepers:** Many CI runners send telemetry, metadata, or source code to third-party SaaS backends.
-5. **Ambiguous exit codes:** Shell scripts and pipeline orchestrators cannot distinguish between scan errors, gate violations, and invalid baseline files.
+1. Flaky builds caused by volatile IDs: Finding identifiers generated with random seeds or timestamps break run-to-run comparisons.
+2. All-or-nothing failures: Scanners fail builds on any finding, preventing gradual adoption in legacy codebases.
+3. Silent security regressions: Existing codebases cannot prevent _new_ vulnerabilities from landing while existing technical debt is tracked.
+4. Cloud-dependent gatekeepers: Many CI runners send telemetry, metadata, or source code to third-party SaaS backends.
+5. Ambiguous exit codes: Shell scripts and pipeline orchestrators cannot distinguish between scan errors, gate violations, and invalid baseline files.
 
 This document establishes the **hard technical architecture, baseline model, finding fingerprinting specification, security policy gating rules, deterministic exit code contract, and adversarial defenses** for the VERIS CI runner (`veris ci`).
 
 ---
 
-## 2. Inviolable Core Invariants
+## 2. Inviolable core invariants
 
 All CI runner implementations MUST strictly adhere to the following invariants:
 
-1. **Zero-Dependency Core (`@veris/core`):**  
+1. Zero-Dependency Core (`@veris/core`):  
    The foundational type system of VERIS remains untouched and has zero runtime dependencies. The CI runner consumes existing core types without altering them.
 
-2. **Immutable `v1.0.0` and `v1.1.0` Baselines:**  
+2. Immutable `v1.0.0` and `v1.1.0` Baselines:  
    Past releases and tags remain permanently immutable. No existing scanning or rule evaluation logic is modified.
 
-3. **Strictly Offline-First & Zero-Telemetry:**  
+3. Strictly Offline-First & Zero-Telemetry:  
    `veris ci` operates completely offline. No network requests, telemetry beacons, cloud verifications, or phone-home calls are permitted under any condition.
 
-4. **100% Deterministic Execution:**  
+4. 100% Deterministic Execution:  
    Given the same target and baseline, `veris ci` MUST produce bit-for-bit identical exit codes, gate evaluations, finding diffs, and `ci-summary.json` output regardless of execution environment, operating system, or invocation count.
 
-5. **Downstream Automation Layer:**  
+5. Downstream Automation Layer:  
    The CI runner is an automation and policy layer wrapped around the deterministic pipeline. It does NOT invent a second rule engine or replace the risk engine; it evaluates structured policies against canonical reports.
 
 ---
 
-## 3. Architecture & Module Topology
+## 3. Architecture & module Topology
 
-The CI integration runner resides within `@veris/cli/src/ci/` to leverage existing CLI composition and packaging, keeping runtime dependencies zero for core packages:
+The CI integration runner resides within `@veris/cli/src/ci/` to use existing CLI composition and packaging, keeping runtime dependencies zero for core packages:
 
 ```
 ┌────────────────────────────────────────────────────────┐
@@ -73,26 +73,26 @@ The CI integration runner resides within `@veris/cli/src/ci/` to leverage existi
 └────────────────────────────────────────────────────────┘
 ```
 
-### Module Responsibilities
+### Module responsibilities
 
-- **`types.ts`:** Strongly typed interfaces for `CiPolicy`, `FindingDiffEntry`, `GateEvaluation`, `CiGateResult`, and `CiSummary`.
-- **`fingerprint.ts`:** Produces canonical, location-aware, stable finding fingerprints that persist across scan sessions.
-- **`baseline.ts`:** Securely ingests previous scan reports (`report.json` or `ci-summary.json`), validating against prototype pollution, oversized files, and schema corruptions.
-- **`comparator.ts`:** Diffs current scan findings against baseline findings, categorizing each into `unchanged`, `new`, `regressed`, `evidence_changed`, or `resolved`.
-- **`policy.ts`:** Evaluates configurable security gates against the scan report and finding diffs, producing deterministic pass/fail results.
-- **`summary.ts`:** Generates machine-readable `ci-summary.json` and Markdown tables for `$GITHUB_STEP_SUMMARY`.
+- `types.ts`: Strongly typed interfaces for `CiPolicy`, `FindingDiffEntry`, `GateEvaluation`, `CiGateResult`, and `CiSummary`.
+- `fingerprint.ts`: Produces canonical, location-aware, stable finding fingerprints that persist across scan sessions.
+- `baseline.ts`: Securely ingests previous scan reports (`report.json` or `ci-summary.json`), validating against prototype pollution, oversized files, and schema corruptions.
+- `comparator.ts`: Diffs current scan findings against baseline findings, categorizing each into `unchanged`, `new`, `regressed`, `evidence_changed`, or `resolved`.
+- `policy.ts`: Evaluates configurable security gates against the scan report and finding diffs, producing deterministic pass/fail results.
+- `summary.ts`: Generates machine-readable `ci-summary.json` and Markdown tables for `$GITHUB_STEP_SUMMARY`.
 
 ---
 
-## 4. Stable Finding Fingerprinting Contract
+## 4. Stable finding fingerprinting contract
 
-### The Volatility Problem
+### The Volatility problem
 
 In standard VERIS reports, finding IDs are generated as:
 $$\text{id} = \text{deterministicId}('fin', \text{ruleId}, \text{sessionId})$$
 Because `sessionId` includes the run timestamp, finding IDs vary between separate runs. Comparing reports by `finding.id` is invalid.
 
-### Canonical Fingerprint Algorithm
+### Canonical fingerprint algorithm
 
 To achieve deterministic comparison across runs, branches, and machines, each finding is assigned a **Stable Finding Fingerprint**:
 
@@ -100,14 +100,14 @@ $$\text{Fingerprint} = \text{deterministicId}('fp', \text{ruleId}, \text{normali
 
 Where:
 
-- **`ruleId`:** The unique identifier of the rule that produced the finding (e.g. `RULE_SUSPICIOUS_PE_SECTION`).
-- **`normalizedArtifactPath`:** Cross-platform relative path to the affected artifact:
+- `ruleId`: The unique identifier of the rule that produced the finding (e.g. `RULE_SUSPICIOUS_PE_SECTION`).
+- `normalizedArtifactPath`: Cross-platform relative path to the affected artifact:
   - Windows backslashes (`\`) converted to forward slashes (`/`).
   - Leading `./` stripped.
   - Case-normalized for file systems.
   - If multiple artifacts exist, paths are sorted deterministically and joined with a null separator `\0`.
   - If no artifact path is associated, defaults to `""`.
-- **`title`:** Canonical finding title.
+- `title`: Canonical finding title.
 
 This guarantees:
 
@@ -117,23 +117,23 @@ This guarantees:
 
 ---
 
-## 5. Baseline Model & Comparison Engine Contract
+## 5. Baseline model & comparison engine contract
 
 A baseline represents an approved prior security state (typically the latest commit on `main` or the previous release).
 
-### Finding Diff Taxonomy
+### Finding diff taxonomy
 
 Given a current finding set $C$ and baseline finding set $B$, findings are categorized by fingerprint:
 
 | Status                 | Definition                                                                           | Criteria                                                                                                              |
 | :--------------------- | :----------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------- |
-| **`unchanged`**        | Finding existed in baseline and current state with identical severity.               | $f \in C \land f \in B \land \text{sev}(f_C) == \text{sev}(f_B)$                                                      |
-| **`new`**              | Finding exists in current scan but was NOT present in baseline.                      | $f \in C \land f \notin B$                                                                                            |
-| **`regressed`**        | Finding existed in baseline, but severity score or level has worsened.               | $f \in C \land f \in B \land (\text{sev}(f_C) > \text{sev}(f_B) \lor \text{score}(f_C) > \text{score}(f_B))$          |
-| **`evidence_changed`** | Finding existed with same severity, but underlying evidence count or detail changed. | $f \in C \land f \in B \land \text{sev}(f_C) == \text{sev}(f_B) \land \text{evidence}(f_C) \neq \text{evidence}(f_B)$ |
-| **`resolved`**         | Finding existed in baseline but is NO LONGER detected.                               | $f \notin C \land f \in B$                                                                                            |
+| `unchanged`        | Finding existed in baseline and current state with identical severity.               | $f \in C \land f \in B \land \text{sev}(f_C) == \text{sev}(f_B)$                                                      |
+| `new`              | Finding exists in current scan but was NOT present in baseline.                      | $f \in C \land f \notin B$                                                                                            |
+| `regressed`        | Finding existed in baseline, but severity score or level has worsened.               | $f \in C \land f \in B \land (\text{sev}(f_C) > \text{sev}(f_B) \lor \text{score}(f_C) > \text{score}(f_B))$          |
+| `evidence_changed` | Finding existed with same severity, but underlying evidence count or detail changed. | $f \in C \land f \in B \land \text{sev}(f_C) == \text{sev}(f_B) \land \text{evidence}(f_C) \neq \text{evidence}(f_B)$ |
+| `resolved`         | Finding existed in baseline but is NO LONGER detected.                               | $f \notin C \land f \in B$                                                                                            |
 
-### Delta Metrics
+### Delta metrics
 
 The comparator computes:
 
@@ -143,11 +143,11 @@ The comparator computes:
 
 ---
 
-## 6. Security Policy Gating Engine Contract
+## 6. Security policy gating engine contract
 
 Security policies define the acceptance criteria for a build. If any enabled gate fails, `veris ci` terminates with `GATE_VIOLATION` (exit code `10`).
 
-### Policy Configuration Schema
+### Policy configuration schema
 
 ```typescript
 export interface CiPolicy {
@@ -185,43 +185,43 @@ export interface CiPolicy {
 }
 ```
 
-### Gate Evaluation Rules
+### Gate evaluation rules
 
-1. **Severity Threshold Gate (`failOn`):**
+1. Severity Threshold Gate (`failOn`):
    - Evaluated against all findings in the current report.
    - Severity rank: $\text{info (0)} < \text{low (1)} < \text{medium (2)} < \text{high (3)} < \text{critical (4)}$.
    - Fails if $\exists f \in C : \text{rank}(f.\text{severity}) \ge \text{rank}(\text{policy.failOn})$.
-2. **New Findings Gate (`failOnNew` / `maxNew`):**
+2. New Findings Gate (`failOnNew` / `maxNew`):
    - If `failOnNew` is true, fails if $|New| > 0$.
    - If `maxNew` is set to $N$, fails if $|New| > N$.
-3. **Regression Gate (`failOnRegressions`):**
+3. Regression Gate (`failOnRegressions`):
    - Fails if $|Regressed| > 0$.
    - Fails if $\text{RiskScore}_{\text{current}} > \text{RiskScore}_{\text{baseline}} + 0.001$.
-4. **Risk Ceiling Gate (`maxRisk`):**
+4. Risk Ceiling Gate (`maxRisk`):
    - Fails if $\text{RiskScore}_{\text{current}} > \text{policy.maxRisk}$.
-5. **Plugin Health Gate (`failOnPluginQuarantine`):**
+5. Plugin Health Gate (`failOnPluginQuarantine`):
    - Fails if any plugin was quarantined or threw uncaught exceptions. Exit code `13` (`PLUGIN_ERROR`).
 
 ---
 
-## 7. Deterministic Exit Codes Contract
+## 7. Deterministic exit codes contract
 
 Process exit codes in CI must be unambiguous to allow orchestration scripts to make precise downstream decisions:
 
 | Exit Code | Name               | Meaning                                                                                   |
 | :-------: | :----------------- | :---------------------------------------------------------------------------------------- |
-|  **`0`**  | `SUCCESS`          | Scan completed successfully and all configured security gates passed.                     |
-|  **`1`**  | `ERROR`            | Uncaught fatal runtime error during scan execution.                                       |
-|  **`2`**  | `USAGE_ERROR`      | Invalid command line arguments, flags, or combinations.                                   |
-| **`10`**  | `GATE_VIOLATION`   | One or more security policy gates failed (e.g. threshold exceeded, new finding detected). |
-| **`11`**  | `INVALID_BASELINE` | Baseline file is missing, unreadable, corrupt, oversized, or fails schema validation.     |
-| **`12`**  | `INVALID_CONFIG`   | CI policy configuration file is malformed or contains invalid values.                     |
-| **`13`**  | `PLUGIN_ERROR`     | A plugin failed, crashed, or was quarantined and policy forbids plugin failure.           |
-| **`130`** | `CANCELLED`        | Execution interrupted via `SIGINT` (Ctrl+C) or `SIGTERM`.                                 |
+|  `0`  | `SUCCESS`          | Scan completed successfully and all configured security gates passed.                     |
+|  `1`  | `ERROR`            | Uncaught fatal runtime error during scan execution.                                       |
+|  `2`  | `USAGE_ERROR`      | Invalid command line arguments, flags, or combinations.                                   |
+| `10`  | `GATE_VIOLATION`   | One or more security policy gates failed (e.g. threshold exceeded, new finding detected). |
+| `11`  | `INVALID_BASELINE` | Baseline file is missing, unreadable, corrupt, oversized, or fails schema validation.     |
+| `12`  | `INVALID_CONFIG`   | CI policy configuration file is malformed or contains invalid values.                     |
+| `13`  | `PLUGIN_ERROR`     | A plugin failed, crashed, or was quarantined and policy forbids plugin failure.           |
+| `130` | `CANCELLED`        | Execution interrupted via `SIGINT` (Ctrl+C) or `SIGTERM`.                                 |
 
 ---
 
-## 8. Machine-Readable Schema & Artifact Specifications
+## 8. Machine-Readable schema & artifact specifications
 
 ### `ci-summary.json`
 
@@ -282,7 +282,7 @@ Every `veris ci` execution writes a canonical machine-readable JSON artifact to 
 }
 ```
 
-### GitHub Step Summary (`$GITHUB_STEP_SUMMARY`)
+### GitHub step summary (`$GITHUB_STEP_SUMMARY`)
 
 When running within GitHub Actions, `veris ci` detects the `GITHUB_STEP_SUMMARY` environment variable or accepts `--github-step-summary`. It formats and appends an accessible Markdown summary including:
 
@@ -293,24 +293,24 @@ When running within GitHub Actions, `veris ci` detects the `GITHUB_STEP_SUMMARY`
 
 ---
 
-## 9. Adversarial Security Hardening
+## 9. Adversarial security hardening
 
 Because baseline files and configuration in CI environments may originate from pull requests, untrusted branches, or third-party forks, `veris ci` implements defense-in-depth:
 
-1. **Prototype Pollution Protection:**  
+1. Prototype Pollution Protection:  
    The baseline parser strips or rejects forbidden keys (`__proto__`, `constructor`, `prototype`) during deserialization using a secure recursive sanitizer.
-2. **File Size Limit (DoS Prevention):**  
+2. File Size Limit (DoS Prevention):  
    Baselines exceeding 50 MB are rejected immediately before reading into memory to prevent heap exhaustion.
-3. **Path Traversal Defense:**  
+3. Path Traversal Defense:  
    Baseline paths are resolved with strictly validated boundaries. Escaping parent directory traversals (`../../../../etc/passwd`) are detected and rejected.
-4. **Schema Integrity Verification:**  
+4. Schema Integrity Verification:  
    Before comparison, the baseline payload structure is rigorously type-validated. Missing required arrays or malformed severity objects trigger `ExitCode.INVALID_BASELINE` (`11`) without throwing uncaught exceptions.
-5. **ReDoS Immunity:**  
-   Path normalization and string hashing utilize linear-time standard library routines (`node:crypto` and `node:path`) with zero backtracking regular expressions.
+5. ReDoS Immunity:  
+   Path normalization and string hashing use linear-time standard library routines (`node:crypto` and `node:path`) with zero backtracking regular expressions.
 
 ---
 
-## 10. CLI UX & Command Specifications
+## 10. CLI UX & command specifications
 
 `veris ci` provides a focused, high-signal terminal interface adhering to the VERIS design system:
 
@@ -338,6 +338,6 @@ OPTIONS
 
 ---
 
-## 11. Conclusion & Next Steps
+## 11. Conclusion & next steps
 
 ADR-015 formalizes the deterministic CI integration runner for VERIS. It unifies scanning, differential analysis, and security gating into a single, offline-first command with exact exit code semantics and zero telemetry.

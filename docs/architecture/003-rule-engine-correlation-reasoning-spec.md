@@ -1,4 +1,4 @@
-# VERIS Rule Engine, Correlation Engine & Reasoning Pipeline — SPEC-003
+# VERIS rule engine, correlation engine & reasoning pipeline: SPEC-003
 
 **Status:** Frozen  
 **Version:** 1.0  
@@ -7,7 +7,7 @@
 
 ---
 
-## Table of Contents
+## Table of contents
 
 1. [Engine Pipeline Overview](#1-engine-pipeline-overview)
 2. [Design Philosophy](#2-design-philosophy)
@@ -77,7 +77,7 @@
 
 ---
 
-## 1. Engine Pipeline Overview
+## 1. Engine pipeline overview
 
 The VERIS engine pipeline is frozen as:
 
@@ -155,21 +155,21 @@ The VERIS engine pipeline is frozen as:
 
 ---
 
-## 2. Design Philosophy
+## 2. Design philosophy
 
-### 2.1 Rules as Declarative Matchers
+### 2.1 Rules as declarative matchers
 
 Rules are declarative descriptions of behavioral patterns. They are not programs. Complex logic belongs in the evaluator, not in individual rules. A rule should be readable as data: "match behavior X with properties matching pattern Y."
 
-### 2.2 Evidence-First Findings
+### 2.2 Evidence-First findings
 
 Every Finding is rooted in Evidence. No Finding may be produced without at least one Evidence binding a Rule to a Behavior. This is the non-negotiable foundation of explainability.
 
-### 2.3 Composition over Inheritance
+### 2.3 Composition over inheritance
 
 Rule matching uses composable matchers (single, multi-behavior, threshold, composite). New matching strategies are added as new matcher types, not by subclassing rules.
 
-### 2.4 Pipeline as Data Flow
+### 2.4 Pipeline as data flow
 
 Each engine stage is a pure transformation: `(Input) => Output`. Stages have no side effects. All state is passed through explicitly. This enables caching, replay, parallelization, and distributed execution.
 
@@ -177,7 +177,7 @@ Each engine stage is a pure transformation: `(Input) => Output`. Stages have no 
 
 Confidence scores reflect how closely the evidence matches the rule pattern, not statistical probability. A regex match on a hardcoded API key gets confidence 1.0. A heuristic match on obfuscated string construction may get 0.6. Confidence is deterministic and reproducible.
 
-### 2.6 Separation of Concerns
+### 2.6 Separation of concerns
 
 | Concern              | Owner                                        |
 | -------------------- | -------------------------------------------- |
@@ -193,9 +193,9 @@ Confidence scores reflect how closely the evidence matches the rule pattern, not
 
 ---
 
-## 3. Rule Engine
+## 3. Rule engine
 
-### 3.1 Rule Lifecycle
+### 3.1 Rule lifecycle
 
 ```
                       ┌──────────────┐
@@ -234,15 +234,15 @@ Confidence scores reflect how closely the evidence matches the rule pattern, not
 
 **Lifecycle states:**
 
-1. **Authored** — Rule source written (human or codegen)
-2. **Compiled** — Rule serialized into its definition format
-3. **Loaded** — Rule loaded into engine from pack at scan start
-4. **Validated** — Rule checked for schema conformance, dependency resolution, taxonomy validity
-5. **Eligible** — Rule checked against scan configuration (enabled/disabled, severity filters, artifact type filters)
-6. **Executed** — Rule matched against behaviors
-7. **Completed** — RuleResult produced (matched or unmatched)
+1. Authored: Rule source written (human or codegen)
+2. Compiled: Rule serialized into its definition format
+3. Loaded: Rule loaded into engine from pack at scan start
+4. Validated: Rule checked for schema conformance, dependency resolution, taxonomy validity
+5. Eligible: Rule checked against scan configuration (enabled/disabled, severity filters, artifact type filters)
+6. Executed: Rule matched against behaviors
+7. Completed: RuleResult produced (matched or unmatched)
 
-### 3.2 Rule Execution Pipeline
+### 3.2 Rule execution pipeline
 
 ```
 For each Artifact:
@@ -273,7 +273,7 @@ For each Artifact:
        - Pre-matched results cached for re-entrant rules
 ```
 
-### 3.3 Rule Definition (Canonical)
+### 3.3 Rule definition (canonical)
 
 This extends the Rule object defined in SPEC-002 §3.6 with full detail.
 
@@ -327,7 +327,7 @@ type Precondition =
   | { kind: 'no-other-rule-matched'; ruleIds: RuleId[] };
 ```
 
-**RuleLogic (discriminated union — declarative only):**
+**RuleLogic (discriminated union, declarative only):**
 
 ```typescript
 type RuleLogic =
@@ -400,7 +400,7 @@ interface TrustContribution {
 }
 ```
 
-### 3.4 Rule Metadata & Categories
+### 3.4 Rule metadata & categories
 
 **RuleCategory (open):**
 
@@ -422,7 +422,7 @@ type RuleCategory =
   | 'experimental';
 ```
 
-### 3.5 Rule Dependencies & Priorities
+### 3.5 Rule dependencies & priorities
 
 **Dependency types:**
 
@@ -449,15 +449,15 @@ interface RuleDependency {
 
 Rules with the same priority may execute in parallel (within the same artifact context).
 
-### 3.6 Rule Versioning & Compatibility
+### 3.6 Rule versioning & compatibility
 
 **Rule version format:** `MAJOR.MINOR.PATCH` (semver)
 
 | Component | Change                                                                             |
 | --------- | ---------------------------------------------------------------------------------- |
-| **Major** | Breaking change to match behavior. Removing a matching pattern. Changing severity. |
-| **Minor** | Adding new matching patterns. Adding new references. Adding new metadata.          |
-| **Patch** | Fixing regex false positives. Updating descriptions. Updating remediation text.    |
+| Major | Breaking change to match behavior. Removing a matching pattern. Changing severity. |
+| Minor | Adding new matching patterns. Adding new references. Adding new metadata.          |
+| Patch | Fixing regex false positives. Updating descriptions. Updating remediation text.    |
 
 **Compatibility rules:**
 
@@ -465,7 +465,7 @@ Rules with the same priority may execute in parallel (within the same artifact c
 - Rules targeting engine v2 will not load on engine v1 (engine checks `engineVersion` constraint in pack manifest).
 - Rule version is resolved at pack load time. Multiple versions of the same rule cannot coexist in a single scan session.
 
-### 3.7 Rule Configuration & Enable/Disable Strategy
+### 3.7 Rule configuration & enable/Disable strategy
 
 **Configuration sources (merged in order, later overrides earlier):**
 
@@ -498,7 +498,7 @@ rules:
 - Rules can be disabled by severity filter (e.g., only run `critical` and `high`).
 - Rules can be disabled by category (e.g., skip all `experimental` rules).
 
-### 3.8 Rule Caching
+### 3.8 Rule caching
 
 **Cache levels:**
 
@@ -515,21 +515,21 @@ rules:
 - No cross-session caching (to guarantee reproducibility).
 - Cache size limit: 100,000 entries. Eviction: LRU.
 
-### 3.9 Rule Matchers
+### 3.9 Rule matchers
 
 **Matcher types:**
 
 | Matcher          | Purpose                     | Performance Profile                  |
 | ---------------- | --------------------------- | ------------------------------------ |
-| `exact`          | Exact string/property match | O(1) — hash lookup                   |
-| `regex`          | Regular expression match    | O(n) — depends on pattern complexity |
-| `range`          | Numeric range check         | O(1) — comparison                    |
-| `set`            | Set membership check        | O(1) — hash set lookup               |
-| `exists`         | Property existence check    | O(1) — key lookup                    |
-| `threshold`      | Aggregate threshold check   | O(n) — scan behaviors                |
-| `multi-behavior` | Cross-behavior pattern      | O(n*m) — behavior set matching       |
+| `exact`          | Exact string/property match | O(1), hash lookup                   |
+| `regex`          | Regular expression match    | O(n), depends on pattern complexity |
+| `range`          | Numeric range check         | O(1), comparison                    |
+| `set`            | Set membership check        | O(1), hash set lookup               |
+| `exists`         | Property existence check    | O(1), key lookup                    |
+| `threshold`      | Aggregate threshold check   | O(n), scan behaviors                |
+| `multi-behavior` | Cross-behavior pattern      | O(n*m), behavior set matching       |
 | `composite`      | Boolean combination         | Depends on sub-matchers              |
-| `correlation`    | Cross-rule correlation      | O(n*m) — finding set matching        |
+| `correlation`    | Cross-rule correlation      | O(n*m), finding set matching        |
 
 **Matcher contract:**
 
@@ -540,7 +540,7 @@ interface RuleMatcher {
 }
 ```
 
-### 3.10 Rule Evaluator (Safe Sandbox)
+### 3.10 Rule evaluator (safe sandbox)
 
 **Purpose:** Execute safe expressions within rule matching without allowing arbitrary code execution.
 
@@ -566,7 +566,7 @@ interface RuleMatcher {
 - Maximum expression length: 10,000 characters
 - Maximum execution time: 100ms per expression
 
-### 3.11 Rule Scheduler
+### 3.11 Rule scheduler
 
 **Purpose:** Determine the optimal order of rule execution respecting dependencies and priorities.
 
@@ -584,7 +584,7 @@ interface RuleMatcher {
 - Parallelism is per-artifact, not global.
 - Maximum concurrent rules per artifact: configurable (default 10).
 
-### 3.12 Rule Execution Diagrams
+### 3.12 Rule execution diagrams
 
 **Single-behavior rule execution flow:**
 
@@ -654,9 +654,9 @@ Rule with operator: "and"
 
 ---
 
-## 4. Correlation Engine
+## 4. Correlation engine
 
-### 4.1 Purpose & Responsibilities
+### 4.1 Purpose & responsibilities
 
 The Correlation Engine transforms independent RuleResults into structured BehaviorChains. It answers the question: "Do these individual findings form a coherent multi-step pattern?"
 
@@ -669,7 +669,7 @@ The Correlation Engine transforms independent RuleResults into structured Behavi
 - Preserve full provenance of every merge/dedup decision
 - Prevent double-counting risk contributions
 
-### 4.2 Correlation Strategies
+### 4.2 Correlation strategies
 
 ```typescript
 type CorrelationStrategy =
@@ -681,7 +681,7 @@ type CorrelationStrategy =
   | 'temporal-cluster'; // Findings within time window → grouped
 ```
 
-### 4.3 Behavioral Sequence Detection
+### 4.3 Behavioral sequence detection
 
 **Algorithm:**
 
@@ -690,7 +690,7 @@ type CorrelationStrategy =
 3. Scan for known behavioral sequences defined in rule packs.
 4. Sequence knowledge is encoded as correlation rules (RuleLogic.kind: "correlation").
 
-**Example — Download → Extract → Execute → Persist → Cleanup:**
+**Example, Download → Extract → Execute → Persist → Cleanup:**
 
 ```typescript
 // Correlation rule (defined in a rule pack)
@@ -724,7 +724,7 @@ type CorrelationStrategy =
 
 **Dedup is deterministic:** Given the same inputs, the same duplicates are always eliminated.
 
-### 4.5 Evidence Grouping
+### 4.5 Evidence grouping
 
 Evidence is grouped under Findings using the following rules:
 
@@ -732,7 +732,7 @@ Evidence is grouped under Findings using the following rules:
 2. Evidence from different behaviors but the same rule belongs to the same Finding (with multiple Evidence entries).
 3. Evidence from correlation rules is grouped under the BehaviorChain, not individual Findings.
 
-### 4.6 Provenance Preservation
+### 4.6 Provenance preservation
 
 Every merge, dedup, or grouping decision is recorded in the Finding's `metadata.provenance`:
 
@@ -747,20 +747,20 @@ interface ProvenanceEntry {
 }
 ```
 
-### 4.7 Risk Double-Counting Prevention
+### 4.7 Risk Double-Counting prevention
 
 **Rules:**
 
 1. If a Finding is a member of a BehaviorChain, its risk contribution is attributed to the chain, not counted individually.
 2. If multiple Findings reference the same Evidence, the risk contribution of that Evidence is counted only once.
-3. Correlation rules do not generate additional risk — they reorganize existing Findings. The risk of a chain is the aggregate of its members, not additive.
+3. Correlation rules do not generate additional risk. They reorganize existing Findings. The risk of a chain is the aggregate of its members, not additive.
 4. Deduped Findings contribute zero additional risk (their risk was already counted).
 
 ---
 
-## 5. Trust Engine
+## 5. Trust engine
 
-### 5.1 Purpose & Responsibilities
+### 5.1 Purpose & responsibilities
 
 The Trust Engine produces a TrustProfile per artifact, answering: "How trustworthy is this artifact based on what we found?"
 
@@ -771,7 +771,7 @@ The Trust Engine produces a TrustProfile per artifact, answering: "How trustwort
 - Provide contributing factors with human-readable explanations
 - Support comparison across artifacts and scan sessions
 
-### 5.2 Trust Score Computation
+### 5.2 Trust score computation
 
 ```
 trustScore = clamp(1.0 - normalizedRisk, 0.0, 1.0)
@@ -791,7 +791,7 @@ Factors:
   finding density          0.05      [0.0, 0.5]
 ```
 
-### 5.3 Scoring Factors
+### 5.3 Scoring factors
 
 ```typescript
 interface TrustFactor {
@@ -804,7 +804,7 @@ interface TrustFactor {
 }
 ```
 
-### 5.4 Normalization Strategy
+### 5.4 Normalization strategy
 
 - Trust scores are normalized to [0.0, 1.0].
 - 0.0 = definitely malicious, 1.0 = definitely trusted.
@@ -814,9 +814,9 @@ interface TrustFactor {
 
 ---
 
-## 6. Risk Engine
+## 6. Risk engine
 
-### 6.1 Purpose & Responsibilities
+### 6.1 Purpose & responsibilities
 
 The Risk Engine builds on the TrustProfile to produce a RiskProfile that answers: "What is the business impact of these findings, and what should be fixed first?"
 
@@ -827,7 +827,7 @@ The Risk Engine builds on the TrustProfile to produce a RiskProfile that answers
 - Provide actionable risk scores
 - Generate ordered recommendation priorities
 
-### 6.2 Risk Score Computation
+### 6.2 Risk score computation
 
 ```
 riskScore = Σ(finding.severity.score × finding.confidence × exploitability)
@@ -840,7 +840,7 @@ Where:
 Normalized: riskScore = clamp(riskScore / maxPossibleRisk, 0.0, 10.0)
 ```
 
-### 6.3 Severity × Likelihood × Impact Model
+### 6.3 Severity × likelihood × impact model
 
 ```typescript
 interface RiskCalculation {
@@ -855,7 +855,7 @@ interface RiskCalculation {
 }
 ```
 
-### 6.4 Risk Drivers & Prioritization
+### 6.4 Risk drivers & prioritization
 
 **Top-N prioritization:**
 
@@ -876,9 +876,9 @@ interface RiskCalculation {
 
 ---
 
-## 7. Reasoning Engine
+## 7. Reasoning engine
 
-### 7.1 Purpose & Responsibilities
+### 7.1 Purpose & responsibilities
 
 The Reasoning Engine transforms analysis data into human-readable, traceable explanations. Every sentence must be grounded in deterministic evidence.
 
@@ -891,7 +891,7 @@ The Reasoning Engine transforms analysis data into human-readable, traceable exp
 - Justify confidence scores
 - Provide full traceability from explanation back to evidence
 
-### 7.2 Explanation Generation
+### 7.2 Explanation generation
 
 **Explanation templates (from Rule definition):**
 
@@ -918,7 +918,7 @@ interface Explanation {
 - Example template: `"Found pattern '{matched.value}' matching {rule.name} at {location.line}:{location.column}"`
 - Variables are type-checked at rule compile time.
 
-### 7.3 Evidence Summarization
+### 7.3 Evidence summarization
 
 For findings with multiple Evidence entries, the Reasoning Engine generates:
 
@@ -932,7 +932,7 @@ interface EvidenceSummary {
 }
 ```
 
-### 7.4 Recommendation Rationale
+### 7.4 Recommendation rationale
 
 Each Recommendation includes:
 
@@ -947,7 +947,7 @@ interface RecommendationRationale {
 }
 ```
 
-### 7.5 Confidence Justification
+### 7.5 Confidence justification
 
 ```typescript
 interface ConfidenceJustification {
@@ -961,7 +961,7 @@ interface ConfidenceJustification {
 }
 ```
 
-### 7.6 Traceability in Explanations
+### 7.6 Traceability in explanations
 
 Every explanation block carries traceability metadata:
 
@@ -981,9 +981,9 @@ interface ExplanationTrace {
 }
 ```
 
-### 7.7 AI Consumer Integration Points
+### 7.7 AI consumer integration points
 
-The Reasoning Engine produces structured data that AI consumers (in `@veris/ai`) can consume. AI never modifies the canonical objects — it consumes the output of the Reasoning Engine.
+The Reasoning Engine produces structured data that AI consumers (in `@veris/ai`) can consume. AI never modifies the canonical objects. It consumes the output of the Reasoning Engine.
 
 **Integration points:**
 
@@ -1022,9 +1022,9 @@ interface AIExplanation {
 
 ---
 
-## 8. Rule Packs
+## 8. Rule packs
 
-### 8.1 Pack Organization
+### 8.1 Pack organization
 
 ```
 packages/rules/src/packs/
@@ -1109,7 +1109,7 @@ packages/rules/src/packs/
     └── manifest.json
 ```
 
-### 8.2 Pack Manifest
+### 8.2 Pack manifest
 
 ```typescript
 interface PackManifest {
@@ -1141,7 +1141,7 @@ interface PackDependency {
 }
 ```
 
-### 8.3 Pack Dependencies
+### 8.3 Pack dependencies
 
 - `secrets` may depend on `core` (for file-type detection).
 - `scripts` may depend on `core`.
@@ -1149,7 +1149,7 @@ interface PackDependency {
 - `enterprise` may depend on `secrets` + `configuration`.
 - Dependency cycles between packs are forbidden (enforced at load time).
 
-### 8.4 Pack Isolation & Loading
+### 8.4 Pack isolation & loading
 
 1. Packs are loaded from `@veris/rules` at scan start.
 2. Dependency graph is resolved: `core → scripts → executables → ...`
@@ -1162,9 +1162,9 @@ interface PackDependency {
 
 ---
 
-## 9. Rule Testing
+## 9. Rule testing
 
-### 9.1 Unit Testing
+### 9.1 Unit testing
 
 ```typescript
 // Testing convention (using Vitest)
@@ -1193,7 +1193,7 @@ describe('aws-key rule', () => {
 });
 ```
 
-### 9.2 Golden Tests
+### 9.2 Golden tests
 
 Golden tests capture full rule outputs against known inputs:
 
@@ -1212,7 +1212,7 @@ packages/rules/__tests__/golden/
 - CI runs `pnpm test:golden` to catch unexpected changes.
 - Golden updates are intentional (documented in PR).
 
-### 9.3 Regression Corpus
+### 9.3 Regression corpus
 
 ```
 fixtures/
@@ -1229,7 +1229,7 @@ fixtures/
 │       └── ...
 ```
 
-### 9.4 Rule Fixtures
+### 9.4 Rule fixtures
 
 ```
 packages/rules/__tests__/fixtures/
@@ -1245,7 +1245,7 @@ packages/rules/__tests__/fixtures/
     └── ...
 ```
 
-### 9.5 Performance Benchmarks
+### 9.5 Performance benchmarks
 
 ```
 packages/rules-engine/benchmark/
@@ -1266,7 +1266,7 @@ packages/rules-engine/benchmark/
 - Memory allocation per rule match
 - Cache hit ratio
 
-### 9.6 False-Positive Regression Tests
+### 9.6 False-Positive regression tests
 
 ```typescript
 // false-positive-regression.test.ts
@@ -1285,7 +1285,7 @@ describe('false positive regression suite', () => {
 
 ## 10. Diagnostics
 
-### 10.1 Rule Execution Trace
+### 10.1 Rule execution trace
 
 The engine can produce a detailed trace for debugging:
 
@@ -1314,7 +1314,7 @@ interface RuleTrace {
 }
 ```
 
-### 10.2 Rule Timing
+### 10.2 Rule timing
 
 ```
 Rule Timing Report (aggregate):
@@ -1334,7 +1334,7 @@ Slowest rules:
 
 **Triggering:** Traces and timing are produced when `--diagnostics` flag is passed to CLI or `diagnostics: true` is set in config.
 
-### 10.3 Cache Hit/Miss Tracking
+### 10.3 Cache hit/Miss tracking
 
 ```
 Cache Report:
@@ -1343,7 +1343,7 @@ Cache Report:
   Level 3 (Composite cache):  hits: 234     misses: 89      ratio: 72.4%
 ```
 
-### 10.4 Skipped Rules & Dependency Failures
+### 10.4 Skipped rules & dependency failures
 
 ```
 Skipped Rules:
@@ -1355,7 +1355,7 @@ Dependency Failures:
   - core/dependency-cycle      error: circular dependency detected (A→B→C→A)
 ```
 
-### 10.5 Invalid Evidence Detection
+### 10.5 Invalid evidence detection
 
 ```
 Invalid Evidence:
@@ -1366,7 +1366,7 @@ Invalid Evidence:
     → Finding marked as invalid (not included in report).
 ```
 
-### 10.6 Explanation Generation Diagnostics
+### 10.6 Explanation generation diagnostics
 
 ```
 Explanation Diagnostics:
@@ -1377,9 +1377,9 @@ Explanation Diagnostics:
 
 ---
 
-## 11. Performance Strategy
+## 11. Performance strategy
 
-### 11.1 Performance Targets
+### 11.1 Performance targets
 
 | Metric                   | Target                          | Measurement       |
 | ------------------------ | ------------------------------- | ----------------- |
@@ -1390,7 +1390,7 @@ Explanation Diagnostics:
 | Memory per 10k behaviors | ≤ 50 MB                         | Benchmark         |
 | Pipeline overhead        | ≤ 5% of total execution         | Profiling         |
 
-### 11.2 Optimization Techniques
+### 11.2 Optimization techniques
 
 | Technique                                   | Applied To         | Expected Gain                      |
 | ------------------------------------------- | ------------------ | ---------------------------------- |
@@ -1401,7 +1401,7 @@ Explanation Diagnostics:
 | Early termination (composite short-circuit) | Composite matchers | 2x–5x for `and` composites         |
 | Pre-computed behavior index                 | All rules          | O(1) taxonomyId lookup             |
 
-### 11.3 Memory Budget
+### 11.3 Memory budget
 
 | Component                      | Budget      |
 | ------------------------------ | ----------- |
@@ -1410,13 +1410,13 @@ Explanation Diagnostics:
 | RuleResults (500,000)          | ~200 MB     |
 | Cache (L1 + L2 + L3)           | ~100 MB     |
 | Correlation engine working set | ~50 MB      |
-| **Total per scan session**     | **~500 MB** |
+| Total per scan session     | ~500 MB |
 
 ---
 
-## 12. Future Compatibility
+## 12. Future compatibility
 
-### 12.1 Plugin-Based Rules (V2+)
+### 12.1 Plugin-Based rules (V2+)
 
 - External rules are loaded via the plugin system (`@veris/plugins`).
 - Plugin rules implement the same `RuleDefinition` contract.
@@ -1429,28 +1429,28 @@ Explanation Diagnostics:
 - Marketplace packs include manifest, rules, and test fixtures.
 - The engine validates pack signatures before loading.
 
-### 12.3 AI Explanation Consumers
+### 12.3 AI explanation consumers
 
 - AI consumers read `AIReadyContext` (produced by Reasoning Engine).
 - AI never modifies the analysis pipeline.
 - New AI providers are added to `@veris/ai` without engine changes.
 - AI explanations are stored separately from canonical findings.
 
-### 12.4 Custom Rule Packs
+### 12.4 Custom rule packs
 
 - Custom packs follow the same manifest contract.
 - Stored in user-configurable directories (e.g., `~/.veris/rules/custom/`).
 - Loaded via the plugin system or directly through config.
 - Pack ID must be unique (no conflict with built-in packs).
 
-### 12.5 Organization-Specific Rules
+### 12.5 Organization-Specific rules
 
 - Organizations can create private rule packs.
 - Private packs follow the same contract as built-in packs.
 - Private packs can disable built-in rules.
 - Private packs can override severities.
 
-### 12.6 Distributed Analysis
+### 12.6 Distributed analysis
 
 The engine pipeline is designed for distributed execution:
 
@@ -1461,7 +1461,7 @@ The engine pipeline is designed for distributed execution:
 
 **Distribution boundary:** After extraction and per-artifact rule matching, results are merged at the correlation engine.
 
-### 12.7 Incremental Scans
+### 12.7 Incremental scans
 
 - Deterministic IDs enable diffing.
 - The scheduler skips artifacts whose content hashes haven't changed.
@@ -1470,33 +1470,33 @@ The engine pipeline is designed for distributed execution:
 
 ---
 
-## 13. Engineering Tradeoffs
+## 13. Engineering tradeoffs
 
-### 13.1 Declarative Rules vs. Programmable Rules
+### 13.1 Declarative rules vs. programmable rules
 
 **Tradeoff:** Declarative rules (data-driven, limited expression) are safer, more testable, and more portable but less powerful than programmable rules (full scripting language).
 
 **Decision:** Declarative rules with a safe sandbox evaluator. If a rule needs complex logic, it belongs in the evaluator (a shared component), not in individual rules. This ensures all rules benefit from improved matching capabilities.
 
-### 13.2 Per-Artifact Parallelism vs. Global State
+### 13.2 Per-Artifact parallelism vs. global state
 
 **Tradeoff:** Per-artifact parallelism is simple and scalable but prevents cross-artifact analysis at rule matching time.
 
 **Decision:** Rule matching is per-artifact parallel. Cross-artifact analysis is deferred to the Correlation Engine, which has access to all artifacts. This keeps the Rule Engine simple and scalable.
 
-### 13.3 Caching Complexity vs. Performance
+### 13.3 Caching complexity vs. performance
 
 **Tradeoff:** Multi-level caching adds complexity, cache invalidation logic, and memory pressure but significantly improves performance for repeated rule applications.
 
 **Decision:** Implement three-level caching with deterministic content-hash keys. Cache is per-session only (no cross-session persistence). This guarantees reproducibility while providing performance benefits within a session.
 
-### 13.4 Strict Dependency Resolution vs. Best-Effort
+### 13.4 Strict dependency resolution vs. best-effort
 
 **Tradeoff:** Strict dependency resolution guarantees correct execution ordering but may fail entirely if a dependency is missing. Best-effort execution maximizes results but may miss relevant findings.
 
 **Decision:** Strict dependency resolution for required dependencies. Best-effort for optional dependencies. Missing required dependency → rule is skipped with a diagnostic message.
 
-### 13.5 Explanation Template Simplicity vs. Richness
+### 13.5 Explanation template simplicity vs. richness
 
 **Tradeoff:** Simple templates (string interpolation) are easy to maintain but produce less natural explanations. Rich templates (NLG, AI) produce better text but add nondeterminism and latency.
 
@@ -1504,19 +1504,19 @@ The engine pipeline is designed for distributed execution:
 
 ---
 
-## 14. Common Mistakes to Avoid
+## 14. Common Mistakes to avoid
 
-### 14.1 Rules That Parse Files
+### 14.1 Rules that parse files
 
 **Mistake:** Writing rules that directly inspect file content, bypassing the Feature/Behavior pipeline.
 **Prevention:** Rules must never reference raw file content. All input comes through Behaviors. If a rule needs information not in the Behavior's properties, add it to the Feature extraction phase.
 
-### 14.2 Overly Complex Match Logic
+### 14.2 Overly complex match logic
 
 **Mistake:** Single rules with dozens of sub-matchers, deeply nested composites, and complex preconditions.
 **Prevention:** A rule should match one pattern. Complex patterns belong in the Correlation Engine. If a rule has more than 5 sub-matchers, split it into multiple rules with a correlation rule chaining them.
 
-### 14.3 Non-Deterministic Rules
+### 14.3 Non-Deterministic rules
 
 **Mistake:** Rules using random numbers, time-based conditions, or external data sources.
 **Prevention:** All matchers and evaluators must be pure functions. Random, time, and network access are forbidden in the rule engine.
@@ -1526,7 +1526,7 @@ The engine pipeline is designed for distributed execution:
 **Mistake:** Caching aggressively across sessions, leading to stale results that don't match the current input.
 **Prevention:** Cache is per-session only. Content-hash keys ensure correctness. Cross-session caching is never implemented.
 
-### 14.5 Confusing Correlation with Rule Matching
+### 14.5 Confusing correlation with rule matching
 
 **Mistake:** Using rules to detect behavioral sequences that should be handled by the Correlation Engine.
 **Prevention:** Rules detect atomic behavioral patterns. The Correlation Engine detects sequences. A correlation rule references source rule IDs, not behavior taxonomy IDs.
@@ -1536,54 +1536,54 @@ The engine pipeline is designed for distributed execution:
 **Mistake:** Summing risk scores of individual findings and their containing behavior chains independently, overstating the actual risk.
 **Prevention:** A finding's risk is counted once. If it belongs to a chain, the chain's risk incorporates but does not duplicate the finding's risk.
 
-### 14.7 Ignoring False Positive Tests
+### 14.7 Ignoring false positive tests
 
 **Mistake:** Adding rules without corresponding false-positive regression tests.
 **Prevention:** Every rule must have at least one positive test, one negative test, and one false-positive regression test.
 
-### 14.8 Hardcoded Severities
+### 14.8 Hardcoded severities
 
 **Mistake:** Every rule has a fixed severity that cannot be overridden by user configuration.
 **Prevention:** Severity has a default in the rule definition but is overridable in user config. The engine resolves severity at load time.
 
-### 14.9 Not Recording Provenance
+### 14.9 Not recording provenance
 
 **Mistake:** Merging or deduplicating findings without recording why, making debugging impossible.
 **Prevention:** Every merge/dedup/group action records a ProvenanceEntry with action, source IDs, target ID, reason, and timestamp.
 
-### 14.10 AI in the Analysis Pipeline
+### 14.10 AI in the analysis pipeline
 
 **Mistake:** Using AI (LLM, embedding) to determine whether a rule matched.
 **Prevention:** AI is a consumer of analysis results, never a participant in the analysis. AI lives in `@veris/ai`, imported only by `@veris/cli` and `@veris/api`.
 
 ---
 
-## 15. Final Recommendations
+## 15. Final recommendations
 
-### 15.1 Implementation Order
+### 15.1 Implementation order
 
 | Phase          | Components                                                                | Rationale                                        |
 | -------------- | ------------------------------------------------------------------------- | ------------------------------------------------ |
-| **Phase 1**    | Rule interfaces, RuleDefinition, RuleMatcher, RuleRegistry                | Foundation — needed before any rules can execute |
-| **Phase 2**    | PropertyMatchers (exact, regex, range), RuleScheduler, RuleLoader         | Core matching and scheduling                     |
-| **Phase 3**    | Safe evaluator sandbox, composite matchers, threshold matchers            | Advanced matching capabilities                   |
-| **Phase 4**    | Rule caching (3 levels), diagnostic system                                | Performance and debuggability                    |
-| **Phase 5**    | Correlation Engine (dedup, grouping, sequence detection)                  | Higher-order analysis                            |
-| **Phase 6**    | Trust Engine, Risk Engine                                                 | Scoring and prioritization                       |
-| **Phase 7**    | Reasoning Engine (templates, traceability)                                | Explainability                                   |
-| **Phase 8**    | Rule packs (core, secrets, scripts, executables, archives, configuration) | Shipped rules                                    |
-| **Continuous** | Benchmarks, golden tests, regression corpus, false-positive tests         | Quality assurance                                |
+| Phase 1    | Rule interfaces, RuleDefinition, RuleMatcher, RuleRegistry                | Foundation, needed before any rules can execute |
+| Phase 2    | PropertyMatchers (exact, regex, range), RuleScheduler, RuleLoader         | Core matching and scheduling                     |
+| Phase 3    | Safe evaluator sandbox, composite matchers, threshold matchers            | Advanced matching capabilities                   |
+| Phase 4    | Rule caching (3 levels), diagnostic system                                | Performance and debuggability                    |
+| Phase 5    | Correlation Engine (dedup, grouping, sequence detection)                  | Higher-order analysis                            |
+| Phase 6    | Trust Engine, Risk Engine                                                 | Scoring and prioritization                       |
+| Phase 7    | Reasoning Engine (templates, traceability)                                | Explainability                                   |
+| Phase 8    | Rule packs (core, secrets, scripts, executables, archives, configuration) | Shipped rules                                    |
+| Continuous | Benchmarks, golden tests, regression corpus, false-positive tests         | Quality assurance                                |
 
-### 15.2 Critical Success Factors
+### 15.2 Critical success factors
 
-1. **Write rules as data.** A rule definition should be readable by someone who doesn't know TypeScript. If a rule requires code, it's too complex — push logic to the evaluator.
-2. **Test traceability first.** Before optimizing, verify that every Finding can trace back to its Evidence, Behavior, Feature, and Artifact.
-3. **Cache last.** Build the engine without caching first. Add caching only when profiling identifies specific bottlenecks.
-4. **Parallelism at artifact level.** The simplest and most impactful parallelism is processing multiple artifacts simultaneously. Optimize this before in-process parallelism.
-5. **Diagnose everything.** The diagnostic system is not optional. It is essential for debugging false positives, performance issues, and rule development.
-6. **Correlation is the differentiator.** Basic rule matching is table stakes. The Correlation Engine — detecting multi-step behavioral sequences — is what makes VERIS different.
+1. Write rules as data. A rule definition should be readable by someone who doesn't know TypeScript. If a rule requires code, it's too complex, push logic to the evaluator.
+2. Test traceability first. Before optimizing, verify that every Finding can trace back to its Evidence, Behavior, Feature, and Artifact.
+3. Cache last. Build the engine without caching first. Add caching only when profiling identifies specific bottlenecks.
+4. Parallelism at artifact level. The simplest and most impactful parallelism is processing multiple artifacts simultaneously. Optimize this before in-process parallelism.
+5. Diagnose everything. The diagnostic system is not optional. It is essential for debugging false positives, performance issues, and rule development.
+6. Correlation is the differentiator. Basic rule matching is table stakes. The Correlation Engine, detecting multi-step behavioral sequences, is what makes VERIS different.
 
-### 15.3 Architectural Invariants
+### 15.3 Architectural invariants
 
 ```
 1. Rules never parse files. Rules consume Behaviors only.

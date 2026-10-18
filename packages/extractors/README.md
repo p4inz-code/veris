@@ -4,11 +4,11 @@ Artifact extraction framework.
 
 ## Architecture
 
-- **Interfaces** — Extractor, ExtractorRegistry contracts
-- **Registry** — ExtractorRegistry implementation
-- **Builtins** — Shipping extractors
+- Interfaces: Extractor, ExtractorRegistry contracts
+- Registry: ExtractorRegistry implementation
+- Builtins: Shipping extractors
 
-## Built-in Extractors
+## Built-in extractors
 
 - ArchiveExtractor: tar, zip, gzip, bzip2, 7z
 - ExecutableExtractor: ELF, PE, Mach-O
@@ -19,4 +19,4 @@ Artifact extraction framework.
 
 ## Principle
 
-Extractors extract only — they never analyze.
+Extractors extract only, they never analyze.

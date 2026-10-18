@@ -1,4 +1,4 @@
-# Knowledge Pack System
+# Knowledge pack system
 
 Knowledge Packs are deterministic offline intelligence databases that enrich Veris security analysis. They provide structured threat intelligence data without any cloud dependency.
 
@@ -15,21 +15,21 @@ KnowledgePackFile (JSON on disk)
 
 | Component       | File             | Purpose                                                          |
 | --------------- | ---------------- | ---------------------------------------------------------------- |
-| **Types**       | `types.ts`       | Core type definitions for packs, entries, indicators, enrichment |
-| **Schema**      | `schema.ts`      | Schema constants, validation rules, format helpers               |
-| **Categories**  | `categories.ts`  | Built-in knowledge categories (11 categories)                    |
-| **Validator**   | `validator.ts`   | Strict pack validation (fields, IDs, references, checksums)      |
-| **Registry**    | `registry.ts`    | Pack lifecycle management (load/unload/reload/list)              |
-| **Loader**      | `loader.ts`      | Disk-based pack loading with recursive discovery                 |
-| **Resolver**    | `resolver.ts`    | Fast immutable index for pack queries                            |
-| **Cache**       | `cache.ts`       | Content-addressed immutable cache                                |
-| **Config**      | `config.ts`      | Pack configuration (enabled/disabled/directories)                |
-| **Diagnostics** | `diagnostics.ts` | Pack loading status and error reporting                          |
-| **Update**      | `update.ts`      | Offline update bundle framework (no networking)                  |
-| **Enricher**    | `enricher.ts`    | Evidence enrichment via pack matching                            |
-| **Data packs**  | `data/*.ts`      | Built-in production knowledge packs                              |
+| Types       | `types.ts`       | Core type definitions for packs, entries, indicators, enrichment |
+| Schema      | `schema.ts`      | Schema constants, validation rules, format helpers               |
+| Categories  | `categories.ts`  | Built-in knowledge categories (11 categories)                    |
+| Validator   | `validator.ts`   | Strict pack validation (fields, IDs, references, checksums)      |
+| Registry    | `registry.ts`    | Pack lifecycle management (load/unload/reload/list)              |
+| Loader      | `loader.ts`      | Disk-based pack loading with recursive discovery                 |
+| Resolver    | `resolver.ts`    | Fast immutable index for pack queries                            |
+| Cache       | `cache.ts`       | Content-addressed immutable cache                                |
+| Config      | `config.ts`      | Pack configuration (enabled/disabled/directories)                |
+| Diagnostics | `diagnostics.ts` | Pack loading status and error reporting                          |
+| Update      | `update.ts`      | Offline update bundle framework (no networking)                  |
+| Enricher    | `enricher.ts`    | Evidence enrichment via pack matching                            |
+| Data packs  | `data/*.ts`      | Built-in production knowledge packs                              |
 
-## Pack Format
+## Pack format
 
 Knowledge Packs are JSON files (`.veris-pack.json`) with the following structure:
 
@@ -77,7 +77,7 @@ Knowledge Packs are JSON files (`.veris-pack.json`) with the following structure
 }
 ```
 
-## Built-in Categories
+## Built-in categories
 
 | ID                    | Name                         | Description                              |
 | --------------------- | ---------------------------- | ---------------------------------------- |
@@ -167,5 +167,5 @@ signed pack updates. The update system supports:
 - Rollback to previous versions
 - Future format compatibility
 
-No network transport is implemented — the framework only handles
+No network transport is implemented. The framework only handles
 bundle format, signature verification, and file management.

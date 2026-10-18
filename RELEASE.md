@@ -10,8 +10,8 @@
 - Knowledge pack system with built-in packs
 - PE deep analysis engine (headers, sections, imports, packers, signatures)
 - 6 export formats: JSON, Markdown, HTML, SARIF 2.1.0, CSV, JUnit
-- Deterministic analysis — identical inputs produce identical outputs
-- Offline-first — analysis pipeline requires no network access
+- Deterministic analysis: identical inputs produce identical outputs
+- Offline-first: analysis pipeline requires no network access
 
 ## Stability
 

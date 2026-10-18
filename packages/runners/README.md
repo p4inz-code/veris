@@ -2,8 +2,8 @@
 
 Execution environment adapters.
 
-## Runner Types
+## Runner types
 
-- **LocalRunner** — Local filesystem scanning
-- **CiRunner** — CI integration (stdin/stdout)
-- **DaemonRunner** — Watch mode / persistent daemon
+- LocalRunner: Local filesystem scanning
+- CiRunner: CI integration (stdin/stdout)
+- DaemonRunner: Watch mode / persistent daemon

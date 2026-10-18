@@ -1,6 +1,6 @@
-# VERIS Benchmark Suite
+# VERIS benchmark suite
 
-> **Status**: Foundation established — baseline measurements available.  
+> **Status**: Foundation established, baseline measurements available.  
 > No optimizations have been applied; the suite captures the current state.
 
 ## Overview
@@ -10,7 +10,7 @@ performance measurements of the VERIS scan pipeline. It runs real scans
 against synthesized workloads and verifies that analysis results are
 deterministic across iterations.
 
-## Quick Start
+## Quick start
 
 ```bash
 # Run all benchmarks (default: 1 warmup, 3 measured iterations)
@@ -26,22 +26,22 @@ pnpm --filter @veris/perf bench:json
 pnpm --filter @veris/perf bench -- --workload small,medium --iterations 5 --warmups 2
 ```
 
-## What Is Measured
+## What is measured
 
-### Pipeline Stages
+### Pipeline stages
 
-- Discovery — filesystem traversal and artifact graph construction
-- Classification — MIME type, magic bytes, extension analysis
-- Extraction — feature extraction (JS, TS, JSON, YAML, Shell, etc.)
-- Knowledge — feature normalization and enrichment
-- Analysis — analyzer execution and evidence generation
-- Rules — rule engine evaluation
-- Correlation — behavioral chain detection
-- Risk — risk score computation
-- Reporting — report construction
-- Export — output serialization (JSON, Markdown, etc.)
+- Discovery: filesystem traversal and artifact graph construction
+- Classification: MIME type, magic bytes, extension analysis
+- Extraction: feature extraction (JS, TS, JSON, YAML, Shell, etc.)
+- Knowledge: feature normalization and enrichment
+- Analysis: analyzer execution and evidence generation
+- Rules: rule engine evaluation
+- Correlation: behavioral chain detection
+- Risk: risk score computation
+- Reporting: report construction
+- Export: output serialization (JSON, Markdown, etc.)
 
-### Metrics Per Workload
+### Metrics per workload
 
 | Metric          | Source                            | Unit    |
 | :-------------- | :-------------------------------- | :------ |
@@ -58,7 +58,7 @@ pnpm --filter @veris/perf bench -- --workload small,medium --iterations 5 --warm
 - Per-stage median durations and percentage breakdowns
 - Determinism hash (SHA-256 of canonical analysis payload)
 
-## Workload Matrix
+## Workload matrix
 
 | ID               | Name                | Files | Category | Purpose                                         |
 | :--------------- | :------------------ | :---: | :------- | :---------------------------------------------- |
@@ -70,22 +70,22 @@ pnpm --filter @veris/perf bench -- --workload small,medium --iterations 5 --warm
 Workloads are synthesized in temporary directories and cleaned up automatically.
 No machine-specific paths are used.
 
-## Determinism Contract
+## Determinism contract
 
 For every workload, the suite runs N iterations with an identical fixed
 timestamp (`2026-08-09T00:00:00.000Z`) and compares the canonical analysis
 payload across runs. The comparison:
 
-- **Includes**: Findings, evidence, severity, risk scores, confidence values,
+- Includes: Findings, evidence, severity, risk scores, confidence values,
   ordering, rule matches, behavioral chains, report structure
-- **Excludes**: `scanDurationMs`, `startedAt`, `completedAt` (runtime metadata
+- Excludes: `scanDurationMs`, `startedAt`, `completedAt` (runtime metadata
   that legitimately varies per-run)
 
 This is the same determinism contract enforced by the existing
 `scan-determinism.test.ts` test. If determinism verification fails, the
 benchmark exits with a non-zero exit code.
 
-## Output Schema
+## Output schema
 
 Results are written to `benchmark-results/benchmark-results.json` with the
 following stable schema (version `1.0.0`):
@@ -117,15 +117,15 @@ interface BenchmarkSuiteResult {
 
 A human-readable report is also written to `benchmark-results/benchmark-report.txt`.
 
-## CI Integration
+## CI integration
 
 The benchmark suite is designed for CI consumption:
 
-1. **Machine-readable output**: `--json` flag outputs JSON to stdout
-2. **Exit codes**: Non-zero on determinism failure
-3. **No network dependency**: Fully offline
-4. **Stable schema**: Schema version for backward compatibility
-5. **Environment capture**: Records Node version, commit SHA, platform
+1. Machine-readable output: `--json` flag outputs JSON to stdout
+2. Exit codes: Non-zero on determinism failure
+3. No network dependency: Fully offline
+4. Stable schema: Schema version for backward compatibility
+5. Environment capture: Records Node version, commit SHA, platform
 
 A future CI step can:
 
@@ -137,14 +137,14 @@ A future CI step can:
 The nightly workflow (`.github/workflows/nightly.yml`) is the natural
 integration point for benchmark execution.
 
-## What This Suite Does NOT Do
+## What this suite does NOT do
 
-- **No optimization**: The suite measures reality, not aspirations
-- **No flaky timing assertions**: No hard-coded "must be under X ms" gates
-- **No false precision**: Coefficient of variation is reported to help assess
+- No optimization: The suite measures reality, not aspirations
+- No flaky timing assertions: No hard-coded "must be under X ms" gates
+- No false precision: Coefficient of variation is reported to help assess
   measurement reliability
-- **No network access**: Fully offline
-- **No modification of production code**: The harness calls `runScan` as-is
+- No network access: Fully offline
+- No modification of production code: The harness calls `runScan` as-is
 
 ## Architecture
 

@@ -10,7 +10,7 @@ Discovery  →  Classification  →  Extraction  →  Rules  →  Risk  →  Rep
 ```
 
 Each stage transforms data before passing it to the next. The pipeline is
-entirely deterministic — no randomness, no network calls, no mutable state.
+entirely deterministic: no randomness, no network calls, no mutable state.
 
 ### Discovery
 
@@ -47,16 +47,16 @@ Exports to JSON, Markdown, HTML, SARIF, CSV, and JUnit.
 
 ## Key properties
 
-- **Deterministic** — Same input always produces identical analysis results (findings, evidence, ordering, risk scores)
-- **Offline-first** — Analysis requires no network access
-- **Immutable** — All outputs are frozen at construction
-- **Explainable** — Every finding traces to specific evidence
-- **AI as consumer** — AI explains results, never participates in analysis
+- Deterministic: Same input always produces identical analysis results (findings, evidence, ordering, risk scores)
+- Offline-first: Analysis requires no network access
+- Immutable: All outputs are frozen at construction
+- Explainable: Every finding traces to specific evidence
+- AI as consumer: AI explains results, never participates in analysis
 
 ## Design constraints
 
 - No `Math.random()`, `crypto.randomUUID()`, or other randomness in analysis
-- No randomness in analysis — a single run timestamp is captured at scan start and injected as report metadata
+- No randomness in analysis: a single run timestamp is captured at scan start and injected as report metadata
 - Stable ordering in all collections
 - Immutable output objects
 - No circular dependencies between components

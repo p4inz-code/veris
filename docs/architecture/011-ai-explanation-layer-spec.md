@@ -1,6 +1,6 @@
-# VERIS AI Explanation Layer — SPEC-011
+# VERIS AI explanation layer: SPEC-011
 
-**Status:** Draft — Research & Architecture Design
+**Status:** Draft, Research & Architecture Design
 **Version:** 1.0
 **Applies to:** AI explanation engine, citation system, prompt architecture, provider abstraction, context building, hallucination prevention, caching, explanation modes, testing.
 **Prerequisites:** SPEC-001 through SPEC-010 (all frozen architecture specs)
@@ -8,7 +8,7 @@
 
 ---
 
-## Table of Contents
+## Table of contents
 
 1. [Preamble & Design Philosophy](#1-preamble--design-philosophy)
 2. [Research Synthesis](#2-research-synthesis)
@@ -28,11 +28,11 @@
 
 ---
 
-## 1. Preamble & Design Philosophy
+## 1. Preamble & design philosophy
 
-### 1.1 VERIS's Core Distinction
+### 1.1 VERIS's core distinction
 
-VERIS is fundamentally different from every system researched (Claude Code, GitHub Copilot, Cursor, Elastic Security, CrowdStrike Falcon, Splunk, Google Chronicle, Microsoft Defender XDR). In those systems, AI participates in the primary analysis — generating code, triaging alerts, classifying threats, summarizing incidents.
+VERIS is fundamentally different from every system researched (Claude Code, GitHub Copilot, Cursor, Elastic Security, CrowdStrike Falcon, Splunk, Google Chronicle, Microsoft Defender XDR). In those systems, AI participates in the primary analysis: generating code, triaging alerts, classifying threats, summarizing incidents.
 
 In VERIS, the **analysis pipeline is complete and deterministic before AI is ever involved**:
 
@@ -43,26 +43,26 @@ Discovery → Classification → Extraction → Knowledge → Analysis → Rules
 
 The AI is a **read-only consumer** of the complete, frozen `CanonicalReport`. This architectural constraint is what makes VERIS unique and what enables guarantees that no other security platform can make:
 
-- **Every AI claim is verifiable** against deterministic evidence.
-- **The AI never changes the answer** — it only explains it.
-- **The analysis is reproducible** regardless of which AI provider is used (or if none is used).
-- **The AI can be removed** and the system produces the same findings.
+- Every AI claim is verifiable against deterministic evidence.
+- The AI never changes the answer: it only explains it.
+- The analysis is reproducible regardless of which AI provider is used (or if none is used).
+- The AI can be removed and the system produces the same findings.
 
-### 1.2 Lessons from Production Systems
+### 1.2 Lessons from production systems
 
 | System                       | Key Lesson for VERIS                                                                                  |
 | ---------------------------- | ----------------------------------------------------------------------------------------------------- |
-| **CrowdStrike Charlotte AI** | Validation agents as a gatekeeper between LLM output and user — never show raw LLM output             |
-| **Elastic Security AI**      | Grounded RAG with context-specific triggers — the AI only sees what's relevant to the current context |
-| **Google Chronicle (TIN)**   | Transparent reasoning with step-by-step investigation timeline — show the chain of reasoning          |
-| **Microsoft Defender XDR**   | Managed scope — restrict AI to data within the specific incident/report                               |
-| **Splunk AI**                | Input guardrails — filter before the model receives input, not after                                  |
-| **RAG Citation Research**    | Inspect-Repair pipeline — validate citations before delivery, never trust LLM citation generation     |
-| **Claude Code**              | Context compaction pipeline — hierarchical summarization to manage token budgets                      |
-| **Explainable AI (XAI)**     | Decoupled explanation pipeline — separate inference from explanation, tiered detail levels            |
-| **Offline LLM Research**     | Adapter pattern for provider abstraction, prompt as code in version control                           |
+| CrowdStrike Charlotte AI | Validation agents as a gatekeeper between LLM output and user, never show raw LLM output             |
+| Elastic Security AI      | Grounded RAG with context-specific triggers, the AI only sees what's relevant to the current context |
+| Google Chronicle (TIN)   | Transparent reasoning with step-by-step investigation timeline, show the chain of reasoning          |
+| Microsoft Defender XDR   | Managed scope, restrict AI to data within the specific incident/report                               |
+| Splunk AI                | Input guardrails, filter before the model receives input, not after                                  |
+| RAG Citation Research    | Inspect-Repair pipeline, validate citations before delivery, never trust LLM citation generation     |
+| Claude Code              | Context compaction pipeline, hierarchical summarization to manage token budgets                      |
+| Explainable AI (XAI)     | Decoupled explanation pipeline, separate inference from explanation, tiered detail levels            |
+| Offline LLM Research     | Adapter pattern for provider abstraction, prompt as code in version control                           |
 
-### 1.3 Core Invariants
+### 1.3 Core invariants
 
 The following invariants are **permanent**. They cannot be changed without a new major architecture specification.
 
@@ -100,9 +100,9 @@ IE8. Offline is the default, not an afterthought.
      not workarounds.
 ```
 
-### 1.4 What the AI Explanation Layer Does
+### 1.4 What the AI explanation layer does
 
-| ✅ Does                                        | ❌ Does Not                   |
+| Does                                        | Does Not                   |
 | ---------------------------------------------- | ----------------------------- |
 | Explain why a Finding exists                   | Create or modify Findings     |
 | Trace Evidence back through the pipeline       | Modify Evidence               |
@@ -115,27 +115,27 @@ IE8. Offline is the default, not an afterthought.
 
 ---
 
-## 2. Research Synthesis
+## 2. Research synthesis
 
-### 2.1 Citation Systems — Key Findings
+### 2.1 Citation systems: key findings
 
-**Problem:** LLMs frequently fabricate citations — the "citation-shaped hallucination" where a claim is supported by a plausible-sounding but non-existent reference.
+**Problem:** LLMs frequently fabricate citations. The "citation-shaped hallucination" where a claim is supported by a plausible-sounding but non-existent reference.
 
 **Industry Solutions:**
 
 | Technique                                                    | Used By                              | Applicability to VERIS                                  |
 | ------------------------------------------------------------ | ------------------------------------ | ------------------------------------------------------- |
-| **Inline numbered citations [1]**                            | Elastic Security, Microsoft Defender | High — VERIS has deterministic object IDs               |
-| **Bidirectional traceability** (click citation → see source) | Google Chronicle, CrowdStrike        | High — every canonical object has a stable ID           |
-| **Structured object references** (not fragile text)          | RAG research best practice           | High — VERIS uses `EvidenceId`, `FindingId`, etc.       |
-| **Faithfulness scoring** (claim vs. source)                  | Modern RAG pipelines                 | High — can compare AI claims against evidence           |
-| **Inspect-Repair pipeline**                                  | CiteFix (research)                   | High — post-process citations before delivery           |
-| **Null-evidence refusal**                                    | RAG grounding research               | High — AI must refuse to answer when evidence is absent |
-| **Entity verification** (cross-reference entities)           | Enterprise RAG systems               | Medium — VERIS entities are well-structured             |
+| Inline numbered citations [1]                            | Elastic Security, Microsoft Defender | High — VERIS has deterministic object IDs               |
+| Bidirectional traceability (click citation → see source) | Google Chronicle, CrowdStrike        | High, every canonical object has a stable ID           |
+| Structured object references (not fragile text)          | RAG research best practice           | High — VERIS uses `EvidenceId`, `FindingId`, etc.       |
+| Faithfulness scoring (claim vs. source)                  | Modern RAG pipelines                 | High, can compare AI claims against evidence           |
+| Inspect-Repair pipeline                                  | CiteFix (research)                   | High, post-process citations before delivery           |
+| Null-evidence refusal                                    | RAG grounding research               | High — AI must refuse to answer when evidence is absent |
+| Entity verification (cross-reference entities)           | Enterprise RAG systems               | Medium — VERIS entities are well-structured             |
 
-**Decision:** VERIS will use **structured object references** with **inline numbered citations** and a mandatory **inspect step** that validates every citation before delivery.
+**Decision:** VERIS will use structured object references with inline numbered citations and a mandatory inspect step that validates every citation before delivery.
 
-### 2.2 Prompt Architecture — Key Findings
+### 2.2 Prompt architecture: key findings
 
 **Problem:** Hardcoded prompts are untestable, unversioned, and couple business logic to LLM behavior.
 
@@ -143,16 +143,16 @@ IE8. Offline is the default, not an afterthought.
 
 | Technique                                 | Used By                                     | Applicability to VERIS                |
 | ----------------------------------------- | ------------------------------------------- | ------------------------------------- |
-| **Version-controlled prompt templates**   | GitHub Copilot, Cursor                      | High — prompts are code               |
-| **Reusable template fragments**           | Claude Code (system/developer/user)         | High — compose prompts from fragments |
-| **Dynamic system prompts**                | Elastic Security, Splunk                    | High — inject context into templates  |
-| **Localized prompts**                     | Splunk (English, French, Spanish, Japanese) | Medium — V2+                          |
-| **Prompt versioning in CI/CD**            | Enterprise LLM best practice                | High — prompt changes are tracked     |
-| **Structured output schemas** (JSON mode) | All production systems                      | Critical — enforce citation structure |
+| Version-controlled prompt templates   | GitHub Copilot, Cursor                      | High, prompts are code               |
+| Reusable template fragments           | Claude Code (system/developer/user)         | High, compose prompts from fragments |
+| Dynamic system prompts                | Elastic Security, Splunk                    | High, inject context into templates  |
+| Localized prompts                     | Splunk (English, French, Spanish, Japanese) | Medium — V2+                          |
+| Prompt versioning in CI/CD            | Enterprise LLM best practice                | High, prompt changes are tracked     |
+| Structured output schemas (JSON mode) | All production systems                      | Critical, enforce citation structure |
 
-**Decision:** VERIS will use **version-controlled prompt templates** composed from **reusable fragments**, with **structured output schemas** enforced via JSON mode.
+**Decision:** VERIS will use version-controlled prompt templates composed from reusable fragments, with structured output schemas enforced via JSON mode.
 
-### 2.3 Context Building — Key Findings
+### 2.3 Context building: key findings
 
 **Problem:** LLMs have limited context windows. Sending the entire report is wasteful and causes "lost in the middle" degradation.
 
@@ -160,16 +160,16 @@ IE8. Offline is the default, not an afterthought.
 
 | Technique                                        | Used By                  | Applicability to VERIS                   |
 | ------------------------------------------------ | ------------------------ | ---------------------------------------- |
-| **Context prioritization** (most relevant first) | GitHub Copilot, Cursor   | High — prioritize high-severity findings |
-| **Selective retrieval** (RAG over report)        | Elastic Security, Splunk | High — retrieve only relevant evidence   |
-| **Managed scope** (limit to current context)     | Microsoft Defender       | High — explain one finding at a time     |
-| **Context compaction** (summarize old context)   | Claude Code              | Medium — for multi-finding explanations  |
-| **Prompt caching** (reuse processed context)     | GitHub Copilot           | High — cache processed report context    |
-| **Progressive disclosure** (simple → detailed)   | Google Chronicle         | High — tiered explanation modes          |
+| Context prioritization (most relevant first) | GitHub Copilot, Cursor   | High, prioritize high-severity findings |
+| Selective retrieval (RAG over report)        | Elastic Security, Splunk | High, retrieve only relevant evidence   |
+| Managed scope (limit to current context)     | Microsoft Defender       | High, explain one finding at a time     |
+| Context compaction (summarize old context)   | Claude Code              | Medium, for multi-finding explanations  |
+| Prompt caching (reuse processed context)     | GitHub Copilot           | High, cache processed report context    |
+| Progressive disclosure (simple → detailed)   | Google Chronicle         | High, tiered explanation modes          |
 
-**Decision:** VERIS will use **managed scope** (explain individual findings by default), with **selective retrieval** for cross-finding patterns, and **progressive disclosure** for detail levels.
+**Decision:** VERIS will use managed scope (explain individual findings by default), with selective retrieval for cross-finding patterns, and progressive disclosure for detail levels.
 
-### 2.4 Hallucination Prevention — Key Findings
+### 2.4 Hallucination prevention: key findings
 
 **Problem:** LLMs confidently assert incorrect information. In security contexts, this is dangerous.
 
@@ -177,17 +177,17 @@ IE8. Offline is the default, not an afterthought.
 
 | Technique                                               | Used By                                 | Applicability to VERIS                      |
 | ------------------------------------------------------- | --------------------------------------- | ------------------------------------------- |
-| **Validation agents** (verify output before delivery)   | CrowdStrike Charlotte AI                | Critical — validate every citation          |
-| **Grounded RAG** (anchor to retrieved data)             | Elastic, Splunk, Microsoft Defender     | Critical — anchor to canonical objects      |
-| **Input guardrails** (filter before LLM)                | Splunk (language, gibberish, injection) | High — prevent prompt injection             |
-| **Output guardrails** (filter after LLM)                | All production systems                  | High — enforce citation structure           |
-| **Null-evidence refusal** (refuse when evidence absent) | RAG research                            | Critical — "I cannot explain this finding"  |
-| **Confidence scoring** (flag uncertainty)               | XAI best practice                       | High — AI confidence ≠ detection confidence |
-| **Human-in-the-loop** (flag for review)                 | Microsoft Defender, CrowdStrike         | Medium — for critical explanations          |
+| Validation agents (verify output before delivery)   | CrowdStrike Charlotte AI                | Critical, validate every citation          |
+| Grounded RAG (anchor to retrieved data)             | Elastic, Splunk, Microsoft Defender     | Critical, anchor to canonical objects      |
+| Input guardrails (filter before LLM)                | Splunk (language, gibberish, injection) | High, prevent prompt injection             |
+| Output guardrails (filter after LLM)                | All production systems                  | High, enforce citation structure           |
+| Null-evidence refusal (refuse when evidence absent) | RAG research                            | Critical — "I cannot explain this finding"  |
+| Confidence scoring (flag uncertainty)               | XAI best practice                       | High — AI confidence ≠ detection confidence |
+| Human-in-the-loop (flag for review)                 | Microsoft Defender, CrowdStrike         | Medium, for critical explanations          |
 
-**Decision:** VERIS will use a **multi-layer hallucination prevention system**: input guardrails → grounded context → structured output schema → validation agent → null-evidence refusal → output guardrails.
+**Decision:** VERIS will use a multi-layer hallucination prevention system: input guardrails → grounded context → structured output schema → validation agent → null-evidence refusal → output guardrails.
 
-### 2.5 Explanation Modes — Key Findings
+### 2.5 Explanation modes: key findings
 
 **Problem:** A single explanation format doesn't serve all users. Analysts, managers, and developers need different levels of detail.
 
@@ -195,14 +195,14 @@ IE8. Offline is the default, not an afterthought.
 
 | Technique                                      | Used By                              | Applicability to VERIS                     |
 | ---------------------------------------------- | ------------------------------------ | ------------------------------------------ |
-| **Simple / Power User / Expert tiers**         | XAI best practice, Google Chronicle  | High — map to VERIS user personas          |
-| **Progressive disclosure** (expand for detail) | Microsoft Defender, Google Chronicle | High — default to simple, expand on demand |
-| **Suggested follow-up prompts**                | Microsoft Defender                   | Medium — guide investigation               |
-| **Role-based views**                           | XAI best practice                    | Low — VERIS is a single-user tool          |
+| Simple / Power User / Expert tiers         | XAI best practice, Google Chronicle  | High, map to VERIS user personas          |
+| Progressive disclosure (expand for detail) | Microsoft Defender, Google Chronicle | High, default to simple, expand on demand |
+| Suggested follow-up prompts                | Microsoft Defender                   | Medium, guide investigation               |
+| Role-based views                           | XAI best practice                    | Low — VERIS is a single-user tool          |
 
-**Decision:** VERIS will support three explanation modes — **Simple** (one paragraph), **Technical** (detailed with evidence), and **Expert** (full traceability chain) — with smooth transitions between them.
+**Decision:** VERIS will support three explanation modes, Simple (one paragraph), Technical (detailed with evidence), and Expert (full traceability chain), with smooth transitions between them.
 
-### 2.6 Provider Abstraction — Key Findings
+### 2.6 Provider abstraction: key findings
 
 **Problem:** Tight coupling to a specific AI provider makes the system fragile, vendor-dependent, and unsuitable for offline use.
 
@@ -210,16 +210,16 @@ IE8. Offline is the default, not an afterthought.
 
 | Technique                                               | Used By                           | Applicability to VERIS                |
 | ------------------------------------------------------- | --------------------------------- | ------------------------------------- |
-| **Adapter pattern** for LLM clients                     | LangChain, Mirascope abstractions | Critical — unified interface          |
-| **OpenAI-compatible API as standard**                   | Ollama, LM Studio, llama.cpp      | Critical — de facto standard          |
-| **Health checks before routing**                        | Offline LLM best practice         | High — detect provider unavailability |
-| **Graceful degradation** (fallback behavior)            | All systems                       | Critical — AI is optional             |
-| **Provider configuration** (model, endpoint, params)    | All systems                       | High — user-configurable              |
-| **Request coalescing** (deduplicate identical requests) | Offline LLM best practice         | Medium — for local providers          |
+| Adapter pattern for LLM clients                     | LangChain, Mirascope abstractions | Critical, unified interface          |
+| OpenAI-compatible API as standard                   | Ollama, LM Studio, llama.cpp      | Critical, de facto standard          |
+| Health checks before routing                        | Offline LLM best practice         | High, detect provider unavailability |
+| Graceful degradation (fallback behavior)            | All systems                       | Critical — AI is optional             |
+| Provider configuration (model, endpoint, params)    | All systems                       | High, user-configurable              |
+| Request coalescing (deduplicate identical requests) | Offline LLM best practice         | Medium, for local providers          |
 
-**Decision:** VERIS will use a **provider adapter** with an OpenAI-compatible API interface as the standard, supporting Ollama, LM Studio, OpenAI, Anthropic, and custom endpoints.
+**Decision:** VERIS will use a provider adapter with an OpenAI-compatible API interface as the standard, supporting Ollama, LM Studio, OpenAI, Anthropic, and custom endpoints.
 
-### 2.7 Caching — Key Findings
+### 2.7 Caching: key findings
 
 **Problem:** LLM inference is expensive (even locally). Repeated explanations for the same finding waste compute.
 
@@ -227,19 +227,19 @@ IE8. Offline is the default, not an afterthought.
 
 | Technique                                                  | Used By                | Applicability to VERIS                       |
 | ---------------------------------------------------------- | ---------------------- | -------------------------------------------- |
-| **Exact-match caching** (prompt hash → response)           | All production systems | Critical — same input → same explanation     |
-| **Semantic caching** (similar prompts → similar responses) | Enterprise RAG systems | Low — VERIS prompts are deterministic        |
-| **Cache invalidation** (versioned keys)                    | All production systems | Critical — prompt version → invalidate cache |
-| **Per-session cache**                                      | Claude Code            | Medium — session-scoped for freshness        |
-| **Persistent cache** (across sessions)                     | GitHub Copilot         | High — same findings get same explanations   |
+| Exact-match caching (prompt hash → response)           | All production systems | Critical, same input → same explanation     |
+| Semantic caching (similar prompts → similar responses) | Enterprise RAG systems | Low — VERIS prompts are deterministic        |
+| Cache invalidation (versioned keys)                    | All production systems | Critical, prompt version → invalidate cache |
+| Per-session cache                                      | Claude Code            | Medium, session-scoped for freshness        |
+| Persistent cache (across sessions)                     | GitHub Copilot         | High, same findings get same explanations   |
 
-**Decision:** VERIS will use **exact-match caching** with **versioned cache keys** that include prompt version, model version, and input hash. Cache is persistent across sessions (for the same report version).
+**Decision:** VERIS will use exact-match caching with versioned cache keys that include prompt version, model version, and input hash. Cache is persistent across sessions (for the same report version).
 
 ---
 
-## 3. High-Level Architecture
+## 3. High-Level architecture
 
-### 3.1 System Context
+### 3.1 System context
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -277,7 +277,7 @@ IE8. Offline is the default, not an afterthought.
                                                          └────────────────────┘
 ```
 
-### 3.2 AI Explanation Layer — Internal Architecture
+### 3.2 AI explanation layer: internal architecture
 
 ```
                     ┌────────────────────────────────────────────────────┐
@@ -335,9 +335,9 @@ IE8. Offline is the default, not an afterthought.
                    └─────────────────────────────────────────────────┘
 ```
 
-### 3.3 Layer Architecture Placement
+### 3.3 Layer architecture placement
 
-The AI Explanation Layer sits at **Layer 5/6** in the VERIS package architecture — it is an **enhancement layer** that consumes the output of all lower layers:
+The AI Explanation Layer sits at **Layer 5/6** in the VERIS package architecture. It is an enhancement layer that consumes the output of all lower layers:
 
 | Layer                   | Existing Packages                          | AI Layer                             |
 | ----------------------- | ------------------------------------------ | ------------------------------------ |
@@ -348,15 +348,15 @@ The AI Explanation Layer sits at **Layer 5/6** in the VERIS package architecture
 | L4: Report & Output     | report, exporters                          | Consumes `CanonicalReport`           |
 | L5: Application         | cli, api                                   | Integrates AI explanations into TUI  |
 | L6: Runners             | runners                                    | —                                    |
-| **L5b: AI Explanation** | **`@veris/explain` (NEW)**                 | **Provides AI explanation services** |
+| L5b: AI Explanation | `@veris/explain` (NEW)                 | Provides AI explanation services |
 
 **Dependency rule:** `@veris/explain` depends on `@veris/core` (types, including `CanonicalReport`), `@veris/ai` (provider contracts), and `@veris/shared` (utilities). It is consumed by `@veris/cli` and `@veris/api`. `@veris/explain` is the sole owner of context types (`Explained*`); these are NOT re-exported from canonical packages.
 
 ---
 
-## 4. Module Responsibilities
+## 4. Module responsibilities
 
-### 4.1 Module Map
+### 4.1 Module map
 
 ```
 @veris/explain/
@@ -451,13 +451,13 @@ The AI Explanation Layer sits at **Layer 5/6** in the VERIS package architecture
 └── package.json
 ```
 
-### 4.2 Module Responsibilities
+### 4.2 Module responsibilities
 
-#### 4.2.1 Engine Module (`engine/`)
+#### 4.2.1 Engine module (`engine/`)
 
 The orchestrator that coordinates the entire explanation pipeline.
 
-**`Explainer`** — The top-level orchestrator:
+**`Explainer`**, The top-level orchestrator:
 
 - Receives a request (e.g., "explain finding X at simple detail level")
 - Coordinates: Scope Manager → Context Builder → Prompt Renderer → Provider → Citation Verifier → Validation Agent → Formatter
@@ -465,7 +465,7 @@ The orchestrator that coordinates the entire explanation pipeline.
 - Checks cache before invoking the provider
 - Logs every interaction to the audit log
 
-**`ScopeManager`** — Determines what to include in the context:
+**`ScopeManager`**, Determines what to include in the context:
 
 - For a single finding: include that finding, its evidence, the rule that matched, the artifact, and relevant risk context
 - For a behavior chain: include all findings in the chain, their evidence, and the chain metadata
@@ -473,7 +473,7 @@ The orchestrator that coordinates the entire explanation pipeline.
 - For the full report: include summary statistics, top findings, and risk overview
 - Never includes: raw file contents, full artifact lists, internal diagnostics
 
-**`TokenBudget`** — Manages the context window (fully deterministic):
+**`TokenBudget`**, Manages the context window (fully deterministic):
 
 - Estimates token usage for each context component
 - Prioritizes components by relevance category: evidence > rule > artifact > risk context
@@ -483,14 +483,14 @@ The orchestrator that coordinates the entire explanation pipeline.
   3. If budget remains after including all evidence, allocate to next priority category
   4. If multiple items have identical sort keys, use `object ID ASC` as final tiebreaker
 - All iteration over multi-item structures MUST use a stable sort before any truncation
-- Truncation is atomic (all-or-nothing per component) — never partial inclusion of a single evidence item
+- Truncation is atomic (all-or-nothing per component), never partial inclusion of a single evidence item
 - Returns a budget report including truncation decisions for audit logging
 
-#### 4.2.2 Context Module (`context/`)
+#### 4.2.2 Context module (`context/`)
 
 Builds the structured context that the LLM receives.
 
-**`Builder`** — Orchestrates context construction:
+**`Builder`**, Orchestrates context construction:
 
 - Receives a scope from ScopeManager
 - Calls the appropriate context builder (finding, chain, risk, report)
@@ -498,41 +498,41 @@ Builds the structured context that the LLM receives.
 - Validates that all context references resolve to real objects
 - Returns a frozen `ExplainedContext` object
 
-**`FindingContext`** — Builds context for a single Finding:
+**`FindingContext`**, Builds context for a single Finding:
 
 - Finding metadata (title, severity, confidence, rule ID)
 - Evidence list (source locations, match details, confidence)
 - Rule definition (description, severity, taxonomy IDs)
 - Artifact metadata (path, type)
 - Risk contribution (dimension, weight)
-- **Never includes:** raw file content, full artifact features, internal engine state
+- Never includes: raw file content, full artifact features, internal engine state
 
-**`RiskContext`** — Builds context for RiskProfile:
+**`RiskContext`**, Builds context for RiskProfile:
 
 - Overall risk score and level
 - Top risk drivers (findings with highest contribution)
 - Risk dimension breakdown
 - Trust score and trust modifier
 
-#### 4.2.3 Prompts Module (`prompts/`)
+#### 4.2.3 Prompts module (`prompts/`)
 
 Manages prompt templates as versioned, loadable assets.
 
-**`PromptRegistry`** — Loads and version-manages prompt templates:
+**`PromptRegistry`**, Loads and version-manages prompt templates:
 
 - Loads templates from disk at startup
 - Validates template structure
 - Provides version-checking for cache key generation
 - Supports template inheritance (context templates extend base templates)
 
-**`PromptRenderer`** — Fills templates with context:
+**`PromptRenderer`**, Fills templates with context:
 
 - Takes a template ID and a context object
 - Renders the template by substituting `{{variables}}`
 - Applies output format schema (JSON mode instructions)
 - Returns the rendered prompt string and a list of expected citation anchors
 
-**`PromptLoader`** — Loads templates from disk:
+**`PromptLoader`**, Loads templates from disk:
 
 - Loads from package assets (shipped templates)
 - Loads from user config directory (custom templates)
@@ -579,19 +579,19 @@ interface ProviderCapabilities {
 
 **Adapter implementations** live in `@veris/ai/src/providers/adapters/`:
 
-- `openai.ts` — OpenAI API adapter
-- `anthropic.ts` — Anthropic API adapter
-- `ollama.ts` — Ollama adapter
-- `custom.ts` — Generic OpenAI-compatible endpoint
-- `mock.ts` — Mock provider for testing
+- `openai.ts`: OpenAI API adapter
+- `anthropic.ts`: Anthropic API adapter
+- `ollama.ts`: Ollama adapter
+- `custom.ts`: Generic OpenAI-compatible endpoint
+- `mock.ts`: Mock provider for testing
 
 See M2 in the implementation plan and Section 10 of this spec for full details.
 
-#### 4.2.5 Output Module (`output/`)
+#### 4.2.5 Output module (`output/`)
 
 The critical quality assurance layer between the LLM and the user.
 
-**`CitationVerifier`** — Validates every citation (deterministic):
+**`CitationVerifier`**, Validates every citation (deterministic):
 
 - Parses the LLM output to extract all structured citation markers
 - Checks each citation against the original context object using strongly-typed field access
@@ -600,18 +600,18 @@ The critical quality assurance layer between the LLM and the user.
 - Validates claim consistency for STRUCTURAL fields only (e.g., severity level, confidence score, object count)
 - Marks invalid citations (dangling references, wrong severity, type mismatch)
 - Returns a citation validation report
-- This step is PURELY DETERMINISTIC — no LLM involved
+- This step is PURELY DETERMINISTIC. No LLM involved
 
-**`StructuralValidator`** — Validates output structure (deterministic):
+**`StructuralValidator`**, Validates output structure (deterministic):
 
 - Parses the JSON output against the expected schema
 - Checks that all required fields are present
 - Validates that citation IDs in the citations section match citation markers in the text
 - Enforces maximum output length
 - Checks for markdown/code structure violations
-- This step is PURELY DETERMINISTIC — no LLM involved
+- This step is PURELY DETERMINISTIC. No LLM involved
 
-**`NullEvidenceRefusal`** — Refuse when evidence is absent (deterministic + pattern):
+**`NullEvidenceRefusal`**, Refuse when evidence is absent (deterministic + pattern):
 
 - Detects patterns where the LLM should have cited evidence but didn't
 - Detects patterns where the LLM fabricated evidence IDs
@@ -620,9 +620,9 @@ The critical quality assurance layer between the LLM and the user.
 - Logs the refusal for audit
 - Uses deterministic matching FIRST; pattern heuristics SECOND
 
-**`ValidationAgent`** — Semantic faithfulness scoring (LLM-assisted, optional):
+**`ValidationAgent`**, Semantic faithfulness scoring (LLM-assisted, optional):
 
-- ⚠️ This is the ONLY step that may use an LLM. It runs LAST, after all deterministic checks pass.
+- This is the ONLY step that may use an LLM. It runs LAST, after all deterministic checks pass.
 - Splits the LLM output into atomic factual claims
 - For each claim: checks if it is semantically supported by the context
 - Scoring: `supported` / `contradicted` / `unsupported` / `refused`
@@ -633,7 +633,7 @@ The critical quality assurance layer between the LLM and the user.
 - If the ValidationAgent is unavailable, times out, or produces errors: explanation proceeds
   with a caveat ("This explanation's claims have not been semantically verified"). NEVER block
   delivery because the validator failed.
-- Never allow an LLM to be the sole judge of explanation quality — deterministic checks
+- Never allow an LLM to be the sole judge of explanation quality, deterministic checks
   always run first and are sufficient to catch citation fabrication and structural issues.
 
 **Validation pipeline order (enforced by Explainer orchestrator):**
@@ -674,35 +674,35 @@ LLM response received
 
 **Cardinal rule:** Never allow an LLM to be the sole gatekeeper. Deterministic validation (steps 1-3) is always sufficient to catch citation fabrication and structural issues. The LLM-based step (step 4) is an enhancement, not a safety-critical gate.
 
-**`Formatter`** — Format output at different detail levels:
+**`Formatter`**, Format output at different detail levels:
 
-- **Simple:** One paragraph, one citation per claim, no technical jargon
-- **Technical:** Multiple paragraphs, all citations, technical details, severity labels
-- **Expert:** Full traceability chain, all evidence, rule definitions, source locations
+- Simple: One paragraph, one citation per claim, no technical jargon
+- Technical: Multiple paragraphs, all citations, technical details, severity labels
+- Expert: Full traceability chain, all evidence, rule definitions, source locations
 
-**`InputFilter`** — Guardrails before LLM:
+**`InputFilter`**, Guardrails before LLM:
 
 - Detects prompt injection attempts
 - Detects attempts to bypass system instructions
 - Filters out sensitive data patterns
 - Rejects malicious input with a logged warning
 
-**`OutputFilter`** — Guardrails after LLM:
+**`OutputFilter`**, Guardrails after LLM:
 
 - Detects refusals to explain (LLM says "I cannot...")
 - Detects off-topic responses
 - Strips markdown/code that wasn't requested
 - Enforces maximum output length
 
-#### 4.2.6 Cache Module (`cache/`)
+#### 4.2.6 Cache module (`cache/`)
 
-**`CacheKeyGenerator`** — Generates deterministic cache keys:
+**`CacheKeyGenerator`**, Generates deterministic cache keys:
 
 - Components: `{promptVersion}:{modelId}:{modelVersion}:{inputHash}:{engineVersion}:{mode}`
 - Input hash is SHA-256 of the serialized context object
 - Version components ensure cache invalidation on any change
 
-**`PersistentCache`** — SQLite-backed cache:
+**`PersistentCache`**, SQLite-backed cache:
 
 - Stores key → (response, timestamp, token_usage, prompt_version)
 - Supports TTL-based expiration
@@ -712,16 +712,16 @@ LLM response received
 
 #### 4.2.7 Explanation Modes (managed within `output/formatter.ts`, not a separate module)
 
-**`Simple`** — One-paragraph explanation:
+**`Simple`**, One-paragraph explanation:
 
-- "What happened?" — the finding in plain language
-- "Why it matters?" — the impact on security
-- "Who should care?" — the affected audience
+- "What happened?": the finding in plain language
+- "Why it matters?": the impact on security
+- "Who should care?": the affected audience
 - One citation per claim
 - No technical jargon
 - Target: 3-5 sentences
 
-**`Technical`** — Detailed explanation with evidence:
+**`Technical`**, Detailed explanation with evidence:
 
 - Finding description with rule details
 - Evidence summary (matched locations, confidence, match detail)
@@ -730,7 +730,7 @@ LLM response received
 - All citations visible
 - Target: 1-3 paragraphs
 
-**`Expert`** — Full traceability chain:
+**`Expert`**, Full traceability chain:
 
 - Complete trace: Finding → Evidence → Behavior → Feature → Artifact
 - Rule definition (full metadata including CWE/OWASP references)
@@ -740,9 +740,9 @@ LLM response received
 - Full citation list with object IDs
 - Target: 3-5 paragraphs with lists
 
-#### 4.2.8 Logging Module (`logging/`)
+#### 4.2.8 Logging module (`logging/`)
 
-**`AuditLog`** — Append-only log of every AI interaction:
+**`AuditLog`**, Append-only log of every AI interaction:
 
 - Timestamp, session ID, request ID
 - Prompt template version used
@@ -754,7 +754,7 @@ LLM response received
 - User rating (optional, for feedback)
 - Log format: JSON Lines, written to `~/.veris/logs/ai-audit.jsonl`
 
-**`Metrics`** — Aggregated metrics for monitoring:
+**`Metrics`**, Aggregated metrics for monitoring:
 
 - Token usage (prompt, completion, total) per provider
 - Cache hit rate
@@ -765,9 +765,9 @@ LLM response received
 
 ---
 
-## 5. Recommended Package Structure
+## 5. Recommended package structure
 
-### 5.1 Package Layout
+### 5.1 Package layout
 
 ```
 packages/explain/                      # @veris/explain (NEW)
@@ -868,7 +868,7 @@ packages/explain/                      # @veris/explain (NEW)
 └── benchmarks/
 ```
 
-### 5.2 Package Dependencies
+### 5.2 Package dependencies
 
 ```jsonc
 {
@@ -892,7 +892,7 @@ packages/explain/                      # @veris/explain (NEW)
 }
 ```
 
-### 5.3 Dependencies on Existing Packages
+### 5.3 Dependencies on existing packages
 
 | Existing Package | How `@veris/explain` Uses It                                                                |
 | ---------------- | ------------------------------------------------------------------------------------------- |
@@ -907,7 +907,7 @@ packages/explain/                      # @veris/explain (NEW)
 
 ## 6. Public API
 
-### 6.1 Core Types
+### 6.1 Core types
 
 ```typescript
 // ── Citation System ──
@@ -1144,7 +1144,7 @@ interface ExplainError {
 type ExplainResult = ExplainSuccess | ExplainRefused | ExplainError;
 ```
 
-### 6.2 Public API Surface
+### 6.2 Public API surface
 
 ```typescript
 // ── Main Explainer ──
@@ -1346,9 +1346,9 @@ interface ExplainCommandContext {
 
 ---
 
-## 7. Data Flow
+## 7. Data flow
 
-### 7.1 Explaining a Single Finding — Sequence Diagram
+### 7.1 Explaining a single finding: sequence diagram
 
 ```
 User clicks "Explain" on Finding fin_abc123
@@ -1429,20 +1429,20 @@ User clicks "Explain" on Finding fin_abc123
          └── Return ExplainResult to caller
 ```
 
-### 7.2 Data Flow Rules
+### 7.2 Data flow rules
 
 | Rule                             | Description                                 | Enforced By                       |
 | -------------------------------- | ------------------------------------------- | --------------------------------- |
-| **Read-only on CanonicalReport** | Context builder never modifies the report   | Type system (readonly properties) |
-| **No raw file content**          | Context never includes file bytes           | ContextBuilder implementation     |
-| **Every citation resolves**      | Citation Verifier checks every citation     | CitationVerifier                  |
-| **No unsupported claims**        | Validation Agent filters unsupported claims | ValidationAgent                   |
-| **Null-evidence refusal**        | If evidence is absent, refuse to explain    | NullEvidenceRefusal               |
-| **Cache-before-provider**        | Always check cache before calling provider  | Explainer orchestrator            |
-| **Log-before-return**            | Always log the interaction before returning | Explainer orchestrator            |
-| **Graceful degradation**         | Provider failure → error, not crash         | Explainer orchestrator            |
+| Read-only on CanonicalReport | Context builder never modifies the report   | Type system (readonly properties) |
+| No raw file content          | Context never includes file bytes           | ContextBuilder implementation     |
+| Every citation resolves      | Citation Verifier checks every citation     | CitationVerifier                  |
+| No unsupported claims        | Validation Agent filters unsupported claims | ValidationAgent                   |
+| Null-evidence refusal        | If evidence is absent, refuse to explain    | NullEvidenceRefusal               |
+| Cache-before-provider        | Always check cache before calling provider  | Explainer orchestrator            |
+| Log-before-return            | Always log the interaction before returning | Explainer orchestrator            |
+| Graceful degradation         | Provider failure → error, not crash         | Explainer orchestrator            |
 
-### 7.3 Token Flow
+### 7.3 Token flow
 
 ```
 CanonicalReport (full: ~500KB for 100 findings)
@@ -1480,17 +1480,17 @@ They will be tuned per model at initialization time via `ProviderCapabilities.ma
 | Artifact context           | 150       | 3%          | Medium                    | Trimmed after rule                        |
 | Risk context               | 300       | 6%          | Low                       | Trimmed after artifact                    |
 | Output format instructions | 200       | 4%          | Highest (always included) | Never trimmed                             |
-| **Total prompt**           | **3,650** | **73%**     | —                         | —                                         |
+| Total prompt           | 3,650 | 73%     | —                         | —                                         |
 | Reserved for output        | 1,350     | 27%         | —                         | —                                         |
-| **Total budget**           | **5,000** | **100%**    | —                         | —                                         |
+| Total budget           | 5,000 | 100%    | —                         | —                                         |
 
 ---
 
-## 8. Citation Model
+## 8. Citation model
 
-### 8.1 Citation Format
+### 8.1 Citation format
 
-VERIS uses **structured inline citations** with **numbered reference markers**. Each citation is a bracketed reference to a canonical VERIS object ID.
+VERIS uses **structured inline citations** with numbered reference markers. Each citation is a bracketed reference to a canonical VERIS object ID.
 
 **Format:** `[src:<sourceType>:<sourceId>]`
 
@@ -1533,7 +1533,7 @@ which has a severity of critical.
     CWE: CWE-798 | OWASP: A2:2021
 ```
 
-### 8.2 Citation Source Types
+### 8.2 Citation source types
 
 | Source Type      | ID Format        | Example                    | Verified Against       |
 | ---------------- | ---------------- | -------------------------- | ---------------------- |
@@ -1548,18 +1548,18 @@ which has a severity of critical.
 | `rule-prop`      | `{rule}:{prop}`  | `secrets/aws-key:severity` | Rule definition        |
 | `report-meta`    | `report:{field}` | `report:riskScore`         | Report.summary         |
 
-### 8.3 Citation Verification
+### 8.3 Citation verification
 
 The CitationVerifier runs after the LLM generates content but before the explanation is returned to the user.
 
 **Verification steps:**
 
-1. **Parse citations:** Extract all `[src:...]` markers from the generated text.
-2. **Resolve sources:** For each citation, look up the source object in the context.
-3. **Validate existence:** Does the source object exist? (id match)
-4. **Validate type match:** Does the source type match the object type?
-5. **Validate claim consistency:** Is the claim in the text consistent with the source object's data? (e.g., if citing severity "critical", does the object actually have critical severity?)
-6. **Score:** Each citation gets: `verified` (passed all checks), `warning` (minor inconsistency), or `failed` (object not found or major inconsistency).
+1. Parse citations: Extract all `[src:...]` markers from the generated text.
+2. Resolve sources: For each citation, look up the source object in the context.
+3. Validate existence: Does the source object exist? (id match)
+4. Validate type match: Does the source type match the object type?
+5. Validate claim consistency: Is the claim in the text consistent with the source object's data? (e.g., if citing severity "critical", does the object actually have critical severity?)
+6. Score: Each citation gets: `verified` (passed all checks), `warning` (minor inconsistency), or `failed` (object not found or major inconsistency).
 
 **Verification actions:**
 
@@ -1570,12 +1570,12 @@ The CitationVerifier runs after the LLM generates content but before the explana
 | Any failed      | Explanation is flagged. If `strictMode`: explanation is rejected and retried. If not strict: failed citations are removed from the citations section, a caveat is added. |
 | All failed      | Explanation is rejected. Audit log entry. Return `ExplainError` with code `CITATION_FAILURE`.                                                                            |
 
-### 8.4 Bidirectional Traceability
+### 8.4 Bidirectional traceability
 
 Every citation supports bidirectional navigation:
 
-- **Forward:** User sees a citation `[1]` in the explanation, clicks it → jumps to the citations section showing the source object.
-- **Backward:** User is viewing a Finding in the TUI, clicks "Explain" → AI generates explanation that traces back to that Finding.
+- Forward: User sees a citation `[1]` in the explanation, clicks it → jumps to the citations section showing the source object.
+- Backward: User is viewing a Finding in the TUI, clicks "Explain" → AI generates explanation that traces back to that Finding.
 
 This is implemented via:
 
@@ -1583,41 +1583,41 @@ This is implemented via:
 - The TUI's ability to navigate to any canonical object by its ID
 - The citations section that lists all source objects with clickable links
 
-### 8.5 Preventing Unsupported Statements — Defense in Depth
+### 8.5 Preventing unsupported statements: defense in depth
 
 | Layer                      | What It Prevents                 | How                                                                                                      |
 | -------------------------- | -------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| **1. System prompt**       | Fabrication of evidence          | Instructions: "Only cite evidence that exists in the provided context. Never invent evidence."           |
-| **2. Context design**      | Fabrication of attributes        | Include exact object IDs, severities, and confidence scores in context — LLM doesn't need to recall them |
-| **3. Output schema**       | Structural hallucination         | JSON mode forces structured output with citations as explicit fields                                     |
-| **4. CitationVerifier**    | Invalid references               | Programmatically checks every citation against the actual context objects                                |
-| **5. ValidationAgent**     | Semantically unsupported claims  | LLM-as-judge checks each claim against the cited source                                                  |
-| **6. NullEvidenceRefusal** | Fabrication when evidence absent | Detects and replaces fabricated content with refusal message                                             |
-| **7. OutputFilter**        | Off-topic content                | Strips content that doesn't match expected explanation format                                            |
-| **8. Audit logging**       | Accountability                   | Every interaction is logged for post-hoc review                                                          |
+| 1. System prompt       | Fabrication of evidence          | Instructions: "Only cite evidence that exists in the provided context. Never invent evidence."           |
+| 2. Context design      | Fabrication of attributes        | Include exact object IDs, severities, and confidence scores in context — LLM doesn't need to recall them |
+| 3. Output schema       | Structural hallucination         | JSON mode forces structured output with citations as explicit fields                                     |
+| 4. CitationVerifier    | Invalid references               | Programmatically checks every citation against the actual context objects                                |
+| 5. ValidationAgent     | Semantically unsupported claims  | LLM-as-judge checks each claim against the cited source                                                  |
+| 6. NullEvidenceRefusal | Fabrication when evidence absent | Detects and replaces fabricated content with refusal message                                             |
+| 7. OutputFilter        | Off-topic content                | Strips content that doesn't match expected explanation format                                            |
+| 8. Audit logging       | Accountability                   | Every interaction is logged for post-hoc review                                                          |
 
 ---
 
-## 9. Prompt Architecture
+## 9. Prompt architecture
 
-### 9.1 Prompt Template Structure
+### 9.1 Prompt template structure
 
 Prompt templates are **version-controlled text files** stored in `@veris/explain/prompts/templates/`. They are loaded at startup and rendered with context data.
 
 **Template engine:** [Handlebars](https://handlebarsjs.com/) v4.x. Handlebars was chosen over alternatives for these reasons:
 
-- **Zero dependencies on runtime evaluation** — templates are compiled to functions, not evaled (unlike `lodash.template`).
-- **Built-in iteration** — `{{#each}}` blocks for rendering evidence lists, chain steps, etc. No custom loop syntax needed.
-- **Partial support** — context templates can include shared partials (e.g., a standard evidence-row snippet reused across finding and chain templates).
-- **Helper extensibility** — custom Handlebars helpers can be registered for formatting (e.g., `{{severity-label}}`, `{{format-confidence}}`) without modifying template parsing.
-- **Mature and well-tested** — used in production by thousands of projects since 2013.
-- **Offline-friendly** — Handlebars is a pure JS library with no native dependencies. Bundle size is ~20KB gzipped.
+- Zero dependencies on runtime evaluation: templates are compiled to functions, not evaled (unlike `lodash.template`).
+- Built-in iteration: `{{#each}}` blocks for rendering evidence lists, chain steps, etc. No custom loop syntax needed.
+- Partial support: context templates can include shared partials (e.g., a standard evidence-row snippet reused across finding and chain templates).
+- Helper extensibility: custom Handlebars helpers can be registered for formatting (e.g., `{{severity-label}}`, `{{format-confidence}}`) without modifying template parsing.
+- Mature and well-tested: used in production by thousands of projects since 2013.
+- Offline-friendly: Handlebars is a pure JS library with no native dependencies. Bundle size is ~20KB gzipped.
 
 **Template format:** Handlebars `{{variable}}` substitution syntax, with `{{#each}}` for iteration and `{{#if}}` for conditionals. Variables are context paths like `{{finding.title}}`, `{{evidence.0.matchDetail}}`.
 
-**Context pre-processing:** Before rendering, the `PromptRenderer` converts `ExplainedContext` strongly-typed fields into a flat object that Handlebars can consume. This decouples Handlebars from the TypeScript type system — the renderer is responsible for field extraction, not the template.
+**Context pre-processing:** Before rendering, the `PromptRenderer` converts `ExplainedContext` strongly-typed fields into a flat object that Handlebars can consume. This decouples Handlebars from the TypeScript type system. The renderer is responsible for field extraction, not the template.
 
-#### 9.1.1 System Prompt Template — Finding Explanation (v1)
+#### 9.1.1 System Prompt Template: Finding Explanation (v1)
 
 ```
 # Role
@@ -1671,7 +1671,7 @@ reference an object from the provided context.
 }
 ```
 
-#### 9.1.2 Context Template — Finding Context (v1)
+#### 9.1.2 Context Template: Finding Context (v1)
 
 ```
 ## Finding
@@ -1711,7 +1711,7 @@ reference an object from the provided context.
 - Overall risk score: {{risk.overallScore}}/10
 ```
 
-### 9.2 Template Inventory (V1)
+### 9.2 Template inventory (V1)
 
 | Template ID                 | Type    | Purpose                                             | Variables                                         | Version |
 | --------------------------- | ------- | --------------------------------------------------- | ------------------------------------------------- | ------- |
@@ -1727,15 +1727,15 @@ reference an object from the provided context.
 | `technical-format-v1`       | Format  | Output formatting for technical mode                | Nothing (structural)                              | 1.0.0   |
 | `expert-format-v1`          | Format  | Output formatting for expert mode                   | Nothing (structural)                              | 1.0.0   |
 
-### 9.3 Template Versioning
+### 9.3 Template versioning
 
 **Version format:** `MAJOR.MINOR.PATCH` (semver)
 
 | Component | Change That Increments It                                                                 |
 | --------- | ----------------------------------------------------------------------------------------- |
-| **Major** | Breaking change to output format. Changing citation format. Removing a required variable. |
-| **Minor** | Adding new optional variables. Adding new instructions. Improving existing instructions.  |
-| **Patch** | Fixing typos. Clarifying ambiguous instructions. Adding examples.                         |
+| Major | Breaking change to output format. Changing citation format. Removing a required variable. |
+| Minor | Adding new optional variables. Adding new instructions. Improving existing instructions.  |
+| Patch | Fixing typos. Clarifying ambiguous instructions. Adding examples.                         |
 
 **Version storage:**
 
@@ -1757,9 +1757,9 @@ changed: 2026-07-02
 ...
 ```
 
-### 9.4 How Many Prompt Templates?
+### 9.4 How many prompt templates?
 
-**V1 — 11 templates (4 system + 4 context + 3 format):**
+**V1: 11 templates (4 system + 4 context + 3 format):**
 
 | Category          | Count | Templates                                                              |
 | ----------------- | ----- | ---------------------------------------------------------------------- |
@@ -1769,7 +1769,7 @@ changed: 2026-07-02
 
 **Minimum viable V1: 7 templates** (finding + chain system prompts, finding + chain context templates, 3 format templates). Risk and report-summary can be V1.1.
 
-### 9.5 Localization (Future)
+### 9.5 Localization (future)
 
 Prompt templates support localization via locale-specific template directories:
 
@@ -1793,9 +1793,9 @@ The `PromptLoader` selects templates based on the configured locale, falling bac
 
 ---
 
-## 10. Provider Abstraction
+## 10. Provider abstraction
 
-### 10.1 Adapter Architecture
+### 10.1 Adapter architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -1825,7 +1825,7 @@ The `PromptLoader` selects templates based on the configured locale, falling bac
     └─────────────┘              └─────────────────┘
 ```
 
-### 10.2 Unified Request Format
+### 10.2 Unified request format
 
 All adapters convert the internal request format to the provider's native format:
 
@@ -1848,7 +1848,7 @@ interface InternalMessage {
 // Example: Ollama adapter maps to Ollama chat API format
 ```
 
-### 10.3 Provider Configuration
+### 10.3 Provider configuration
 
 User configures providers in `~/.config/veris/config.json`:
 
@@ -1895,7 +1895,7 @@ User configures providers in `~/.config/veris/config.json`:
 }
 ```
 
-### 10.4 Provider Fallback Logic
+### 10.4 Provider fallback logic
 
 ```
 Request comes in
@@ -1926,7 +1926,7 @@ Health check on active provider
                          Provider 'ollama' is not responding."
 ```
 
-### 10.5 Future Provider Support
+### 10.5 Future provider support
 
 Adding a new provider requires:
 
@@ -1940,9 +1940,9 @@ This ensures provider abstraction is truly decoupled from business logic.
 
 ---
 
-## 11. Caching Strategy
+## 11. Caching strategy
 
-### 11.1 Cache Key Components
+### 11.1 Cache key components
 
 ```
 cacheKey = SHA-256(concatenation of):
@@ -1961,19 +1961,19 @@ finding-explain-v1:ollama:llama3.1:8b:a1b2c3d4...:0.1.0:technical
 → SHA-256 → "7e8f9a0b1c2d3e4f..."
 ```
 
-### 11.2 Cache Invalidation Rules
+### 11.2 Cache invalidation rules
 
 | Event                       | Invalidation Scope                            | Action                                             |
 | --------------------------- | --------------------------------------------- | -------------------------------------------------- |
-| **Prompt template updated** | All entries with old `prompt_version`         | Invalidated on next request with new version       |
-| **Model changed**           | All entries with old `model_id:model_version` | Invalidated on next request                        |
-| **Report content changed**  | All entries for that report                   | Manual invalidation via `clearCacheForReport()`    |
-| **Engine version bumped**   | All entries with old `engine_version`         | Invalidated on next request                        |
-| **Manual invalidation**     | As specified                                  | User-triggered                                     |
-| **Cache full**              | LRU entries                                   | Evicted by LRU policy                              |
-| **TTL expired**             | Individual entries                            | Expired on read (configurable TTL, default 7 days) |
+| Prompt template updated | All entries with old `prompt_version`         | Invalidated on next request with new version       |
+| Model changed           | All entries with old `model_id:model_version` | Invalidated on next request                        |
+| Report content changed  | All entries for that report                   | Manual invalidation via `clearCacheForReport()`    |
+| Engine version bumped   | All entries with old `engine_version`         | Invalidated on next request                        |
+| Manual invalidation     | As specified                                  | User-triggered                                     |
+| Cache full              | LRU entries                                   | Evicted by LRU policy                              |
+| TTL expired             | Individual entries                            | Expired on read (configurable TTL, default 7 days) |
 
-### 11.3 Cache Storage
+### 11.3 Cache storage
 
 **Primary:** SQLite (via `better-sqlite3`)
 
@@ -2031,18 +2031,18 @@ interface InMemoryCacheEntry {
 }
 ```
 
-### 11.4 Cache Behavior
+### 11.4 Cache behavior
 
 | Scenario                                | Behavior                                                     |
 | --------------------------------------- | ------------------------------------------------------------ |
-| **Cache hit, not expired**              | Return cached explanation immediately                        |
-| **Cache hit, expired**                  | Delete entry, regenerate, store new entry                    |
-| **Cache miss**                          | Generate explanation, store in cache                         |
-| **Cache full**                          | LRU eviction of oldest entries                               |
-| **Provider failure, cache hit exists**  | Return cached explanation with "This may be outdated" caveat |
-| **Explanation refused (null-evidence)** | Cache the refusal (don't re-query for same input)            |
+| Cache hit, not expired              | Return cached explanation immediately                        |
+| Cache hit, expired                  | Delete entry, regenerate, store new entry                    |
+| Cache miss                          | Generate explanation, store in cache                         |
+| Cache full                          | LRU eviction of oldest entries                               |
+| Provider failure, cache hit exists  | Return cached explanation with "This may be outdated" caveat |
+| Explanation refused (null-evidence) | Cache the refusal (don't re-query for same input)            |
 
-### 11.5 Cache Statistics
+### 11.5 Cache statistics
 
 ```typescript
 interface CacheStats {
@@ -2061,7 +2061,7 @@ interface CacheStats {
 
 ---
 
-## 12. Testing Strategy
+## 12. Testing strategy
 
 ### 12.1 Testing Challenges
 
@@ -2069,14 +2069,14 @@ Testing an AI explanation system is fundamentally different from testing determi
 
 | Challenge                     | Mitigation                                                                      |
 | ----------------------------- | ------------------------------------------------------------------------------- |
-| **Non-deterministic outputs** | Use LLM-as-judge for semantic evaluation, not string matching                   |
-| **Expensive LLM calls**       | Mock providers for unit tests; golden snapshots for integration                 |
-| **Hard to define "correct"**  | Define correctness criteria: citation validity, evidence coverage, faithfulness |
-| **Prompt regressions**        | Golden test suite with known inputs and expected semantic properties            |
+| Non-deterministic outputs | Use LLM-as-judge for semantic evaluation, not string matching                   |
+| Expensive LLM calls       | Mock providers for unit tests; golden snapshots for integration                 |
+| Hard to define "correct"  | Define correctness criteria: citation validity, evidence coverage, faithfulness |
+| Prompt regressions        | Golden test suite with known inputs and expected semantic properties            |
 
-### 12.2 Test Categories
+### 12.2 Test categories
 
-#### 12.2.1 Unit Tests
+#### 12.2.1 Unit tests
 
 **What they test:** Individual modules in isolation.
 
@@ -2093,7 +2093,7 @@ Testing an AI explanation system is fundamentally different from testing determi
 | TokenBudget         | Allocates budget correctly             | Assert sum of allocations ≤ total budget        |
 | InputFilter         | Detects prompt injection               | Returns `blocked: true`                         |
 
-#### 12.2.2 Golden Tests
+#### 12.2.2 Golden tests
 
 **What they test:** End-to-end explanation generation with known inputs and expected outputs.
 
@@ -2119,7 +2119,7 @@ pnpm golden:update           # Update golden snapshots (after intentional change
 pnpm golden:compare          # Compare against baseline version
 ```
 
-#### 12.2.3 Citation Validation Tests
+#### 12.2.3 Citation validation tests
 
 **What they test:** The citation pipeline's ability to detect and handle citation issues.
 
@@ -2133,7 +2133,7 @@ pnpm golden:compare          # Compare against baseline version
 | Citation to non-existent object | LLM output with fabricated evidence ID | Citation marked as failed                     |
 | No citations provided           | LLM output without citations           | Explanation flagged, retry triggered          |
 
-#### 12.2.4 Faithfulness / Hallucination Tests
+#### 12.2.4 Faithfulness / hallucination tests
 
 **What they test:** The AI's ability to stay within the bounds of the provided evidence.
 
@@ -2149,13 +2149,13 @@ pnpm golden:compare          # Compare against baseline version
 | Hallucinated rule name | References a rule not in context             | `unsupported: true`                       |
 | Null-evidence refusal  | Says "I cannot explain" when evidence absent | `refused: true`                           |
 
-#### 12.2.5 Prompt Regression Tests
+#### 12.2.5 Prompt regression tests
 
 **What they test:** That prompt template changes don't degrade explanation quality.
 
 **Methodology:**
 
-1. Maintain a set of **golden prompts** — known inputs with expected output patterns
+1. Maintain a set of golden prompts, known inputs with expected output patterns
 2. Run the same inputs against old and new prompt versions
 3. Compare outputs on: citation count, evidence coverage, refusal rate, disclaimer presence
 4. Any regression triggers a prompt review
@@ -2170,7 +2170,7 @@ pnpm golden:compare          # Compare against baseline version
 | Disclaimer presence             | 100%                      | % of explanations with disclaimer               |
 | Hallucination rate              | 0%                        | % of claims that are unsupported                |
 
-#### 12.2.6 Provider Failure Tests
+#### 12.2.6 Provider failure tests
 
 **What they test:** Graceful degradation when providers are unavailable.
 
@@ -2183,7 +2183,7 @@ pnpm golden:compare          # Compare against baseline version
 | Provider returns refusal  | `ExplainRefused` returned                 |
 | Cache hit with stale data | Return with "may be outdated" caveat      |
 
-#### 12.2.7 Snapshot Tests for Explanation Output
+#### 12.2.7 Snapshot tests for explanation output
 
 **What they test:** Structural integrity of explanation output across changes.
 
@@ -2219,7 +2219,7 @@ it('generates explanation with correct structure (technical mode)', async () => 
 });
 ```
 
-#### 12.2.8 Determinism Tests
+#### 12.2.8 Determinism tests
 
 Even though LLM outputs are non-deterministic, the surrounding system should be:
 
@@ -2252,51 +2252,51 @@ it('prompt rendering is deterministic', () => {
 
 ---
 
-## 13. Security Model
+## 13. Security model
 
-### 13.1 Threat Model
+### 13.1 Threat model
 
 | Threat                                                                           | Impact                                                                                | Mitigation                                                                           |
 | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| **Prompt injection** — user or finding content tricks LLM                        | LLM bypasses system instructions                                                      | Input guardrails filter injection patterns; system prompt is immutable               |
-| **Data exfiltration** — LLM sends report data to unauthorized endpoint           | Report data leak                                                                      | Provider configuration controls endpoint; local providers don't send data externally |
-| **Citation fabrication** — LLM invents evidence                                  | User sees false claims                                                                | CitationVerifier + ValidationAgent block fabricated citations                        |
-| **Provider compromise** — malicious provider returns harmful content             | User sees manipulated explanations                                                    | Output guardrails + ValidationAgent detect and block harmful content                 |
-| **Cache poisoning** — attacker modifies cache                                    | Stale or incorrect explanations                                                       | Cache integrity via content-addressed keys; SQLite file permissions                  |
-| **Audit log tampering** — attacker modifies audit trail                          | Loss of accountability                                                                | Append-only log file; log rotation with integrity checks                             |
-| **Denial of service** — repeated explanations exhaust resources                  | Cache limits prevent DoS via LRU eviction and max size                                |
-| **Sensitive data in prompts** — context contains secrets masked in code snippets | Snippets are truncated (50 chars before/after match); never include full file content |
+| Prompt injection, user or finding content tricks LLM                        | LLM bypasses system instructions                                                      | Input guardrails filter injection patterns; system prompt is immutable               |
+| Data exfiltration — LLM sends report data to unauthorized endpoint           | Report data leak                                                                      | Provider configuration controls endpoint; local providers don't send data externally |
+| Citation fabrication — LLM invents evidence                                  | User sees false claims                                                                | CitationVerifier + ValidationAgent block fabricated citations                        |
+| Provider compromise, malicious provider returns harmful content             | User sees manipulated explanations                                                    | Output guardrails + ValidationAgent detect and block harmful content                 |
+| Cache poisoning, attacker modifies cache                                    | Stale or incorrect explanations                                                       | Cache integrity via content-addressed keys; SQLite file permissions                  |
+| Audit log tampering, attacker modifies audit trail                          | Loss of accountability                                                                | Append-only log file; log rotation with integrity checks                             |
+| Denial of service, repeated explanations exhaust resources                  | Cache limits prevent DoS via LRU eviction and max size                                |
+| Sensitive data in prompts, context contains secrets masked in code snippets | Snippets are truncated (50 chars before/after match); never include full file content |
 
-### 13.2 Security Controls
+### 13.2 Security controls
 
 | Control                      | Implementation                                                                                    | Enforced At                                       |
 | ---------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| **Input sanitization**       | Strip ANSI escape codes, control characters from user input                                       | InputFilter                                       |
-| **Prompt immutability**      | System prompts are loaded from read-only files, never modified at runtime                         | PromptLoader                                      |
-| **Output validation**        | Every output is validated against schema before delivery                                          | OutputFilter                                      |
-| **Citation boundaries**      | Citations can only reference objects in the provided context                                      | CitationVerifier                                  |
-| **Provider sandboxing**      | Provider adapters run in the same process but with timeout limits                                 | Provider timeout                                  |
-| **Cache integrity**          | Cache keys are content-addressed (SHA-256); tampering produces cache miss                         | CacheKeyGenerator                                 |
-| **Audit integrity**          | Audit log is append-only; log rotation preserves history                                          | AuditLog                                          |
-| **Configuration validation** | All provider config is validated against schema before use                                        | Config loader                                     |
-| **Sensitive data masking**   | API keys in config are masked in logs                                                             | Logger                                            |
-| **Retry budget**             | Maximum N consecutive retries before circuit breaker opens (default: 3 per finding, configurable) | Explainer — circuit breaker state is per-provider |
-| **Audit file permissions**   | Audit log is written with `0600` permissions (owner read/write only)                              | AuditLog — checked at file creation               |
-| **No-log mode**              | Optional `--no-audit` flag disables audit logging for sensitive investigations                    | CLI flag, checked before any log write            |
+| Input sanitization       | Strip ANSI escape codes, control characters from user input                                       | InputFilter                                       |
+| Prompt immutability      | System prompts are loaded from read-only files, never modified at runtime                         | PromptLoader                                      |
+| Output validation        | Every output is validated against schema before delivery                                          | OutputFilter                                      |
+| Citation boundaries      | Citations can only reference objects in the provided context                                      | CitationVerifier                                  |
+| Provider sandboxing      | Provider adapters run in the same process but with timeout limits                                 | Provider timeout                                  |
+| Cache integrity          | Cache keys are content-addressed (SHA-256); tampering produces cache miss                         | CacheKeyGenerator                                 |
+| Audit integrity          | Audit log is append-only; log rotation preserves history                                          | AuditLog                                          |
+| Configuration validation | All provider config is validated against schema before use                                        | Config loader                                     |
+| Sensitive data masking   | API keys in config are masked in logs                                                             | Logger                                            |
+| Retry budget             | Maximum N consecutive retries before circuit breaker opens (default: 3 per finding, configurable) | Explainer, circuit breaker state is per-provider |
+| Audit file permissions   | Audit log is written with `0600` permissions (owner read/write only)                              | AuditLog, checked at file creation               |
+| No-log mode              | Optional `--no-audit` flag disables audit logging for sensitive investigations                    | CLI flag, checked before any log write            |
 
-### 13.3 Data Classification
+### 13.3 Data classification
 
 | Data Type                   | Example             | Classification                      | Handling                                           |
 | --------------------------- | ------------------- | ----------------------------------- | -------------------------------------------------- |
 | Canonical object IDs        | `fin_abc123`        | Public (within session)             | Sent to provider                                   |
 | Finding titles/descriptions | "Hardcoded AWS Key" | Public (intended to be shown)       | Sent to provider                                   |
 | File paths                  | `src/config.ts`     | Public (within report)              | Sent to provider                                   |
-| Code snippets               | `key = "AKIA..."`   | **Sensitive** — may contain secrets | Sent to provider (but truncated to 50 chars)       |
-| Raw file content            | Full file bytes     | **Never included**                  | Excluded by ContextBuilder                         |
-| Provider API keys           | `sk-...`            | **Secret**                          | Stored in config, never sent to provider in prompt |
+| Code snippets               | `key = "AKIA..."`   | Sensitive, may contain secrets | Sent to provider (but truncated to 50 chars)       |
+| Raw file content            | Full file bytes     | Never included                  | Excluded by ContextBuilder                         |
+| Provider API keys           | `sk-...`            | Secret                          | Stored in config, never sent to provider in prompt |
 | Cache                       | Cached explanations | Internal                            | Protected by file permissions                      |
 
-### 13.4 Offline-First Security
+### 13.4 Offline-First security
 
 | Scenario                    | Security Property                                |
 | --------------------------- | ------------------------------------------------ |
@@ -2311,33 +2311,33 @@ it('prompt rendering is deterministic', () => {
 
 ---
 
-## 14. Future Extensibility
+## 14. Future extensibility
 
-### 14.1 Extension Points
+### 14.1 Extension points
 
 | Extension Point              | What It Enables                                            | When     |
 | ---------------------------- | ---------------------------------------------------------- | -------- |
-| **New provider adapters**    | Support any LLM provider that follows the adapter contract | Any time |
-| **New prompt templates**     | Custom explanation styles, domain-specific explanations    | Any time |
-| **Custom context builders**  | Include additional context for specific finding types      | V1.1+    |
-| **Custom validation agents** | Domain-specific faithfulness checks                        | V1.1+    |
-| **Custom output formatters** | New explanation modes beyond simple/technical/expert       | V1.1+    |
-| **Plugin-based extensions**  | Third-party explanation plugins via `@veris/plugin-sdk`    | V2+      |
+| New provider adapters    | Support any LLM provider that follows the adapter contract | Any time |
+| New prompt templates     | Custom explanation styles, domain-specific explanations    | Any time |
+| Custom context builders  | Include additional context for specific finding types      | V1.1+    |
+| Custom validation agents | Domain-specific faithfulness checks                        | V1.1+    |
+| Custom output formatters | New explanation modes beyond simple/technical/expert       | V1.1+    |
+| Plugin-based extensions  | Third-party explanation plugins via `@veris/plugin-sdk`    | V2+      |
 
-### 14.2 V2+ Enhancements
+### 14.2 V2+ enhancements
 
 | Enhancement                   | Description                                     | Impact                                 |
 | ----------------------------- | ----------------------------------------------- | -------------------------------------- |
-| **Multi-finding explanation** | Explain a group of related findings together    | ContextBuilder enhancement             |
-| **Cross-session comparison**  | Explain how findings changed between scans      | New context type + new prompt template |
-| **Interactive debugging**     | LLM can ask the user for clarification          | New interaction pattern                |
-| **Custom personas**           | User-defined explanation styles                 | New format templates                   |
-| **Multi-model voting**        | Consensus-based explanations from multiple LLMs | New provider orchestration             |
-| **Explanation history**       | Show how explanations evolved over time         | New storage + TUI component            |
-| **Plugin-based providers**    | Third-party provider plugins via plugin SDK     | Plugin host integration                |
-| **Feedback learning**         | User ratings improve prompt selection           | New feedback loop component            |
+| Multi-finding explanation | Explain a group of related findings together    | ContextBuilder enhancement             |
+| Cross-session comparison  | Explain how findings changed between scans      | New context type + new prompt template |
+| Interactive debugging     | LLM can ask the user for clarification          | New interaction pattern                |
+| Custom personas           | User-defined explanation styles                 | New format templates                   |
+| Multi-model voting        | Consensus-based explanations from multiple LLMs | New provider orchestration             |
+| Explanation history       | Show how explanations evolved over time         | New storage + TUI component            |
+| Plugin-based providers    | Third-party provider plugins via plugin SDK     | Plugin host integration                |
+| Feedback learning         | User ratings improve prompt selection           | New feedback loop component            |
 
-### 14.3 What Will Never Be Added
+### 14.3 What will never be added
 
 | Feature                            | Rationale                                                         |
 | ---------------------------------- | ----------------------------------------------------------------- |
@@ -2350,34 +2350,34 @@ it('prompt rendering is deterministic', () => {
 
 ---
 
-## 15. Implementation Roadmap
+## 15. Implementation roadmap
 
-### 15.1 Milestone Overview
+### 15.1 Milestone overview
 
 | Milestone                    | Duration     | Focus                                                       | Dependencies                   |
 | ---------------------------- | ------------ | ----------------------------------------------------------- | ------------------------------ |
-| **M1: Foundation**           | 2 weeks      | Types, interfaces, configuration                            | `@veris/core`, `@veris/config` |
-| **M2: Provider Abstraction** | 2 weeks      | Provider interface, adapters, registry                      | M1                             |
-| **M3: Context Building**     | 2 weeks      | Context builders, scope manager, token budget               | M1                             |
-| **M4: Prompt System**        | 2 weeks      | Prompt templates, registry, renderer                        | M1                             |
-| **M5: Core Engine**          | 2 weeks      | Explainer orchestrator, integration of M2-M4                | M2, M3, M4                     |
-| **M6: Output Pipeline**      | 2 weeks      | CitationVerifier, ValidationAgent, guardrails               | M5                             |
-| **M7: Caching**              | 1 week       | Cache key generation, persistent cache                      | M5                             |
-| **M8: Modes & Formatting**   | 1 week       | Simple, Technical, Expert modes                             | M6                             |
-| **M9: CLI Integration**      | 2 weeks      | `veris explain` command, TUI integration                    | M5, M6, M8                     |
-| **M10: Testing Suite**       | 2 weeks      | Golden tests, faithfulness tests, regression tests          | M5, M6                         |
-| **M11: Documentation**       | 1 week       | User guide, configuration reference, prompt authoring guide | M9                             |
-| **Total**                    | **17 weeks** |                                                             |                                |
+| M1: Foundation           | 2 weeks      | Types, interfaces, configuration                            | `@veris/core`, `@veris/config` |
+| M2: Provider Abstraction | 2 weeks      | Provider interface, adapters, registry                      | M1                             |
+| M3: Context Building     | 2 weeks      | Context builders, scope manager, token budget               | M1                             |
+| M4: Prompt System        | 2 weeks      | Prompt templates, registry, renderer                        | M1                             |
+| M5: Core Engine          | 2 weeks      | Explainer orchestrator, integration of M2-M4                | M2, M3, M4                     |
+| M6: Output Pipeline      | 2 weeks      | CitationVerifier, ValidationAgent, guardrails               | M5                             |
+| M7: Caching              | 1 week       | Cache key generation, persistent cache                      | M5                             |
+| M8: Modes & Formatting   | 1 week       | Simple, Technical, Expert modes                             | M6                             |
+| M9: CLI Integration      | 2 weeks      | `veris explain` command, TUI integration                    | M5, M6, M8                     |
+| M10: Testing Suite       | 2 weeks      | Golden tests, faithfulness tests, regression tests          | M5, M6                         |
+| M11: Documentation       | 1 week       | User guide, configuration reference, prompt authoring guide | M9                             |
+| Total                    | 17 weeks |                                                             |                                |
 
-### 15.2 Milestone Details
+### 15.2 Milestone details
 
 #### M1: Foundation (2 weeks)
 
 **Deliverables:**
 
-- `@veris/explain/src/types/` — All types (Explanation, Citation, ExplainResult, etc.)
-- `@veris/explain/src/engine/explainer.ts` — Explainer interface
-- `@veris/explain/src/engine/scope-manager.ts` — ScopeManager interface
+- `@veris/explain/src/types/`: All types (Explanation, Citation, ExplainResult, etc.)
+- `@veris/explain/src/engine/explainer.ts`: Explainer interface
+- `@veris/explain/src/engine/scope-manager.ts`: ScopeManager interface
 - Configuration schema for explain settings
 - Unit tests for all types and interfaces
 
@@ -2389,7 +2389,7 @@ it('prompt rendering is deterministic', () => {
 - Explainer interface is defined and documented
 - No circular dependencies
 
-**Risks:** Low — types and interfaces only.
+**Risks:** Low, types and interfaces only.
 
 ---
 
@@ -2399,10 +2399,10 @@ it('prompt rendering is deterministic', () => {
 
 - `LLMProvider` interface with `generate()`, `generateStream()`, `healthCheck()`, `getCapabilities()`
 - `ProviderRegistry` with routing, fallback, health check aggregation
-- **OpenAI adapter** — works with OpenAI API and compatible endpoints
-- **Ollama adapter** — works with local Ollama instance
-- **Anthropic adapter** — works with Anthropic API
-- **Mock adapter** — for testing (returns configurable responses)
+- OpenAI adapter: works with OpenAI API and compatible endpoints
+- Ollama adapter: works with local Ollama instance
+- Anthropic adapter: works with Anthropic API
+- Mock adapter: for testing (returns configurable responses)
 - Unit tests for all adapters and registry
 
 **Acceptance criteria:**
@@ -2414,7 +2414,7 @@ it('prompt rendering is deterministic', () => {
 - Health checks correctly identify healthy/unhealthy providers
 - Provider capabilities are correctly reported
 
-**Risks:** Medium — API compatibility issues may require iteration. Ollama API compatibility with OpenAI format needs testing.
+**Risks:** Medium, API compatibility issues may require iteration. Ollama API compatibility with OpenAI format needs testing.
 
 ---
 
@@ -2422,13 +2422,13 @@ it('prompt rendering is deterministic', () => {
 
 **Deliverables:**
 
-- `ContextBuilder` — orchestrates context construction from CanonicalReport
-- `FindingContext` — builds context for a single Finding
-- `ChainContext` — builds context for a BehaviorChain
-- `RiskContext` — builds context for RiskProfile
-- `ReportContext` — builds context for full report summary
-- `ScopeManager` implementation — determines scope based on subject type
-- `TokenBudget` implementation — allocates token budget, prioritizes components
+- `ContextBuilder`: orchestrates context construction from CanonicalReport
+- `FindingContext`: builds context for a single Finding
+- `ChainContext`: builds context for a BehaviorChain
+- `RiskContext`: builds context for RiskProfile
+- `ReportContext`: builds context for full report summary
+- `ScopeManager` implementation: determines scope based on subject type
+- `TokenBudget` implementation: allocates token budget, prioritizes components
 - Unit tests with frozen report fixtures
 
 **Acceptance criteria:**
@@ -2441,7 +2441,7 @@ it('prompt rendering is deterministic', () => {
 - Context is deterministic (same report → same context)
 - All context objects are frozen (readonly)
 
-**Risks:** Low — well-defined transformation.
+**Risks:** Low, well-defined transformation.
 
 ---
 
@@ -2449,10 +2449,10 @@ it('prompt rendering is deterministic', () => {
 
 **Deliverables:**
 
-- `PromptRegistry` — load, version, and serve prompt templates
-- `PromptRenderer` — fill templates with context data
-- `PromptLoader` — load templates from disk and package assets
-- **7 V1 templates:** finding-explain-system-v1, finding-context-v1, chain-explain-system-v1, chain-context-v1, simple-format-v1, technical-format-v1, expert-format-v1
+- `PromptRegistry`: load, version, and serve prompt templates
+- `PromptRenderer`: fill templates with context data
+- `PromptLoader`: load templates from disk and package assets
+- 7 V1 templates: finding-explain-system-v1, finding-context-v1, chain-explain-system-v1, chain-context-v1, simple-format-v1, technical-format-v1, expert-format-v1
 - Template validation (syntax checking, variable resolution)
 - Unit tests for template loading and rendering
 
@@ -2465,7 +2465,7 @@ it('prompt rendering is deterministic', () => {
 - Rendering is deterministic (same context + template → same output)
 - Renderer correctly reports expected citation anchors
 
-**Risks:** Medium — prompt quality requires iteration. Initial templates will be refined through testing.
+**Risks:** Medium, prompt quality requires iteration. Initial templates will be refined through testing.
 
 ---
 
@@ -2473,7 +2473,7 @@ it('prompt rendering is deterministic', () => {
 
 **Deliverables:**
 
-- `Explainer` implementation — orchestrates the full pipeline
+- `Explainer` implementation: orchestrates the full pipeline
 - Integration of ScopeManager, ContextBuilder, PromptRegistry, ProviderRegistry
 - Error handling for all failure modes
 - Graceful degradation when provider is unavailable
@@ -2488,7 +2488,7 @@ it('prompt rendering is deterministic', () => {
 - Audit log records every interaction
 - All 3 explanation modes produce structured output
 
-**Risks:** Medium — integration complexity. Each module works independently; integration may reveal edge cases.
+**Risks:** Medium, integration complexity. Each module works independently; integration may reveal edge cases.
 
 ---
 
@@ -2496,12 +2496,12 @@ it('prompt rendering is deterministic', () => {
 
 **Deliverables:**
 
-- `CitationVerifier` — parse and verify all citations
-- `ValidationAgent` — faithfulness scoring using LLM-as-judge
-- `NullEvidenceRefusal` — detect and handle absent evidence
-- `InputFilter` — guardrails before LLM (prompt injection detection)
-- `OutputFilter` — guardrails after LLM (schema conformance, length limits)
-- `Formatter` — format output at different detail levels
+- `CitationVerifier`: parse and verify all citations
+- `ValidationAgent`: faithfulness scoring using LLM-as-judge
+- `NullEvidenceRefusal`: detect and handle absent evidence
+- `InputFilter`: guardrails before LLM (prompt injection detection)
+- `OutputFilter`: guardrails after LLM (schema conformance, length limits)
+- `Formatter`: format output at different detail levels
 - Integration with Explainer
 
 **Acceptance criteria:**
@@ -2514,7 +2514,7 @@ it('prompt rendering is deterministic', () => {
 - Formatter produces correct Markdown for all 3 modes
 - All verification failures are correctly logged
 
-**Risks:** High — validation agent accuracy is critical. LLM-as-judge may have false positives/negatives.
+**Risks:** High, validation agent accuracy is critical. LLM-as-judge may have false positives/negatives.
 
 ---
 
@@ -2522,8 +2522,8 @@ it('prompt rendering is deterministic', () => {
 
 **Deliverables:**
 
-- `CacheKeyGenerator` — deterministic cache key generation
-- `PersistentCache` — SQLite-backed cache with LRU eviction
+- `CacheKeyGenerator`: deterministic cache key generation
+- `PersistentCache`: SQLite-backed cache with LRU eviction
 - In-memory fallback cache (when SQLite unavailable)
 - Cache statistics
 - Integration with Explainer
@@ -2537,7 +2537,7 @@ it('prompt rendering is deterministic', () => {
 - LRU eviction respects max cache size
 - Cache statistics are accurate
 
-**Risks:** Low — well-understood pattern.
+**Risks:** Low, well-understood pattern.
 
 ---
 
@@ -2545,10 +2545,10 @@ it('prompt rendering is deterministic', () => {
 
 **Deliverables:**
 
-- `Simple` mode — one paragraph, one citation per claim
-- `Technical` mode — multiple paragraphs, all citations
-- `Expert` mode — full traceability chain
-- ~~`reExplain()` — re-explain using a different mode (reuses cache if available)~~ [REMOVED from V1]
+- `Simple` mode: one paragraph, one citation per claim
+- `Technical` mode: multiple paragraphs, all citations
+- `Expert` mode: full traceability chain
+- ~~`reExplain()`: re-explain using a different mode (reuses cache if available)~~ [REMOVED from V1]
 - Integration with Explainer
 
 **Acceptance criteria:**
@@ -2559,7 +2559,7 @@ it('prompt rendering is deterministic', () => {
 - ~~`reExplain()` correctly switches modes without re-querying the LLM~~ [REMOVED from V1]
 - Each mode has a distinct prompt format and output structure
 
-**Risks:** Low — formatting is deterministic.
+**Risks:** Low, formatting is deterministic.
 
 ---
 
@@ -2588,7 +2588,7 @@ it('prompt rendering is deterministic', () => {
 - TUI gracefully handles unavailable provider
 - CLI commands respect `--json` flag (output as JSON)
 
-**Risks:** Medium — TUI integration requires changes to `@veris/renderers` and `@veris/cli`.
+**Risks:** Medium, TUI integration requires changes to `@veris/renderers` and `@veris/cli`.
 
 ---
 
@@ -2612,7 +2612,7 @@ it('prompt rendering is deterministic', () => {
 - Provider failure tests verify all failure modes
 - Performance benchmarks meet targets
 
-**Risks:** Medium — golden test maintenance requires discipline to update on intentional changes.
+**Risks:** Medium, golden test maintenance requires discipline to update on intentional changes.
 
 ---
 
@@ -2635,19 +2635,19 @@ it('prompt rendering is deterministic', () => {
 
 ---
 
-### 15.3 Risk Register
+### 15.3 Risk register
 
 | Risk                                                 | Probability | Impact                                     | Mitigation                                                                    |
 | ---------------------------------------------------- | ----------- | ------------------------------------------ | ----------------------------------------------------------------------------- |
-| **CitationVerifier false positives/negatives**       | Medium      | High — undermines trust in AI explanations | Extensive test suite; allow users to review citations                         |
-| **ValidationAgent accuracy insufficient**            | Medium      | High — unsupported claims reach users      | Multi-layer defense (6 layers); never rely on a single layer                  |
-| **Prompt quality poor in initial version**           | High        | Medium — explanations may not be useful    | Iterative refinement based on user feedback; versioned prompts allow rollback |
-| **Provider API compatibility issues**                | Medium      | Medium — specific provider may not work    | Abstraction layer; clear error messages; provider-agnostic                    |
-| **Cache invalidation too aggressive or too lenient** | Low         | Low                                        | Configurable TTL; manual invalidation available                               |
-| **Users don't configure any provider**               | High        | Low — explanations gracefully unavailable  | Default: no provider; clear documentation on setup                            |
-| **LLM output too verbose or too terse**              | Low         | Medium                                     | Token budget enforces length; mode selection lets user choose                 |
+| CitationVerifier false positives/negatives       | Medium      | High, undermines trust in AI explanations | Extensive test suite; allow users to review citations                         |
+| ValidationAgent accuracy insufficient            | Medium      | High, unsupported claims reach users      | Multi-layer defense (6 layers); never rely on a single layer                  |
+| Prompt quality poor in initial version           | High        | Medium, explanations may not be useful    | Iterative refinement based on user feedback; versioned prompts allow rollback |
+| Provider API compatibility issues                | Medium      | Medium, specific provider may not work    | Abstraction layer; clear error messages; provider-agnostic                    |
+| Cache invalidation too aggressive or too lenient | Low         | Low                                        | Configurable TTL; manual invalidation available                               |
+| Users don't configure any provider               | High        | Low, explanations gracefully unavailable  | Default: no provider; clear documentation on setup                            |
+| LLM output too verbose or too terse              | Low         | Medium                                     | Token budget enforces length; mode selection lets user choose                 |
 
-### 15.4 Acceptance Criteria for V1 Release
+### 15.4 Acceptance criteria for V1 release
 
 | Criteria                                                      | Verification                    |
 | ------------------------------------------------------------- | ------------------------------- |
@@ -2666,35 +2666,35 @@ it('prompt rendering is deterministic', () => {
 
 ## Appendices
 
-### A. Comparison with Researched Systems
+### A. comparison with researched systems
 
 | System                       | AI in Analysis?        | Citation System                 | Offline?        | Provider Abstraction          | Hallucination Prevention   | VERIS Lesson                 |
 | ---------------------------- | ---------------------- | ------------------------------- | --------------- | ----------------------------- | -------------------------- | ---------------------------- |
-| **Claude Code**              | Yes (code gen)         | Code references                 | Yes (limited)   | Anthropic-only                | Environmental verification | Context compaction pipeline  |
-| **GitHub Copilot**           | Yes (code gen)         | Public code matching            | No              | OpenAI-only                   | Code referencing filter    | @-mention context injection  |
-| **Cursor**                   | Yes (code gen)         | LSP-based refs                  | No              | Cloud-orchestrated            | RAG grounding              | Semantic indexing pattern    |
-| **Elastic Security**         | Yes (alert triage)     | Inline doc refs                 | No              | LangChain abstraction         | Grounded RAG               | Context-specific triggers    |
-| **CrowdStrike Charlotte AI** | Yes (alert triage)     | API-driven retrieval            | No              | Proprietary                   | Validation agents          | Validation agent pattern     |
-| **Splunk AI**                | Yes (SPL gen)          | RAG-based evidence              | No              | Multi-model                   | Input guardrails           | Input guardrails             |
-| **Microsoft Defender XDR**   | Yes (incident summary) | In-line referencing             | No              | Microsoft-only                | Managed scope              | Managed scope pattern        |
-| **Google Chronicle**         | Yes (alert triage)     | Structured analysis report      | No              | SecLM-specific                | Step-by-step transparency  | Tiered explanation levels    |
-| **VERIS (this spec)**        | **NEVER**              | **Structured object citations** | **First-class** | **Abstracted (any provider)** | **6-layer defense**        | **AI as read-only consumer** |
+| Claude Code              | Yes (code gen)         | Code references                 | Yes (limited)   | Anthropic-only                | Environmental verification | Context compaction pipeline  |
+| GitHub Copilot           | Yes (code gen)         | Public code matching            | No              | OpenAI-only                   | Code referencing filter    | @-mention context injection  |
+| Cursor                   | Yes (code gen)         | LSP-based refs                  | No              | Cloud-orchestrated            | RAG grounding              | Semantic indexing pattern    |
+| Elastic Security         | Yes (alert triage)     | Inline doc refs                 | No              | LangChain abstraction         | Grounded RAG               | Context-specific triggers    |
+| CrowdStrike Charlotte AI | Yes (alert triage)     | API-driven retrieval            | No              | Proprietary                   | Validation agents          | Validation agent pattern     |
+| Splunk AI                | Yes (SPL gen)          | RAG-based evidence              | No              | Multi-model                   | Input guardrails           | Input guardrails             |
+| Microsoft Defender XDR   | Yes (incident summary) | In-line referencing             | No              | Microsoft-only                | Managed scope              | Managed scope pattern        |
+| Google Chronicle         | Yes (alert triage)     | Structured analysis report      | No              | SecLM-specific                | Step-by-step transparency  | Tiered explanation levels    |
+| VERIS (this spec)        | NEVER              | Structured object citations | First-class | Abstracted (any provider) | 6-layer defense        | AI as read-only consumer |
 
-### B. Glossary
+### B. glossary
 
 | Term                      | Definition                                                              |
 | ------------------------- | ----------------------------------------------------------------------- |
-| **Citation**              | A reference from an AI claim to a deterministic canonical object        |
-| **Citation verification** | Programmatic validation that a citation references a real object        |
-| **Faithfulness**          | The degree to which an AI explanation is supported by the evidence      |
-| **Hallucination**         | An AI claim that is not supported by the evidence                       |
-| **Null-evidence refusal** | The AI's decision to refuse explanation when evidence is absent         |
-| **Explanation mode**      | The level of detail (Simple, Technical, Expert)                         |
-| **Provider adapter**      | A module that adapts a specific LLM provider to the unified interface   |
-| **Context scope**         | The subset of the report that is relevant to a specific explanation     |
-| **Token budget**          | The allocation of context window tokens to different context components |
-| **Validation agent**      | An LLM-as-judge that scores the faithfulness of explanations            |
-| **Context compaction**    | Hierarchical summarization to fit more context into token budgets       |
+| Citation              | A reference from an AI claim to a deterministic canonical object        |
+| Citation verification | Programmatic validation that a citation references a real object        |
+| Faithfulness          | The degree to which an AI explanation is supported by the evidence      |
+| Hallucination         | An AI claim that is not supported by the evidence                       |
+| Null-evidence refusal | The AI's decision to refuse explanation when evidence is absent         |
+| Explanation mode      | The level of detail (Simple, Technical, Expert)                         |
+| Provider adapter      | A module that adapts a specific LLM provider to the unified interface   |
+| Context scope         | The subset of the report that is relevant to a specific explanation     |
+| Token budget          | The allocation of context window tokens to different context components |
+| Validation agent      | An LLM-as-judge that scores the faithfulness of explanations            |
+| Context compaction    | Hierarchical summarization to fit more context into token budgets       |
 
 ---
 
@@ -2702,7 +2702,7 @@ _End of SPEC-011. This document describes the architecture for VERIS's AI Explan
 
 ---
 
-## Appendix C: Change Log
+## Appendix C: change log
 
 This section documents every modification made during this hardening pass (Revision 2.0).
 
@@ -2725,7 +2725,7 @@ This section documents every modification made during this hardening pass (Revis
 
 ---
 
-## Appendix D: Resolved Review Matrix
+## Appendix D: resolved review matrix
 
 | Review Item                                     | Status       | Section    | Resolution                                                                      |
 | ----------------------------------------------- | ------------ | ---------- | ------------------------------------------------------------------------------- |
@@ -2751,13 +2751,13 @@ This section documents every modification made during this hardening pass (Revis
 
 ---
 
-## Appendix E: Remaining Debt (Deferred to V2+)
+## Appendix E: remaining debt (deferred to V2+)
 
-The following items were intentionally deferred from V1. They are not gaps -- they are deliberate scope choices.
+The following items were intentionally deferred from V1. They are not gaps, they are deliberate scope choices.
 
 | Item                                   | Category  | V1 Workaround                                                               | Target |
 | -------------------------------------- | --------- | --------------------------------------------------------------------------- | ------ |
-| `reExplain()` -- mode switching        | API       | Call `explainFinding()` with different mode; cache miss is correct behavior | V1.1   |
+| `reExplain()`, mode switching        | API       | Call `explainFinding()` with different mode; cache miss is correct behavior | V1.1   |
 | Multi-finding explanation              | Context   | Explain individual findings; no cross-finding synthesis                     | V1.1   |
 | Anthropic adapter (if complex)         | Provider  | OpenAI adapter covers compatible providers                                  | V1.1   |
 | Explanation persistence (beyond cache) | Storage   | Cache provides cross-session persistence                                    | V2.0   |
@@ -2772,20 +2772,20 @@ The following items were intentionally deferred from V1. They are not gaps -- th
 
 ---
 
-## Appendix F: Final Self-Review Scoring
+## Appendix F: final Self-Review scoring
 
 ### Scores
 
 | Category                 | Score      | Justification                                                                                                                                                                                                                                                               |
 | ------------------------ | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Architecture**         | **9.9/10** | Module decomposition, dependency direction, separation of concerns, and data flow are fully specified. Only gap: precise serialization format for `ExplainedContext` (JSON vs. CBOR) -- will be decided during implementation based on Handlebars compatibility.            |
-| **Security**             | **9.8/10** | All threats identified, all controls specified. Prompt injection now has 6-layer defense with specific mechanisms. Only gap: exact injection pattern database for InputFilter (rule-based vs. ML) -- rule-based recommended, decided during M6 implementation.              |
-| **Maintainability**      | **9.8/10** | Clean module boundaries, explicit dependencies, provider abstraction prevents vendor lock-in, prompt versioning enables rollback. Only gap: template lifecycle management (archiving old versions) -- deferred to V2.                                                       |
-| **Determinism**          | **9.9/10** | Evidence ordering, token trimming, context construction, cache key generation, prompt rendering all fully deterministic with explicit sort orders and tiebreakers. Only non-deterministic element is LLM output, which is handled by the deterministic validation pipeline. |
-| **Explainability**       | **10/10**  | Every AI claim traceable to deterministic evidence via structured citations with bidirectional traceability. Defense-in-depth (8 layers) prevents unsupported claims. Null-evidence refusal prevents fabrication. AI disclaimer mandatory on every output.                  |
-| **Production Readiness** | **9.7/10** | Offline-first, graceful degradation, retry budget with circuit breaker, comprehensive testing (7+ categories), audit logging, cache with schema migration. Only gap: operational runbooks -- these are operational concerns, not architectural.                             |
+| Architecture         | 9.9/10 | Module decomposition, dependency direction, separation of concerns, and data flow are fully specified. Only gap: precise serialization format for `ExplainedContext` (JSON vs. CBOR), will be decided during implementation based on Handlebars compatibility.            |
+| Security             | 9.8/10 | All threats identified, all controls specified. Prompt injection now has 6-layer defense with specific mechanisms. Only gap: exact injection pattern database for InputFilter (rule-based vs. ML), rule-based recommended, decided during M6 implementation.              |
+| Maintainability      | 9.8/10 | Clean module boundaries, explicit dependencies, provider abstraction prevents vendor lock-in, prompt versioning enables rollback. Only gap: template lifecycle management (archiving old versions), deferred to V2.                                                       |
+| Determinism          | 9.9/10 | Evidence ordering, token trimming, context construction, cache key generation, prompt rendering all fully deterministic with explicit sort orders and tiebreakers. Only non-deterministic element is LLM output, which is handled by the deterministic validation pipeline. |
+| Explainability       | 10/10  | Every AI claim traceable to deterministic evidence via structured citations with bidirectional traceability. Defense-in-depth (8 layers) prevents unsupported claims. Null-evidence refusal prevents fabrication. AI disclaimer mandatory on every output.                  |
+| Production Readiness | 9.7/10 | Offline-first, graceful degradation, retry budget with circuit breaker, comprehensive testing (7+ categories), audit logging, cache with schema migration. Only gap: operational runbooks, these are operational concerns, not architectural.                             |
 
-### Overall Rating
+### Overall rating
 
 | Metric               | Score       |
 | -------------------- | ----------- |
@@ -2795,9 +2795,9 @@ The following items were intentionally deferred from V1. They are not gaps -- th
 | Determinism          | 9.9/10      |
 | Explainability       | 10/10       |
 | Production Readiness | 9.7/10      |
-| **Average**          | **9.85/10** |
+| Average          | 9.85/10 |
 
-### Approval Status
+### Approval status
 
 | Criterion                           | Status                                                        |
 | ----------------------------------- | ------------------------------------------------------------- |
@@ -2814,4 +2814,4 @@ The following items were intentionally deferred from V1. They are not gaps -- th
 
 ---
 
-_End of SPEC-011 (Revision 2.0 -- Hardened). This document describes the architecture for VERIS's AI Explanation Layer, which is strictly a read-only consumer of deterministic analysis results. AI NEVER participates in the analysis pipeline._
+_End of SPEC-011 (Revision 2.0, Hardened). This document describes the architecture for VERIS's AI Explanation Layer, which is strictly a read-only consumer of deterministic analysis results. AI NEVER participates in the analysis pipeline._

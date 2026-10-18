@@ -1,4 +1,4 @@
-# VERIS Repository Architecture & Package Design — SPEC-001
+# VERIS repository architecture & package design: SPEC-001
 
 **Status:** Frozen  
 **Version:** 1.0  
@@ -7,7 +7,7 @@
 
 ---
 
-## Table of Contents
+## Table of contents
 
 1. [Architecture Philosophy](#1-architecture-philosophy)
 2. [Complete Repository Tree](#2-complete-repository-tree)
@@ -30,15 +30,15 @@
 
 ---
 
-## 1. Architecture Philosophy
+## 1. Architecture philosophy
 
 VERIS follows **Strict Domain-Driven Package Architecture** built on three principles:
 
-### 1.1 Dependency Rule (Layered)
+### 1.1 Dependency rule (layered)
 
 Packages may only depend on packages at their own layer or below. No upward or lateral dependencies between sibling packages of the same layer unless mediated by an interface in a lower layer.
 
-### 1.2 Dependency Inversion at Every Boundary
+### 1.2 Dependency Inversion at every boundary
 
 Each package owns its interface contracts. A consumer depends on the contract (interface + types), not the implementation. Implementations are injected at composition root.
 
@@ -48,7 +48,7 @@ Each package is independently buildable, independently testable, versioned separ
 
 ---
 
-## 2. Complete Repository Tree
+## 2. Complete repository tree
 
 ```
 veris/
@@ -377,25 +377,25 @@ veris/
 
 ---
 
-## 3. Package Responsibilities
+## 3. Package responsibilities
 
-### Layer 0: Foundation (No Production Dependencies)
+### Layer 0: foundation (no production dependencies)
 
 | Package         | Responsibility                                                                                                 | Dependencies  | Consumers                   |
 | --------------- | -------------------------------------------------------------------------------------------------------------- | ------------- | --------------------------- |
 | `@veris/core`   | Canonical domain types, error hierarchy, constants                                                             | None          | All packages                |
 | `@veris/shared` | General-purpose utilities (collections, hashing, FS, net, path, Result monad, platform, serialization, semver) | `@veris/core` | All non-foundation packages |
 
-### Layer 1: Framework
+### Layer 1: framework
 
 | Package            | Responsibility                                           | Dependencies                   |
 | ------------------ | -------------------------------------------------------- | ------------------------------ |
 | `@veris/logger`    | Structured logging with pluggable transports/formatters  | `@veris/core`, `@veris/shared` |
 | `@veris/config`    | Multi-source config loading, merging, validation         | `@veris/core`, `@veris/shared` |
 | `@veris/telemetry` | Metrics, tracing, OpenTelemetry integration              | `@veris/core`                  |
-| `@veris/ai`        | AI provider adapters (consumer only — no analysis logic) | `@veris/core`, `@veris/shared` |
+| `@veris/ai`        | AI provider adapters (consumer only, no analysis logic) | `@veris/core`, `@veris/shared` |
 
-### Layer 2: Domain
+### Layer 2: domain
 
 | Package               | Responsibility                                                        | Dependencies                                                                     |
 | --------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
@@ -404,40 +404,40 @@ veris/
 | `@veris/rules`        | Shipped rule pack definitions                                         | `@veris/core`, `@veris/rules-engine` (interfaces only)                           |
 | `@veris/knowledge`    | Taxonomy, CWE/OWASP mappings, remediation text                        | `@veris/core`                                                                    |
 
-### Layer 3: Analysis
+### Layer 3: analysis
 
 | Package           | Responsibility                                                                                                  | Dependencies                                                                                                                                          |
 | ----------------- | --------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@veris/analyzer` | Orchestrates the analysis pipeline — loads config, selects extractors, runs the rules engine, collects findings | `@veris/core`, `@veris/extractors` (interfaces only), `@veris/rules-engine`, `@veris/knowledge`, `@veris/logger`, `@veris/config`, `@veris/telemetry` |
+| `@veris/analyzer` | Orchestrates the analysis pipeline, loads config, selects extractors, runs the rules engine, collects findings | `@veris/core`, `@veris/extractors` (interfaces only), `@veris/rules-engine`, `@veris/knowledge`, `@veris/logger`, `@veris/config`, `@veris/telemetry` |
 
-### Layer 4: Report & Output
+### Layer 4: report & output
 
 | Package            | Responsibility                                                  | Dependencies                                    |
 | ------------------ | --------------------------------------------------------------- | ----------------------------------------------- |
 | `@veris/report`    | Canonical report construction, diffing, aggregation             | `@veris/core`, `@veris/knowledge`               |
 | `@veris/exporters` | Report serialization to JSON, SARIF, HTML, Markdown, CSV, JUnit | `@veris/report`, `@veris/core`, `@veris/shared` |
 
-### Layer 5: Application
+### Layer 5: application
 
 | Package      | Responsibility                                    | Dependencies                                                                                                                                                    |
 | ------------ | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `@veris/cli` | CLI entry point, command dispatch, terminal UI    | `@veris/analyzer`, `@veris/report`, `@veris/exporters`, `@veris/config`, `@veris/logger`, `@veris/telemetry`, `@veris/ai`, `@veris/renderers`, `@veris/runners` |
 | `@veris/api` | Public programmatic API, DI container composition | `@veris/analyzer`, `@veris/report`, `@veris/exporters`, `@veris/config`, `@veris/logger`, `@veris/telemetry`, `@veris/ai`                                       |
 
-### Layer 6: Runners
+### Layer 6: runners
 
 | Package          | Responsibility                                     | Dependencies                                                                                                 |
 | ---------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | `@veris/runners` | Execution environment adapters (local, CI, daemon) | `@veris/analyzer`, `@veris/report`, `@veris/exporters`, `@veris/config`, `@veris/logger`, `@veris/telemetry` |
 
-### Layer 7: Plugins (Future)
+### Layer 7: plugins (future)
 
 | Package          | Responsibility                                                                 | Dependencies                                                     |
 | ---------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------------- |
 | `@veris/plugins` | Plugin host, SDK, manifest validation                                          | `@veris/core`, `@veris/shared`, `@veris/logger`, `@veris/config` |
 |                  | _Plugin SDK published separately as `@veris/plugin-sdk` for 3rd-party authors_ | `@veris/core` (types only)                                       |
 
-### Renderers (Cross-cutting)
+### Renderers (cross-cutting)
 
 | Package            | Responsibility                                    | Dependencies                   |
 | ------------------ | ------------------------------------------------- | ------------------------------ |
@@ -445,7 +445,7 @@ veris/
 
 ---
 
-## 4. Dependency Diagram
+## 4. Dependency diagram
 
 ```
                      ┌──────────────────────────────────────┐
@@ -496,16 +496,16 @@ veris/
 
 ---
 
-## 5. Allowed Dependency Directions
+## 5. Allowed dependency directions
 
-### 5.1 Strict Rules
+### 5.1 Strict rules
 
-1. **Downward only.** A package may only depend on packages in its own layer or lower layers. No upward dependencies.
-2. **No lateral dependencies between siblings** unless both depend on a shared interface in a lower layer.
-3. **Interface-only dependencies preferred.** When a layer-2 package depends on another layer-2 package (e.g., `@veris/rules` → `@veris/rules-engine`), dependency must be on interfaces/types only — never on concrete implementations.
-4. **No circular dependencies.** Enforced via ESLint `import/no-cycle` and tooling (`dpdm` or `madge`) in CI.
-5. **`@veris/core` must never import from any other package** within the monorepo.
-6. **`@veris/shared` may import from `@veris/core` only.**
+1. Downward only. A package may only depend on packages in its own layer or lower layers. No upward dependencies.
+2. No lateral dependencies between siblings unless both depend on a shared interface in a lower layer.
+3. Interface-only dependencies preferred. When a layer-2 package depends on another layer-2 package (e.g., `@veris/rules` → `@veris/rules-engine`), dependency must be on interfaces/types only, never on concrete implementations.
+4. No circular dependencies. Enforced via ESLint `import/no-cycle` and tooling (`dpdm` or `madge`) in CI.
+5. `@veris/core` must never import from any other package within the monorepo.
+6. `@veris/shared` may import from `@veris/core` only.
 
 ### 5.2 Visualization
 
@@ -532,9 +532,9 @@ veris/
 
 ---
 
-## 6. Internal API Boundaries
+## 6. Internal API boundaries
 
-### 6.1 Public vs. Internal
+### 6.1 Public vs. internal
 
 Each package exposes exactly **two levels** of API:
 
@@ -552,9 +552,9 @@ Each package exposes exactly **two levels** of API:
 - `internal.ts` is for cross-package use within the same layer only (e.g., analyzer → extractors internal), and must be explicitly imported via `@veris/extractors/internal`.
 - No package may import from implementation files directly (`@veris/extractors/src/registry/...`).
 
-### 6.2 Contract-Driven Boundaries
+### 6.2 Contract-Driven boundaries
 
-Every significant boundary has an **interface package** or **interfaces module**:
+Every significant boundary has an **interface package** or interfaces module:
 
 ```typescript
 // @veris/extractors/src/interfaces/extractor.ts
@@ -568,7 +568,7 @@ export interface Extractor {
 
 The `@veris/analyzer` depends on `Extractor` interface only. Actual extractors are registered at composition root via DI.
 
-### 6.3 Composition Root
+### 6.3 Composition root
 
 Only `@veris/cli` and `@veris/api` perform dependency injection wiring. Domain packages never instantiate their own dependencies.
 
@@ -585,11 +585,11 @@ const container = {
 
 ---
 
-## 7. Shared Package Strategy
+## 7. Shared package strategy
 
 ### 7.1 What Goes in @veris/shared
 
-- **Generic, reusable utilities** with no domain logic
+- Generic, reusable utilities with no domain logic
 - Shared infrastructure concerns (hashing, path resolution, cross-platform helpers)
 - The `Result<T, E>` monad (transport for error handling)
 - Serialization helpers
@@ -603,32 +603,32 @@ const container = {
 - Extractor-specific helpers
 - Anything that has a single consumer (co-locate instead)
 
-### 7.3 The "Three-Consumer Rule"
+### 7.3 The "three-consumer rule"
 
 A utility belongs in `@veris/shared` only if it has **at least three confirmed consumers** across different packages. Otherwise, co-locate it in the consuming package and extract later when the third consumer appears.
 
-### 7.4 No Fat Shared Package
+### 7.4 No Fat shared package
 
 `@veris/shared` must be aggressively pruned. It is the most common source of coupling rot. Every addition must be justified in code review.
 
 ---
 
-## 8. Build Strategy
+## 8. Build strategy
 
 ### 8.1 Toolchain
 
 | Concern         | Choice                                          | Rationale                                                        |
 | --------------- | ----------------------------------------------- | ---------------------------------------------------------------- |
-| Package manager | **pnpm**                                        | Strict dependency isolation, workspace protocol, disk efficiency |
-| TypeScript      | **ts@5.x**                                      | Project references for incremental builds                        |
-| Bundler         | **tsup**                                        | Fast esbuild-based bundling, supports CJS+ESM dual output        |
-| Linter          | **ESLint flat config** + `typescript-eslint` v8 |
-| Formatter       | **Prettier**                                    |
-| Testing         | **Vitest**                                      | Fast, works with ESM, has built-in coverage                      |
-| Benchmarking    | **tinybench**                                   | Low-overhead, precise microbenchmarks                            |
-| CI              | **GitHub Actions**                              | Native monorepo support                                          |
+| Package manager | pnpm                                        | Strict dependency isolation, workspace protocol, disk efficiency |
+| TypeScript      | ts@5.x                                      | Project references for incremental builds                        |
+| Bundler         | tsup                                        | Fast esbuild-based bundling, supports CJS+ESM dual output        |
+| Linter          | ESLint flat config + `typescript-eslint` v8 |
+| Formatter       | Prettier                                    |
+| Testing         | Vitest                                      | Fast, works with ESM, has built-in coverage                      |
+| Benchmarking    | tinybench                                   | Low-overhead, precise microbenchmarks                            |
+| CI              | GitHub Actions                              | Native monorepo support                                          |
 
-### 8.2 Build Steps
+### 8.2 Build steps
 
 ```
 1. pnpm install            # Install all deps
@@ -640,7 +640,7 @@ A utility belongs in `@veris/shared` only if it has **at least three confirmed c
 7. pnpm build:layer4+      # Build all remaining layers in parallel
 ```
 
-### 8.3 TypeScript Project References
+### 8.3 TypeScript project references
 
 Each package has its own `tsconfig.json` extending `tsconfig.base.json`:
 
@@ -664,7 +664,7 @@ Each package has its own `tsconfig.json` extending `tsconfig.base.json`:
 }
 ```
 
-### 8.4 Dual CJS/ESM Output
+### 8.4 Dual CJS/ESM output
 
 Each package emits both:
 
@@ -695,9 +695,9 @@ packages/foo/
 
 ---
 
-## 9. Testing Package Organization
+## 9. Testing package organization
 
-### 9.1 In-Package Tests (`__tests__/`)
+### 9.1 In-Package tests (`__tests__/`)
 
 Every package has a `__tests__/` directory parallel to `src/`:
 
@@ -718,7 +718,7 @@ packages/extractors/
 │   └── tsconfig.json
 ```
 
-### 9.2 Test Types
+### 9.2 Test types
 
 | Test Type   | Location                      | Purpose                          | CI Frequency |
 | ----------- | ----------------------------- | -------------------------------- | ------------ |
@@ -729,7 +729,7 @@ packages/extractors/
 | Fuzz        | `tools/security/fuzzing/`     | Input boundary fuzzing           | Nightly      |
 | Adversarial | `tools/security/adversarial/` | Malicious input resistance       | Nightly      |
 
-### 9.3 Test Fixtures
+### 9.3 Test fixtures
 
 ```
 fixtures/
@@ -749,17 +749,17 @@ fixtures/
 
 Fixtures are committed to the repository and versioned. Large fixtures use Git LFS.
 
-### 9.4 Testing Conventions
+### 9.4 Testing conventions
 
-- **One `describe` block per class/function** matching the source module name.
-- **Factories over fixtures** for domain objects: `createTestFinding()`, `createTestRule()`.
-- **Use `@veris/shared` test helpers** for common setup (temp directories, mock filesystems).
-- **No network calls in unit tests** — all external dependencies are mocked via interfaces.
-- **Coverage threshold**: 90%+ branch coverage on domain packages, 80%+ on application packages.
+- One `describe` block per class/function matching the source module name.
+- Factories over fixtures for domain objects: `createTestFinding()`, `createTestRule()`.
+- Use `@veris/shared` test helpers for common setup (temp directories, mock filesystems).
+- No network calls in unit tests: all external dependencies are mocked via interfaces.
+- Coverage threshold: 90%+ branch coverage on domain packages, 80%+ on application packages.
 
 ---
 
-## 10. Documentation Organization
+## 10. Documentation organization
 
 ```
 docs/
@@ -794,16 +794,16 @@ docs/
 └── README.md
 ```
 
-### 10.1 Documentation Principles
+### 10.1 Documentation principles
 
-- **ADRs for architecture decisions.** Every significant architectural decision is recorded as an ADR with context, decision, consequences.
-- **Guides for developers.** Writing rules, extractors, and plugins each get their own guide.
-- **API reference for consumers.** Generated from TSDoc where possible.
-- **RFCs for future changes.** Major changes start as RFCs with review period.
+- ADRs for architecture decisions. Every significant architectural decision is recorded as an ADR with context, decision, consequences.
+- Guides for developers. Writing rules, extractors, and plugins each get their own guide.
+- API reference for consumers. Generated from TSDoc where possible.
+- RFCs for future changes. Major changes start as RFCs with review period.
 
 ---
 
-## 11. Rule Pack Organization
+## 11. Rule pack organization
 
 ### 11.1 Structure
 
@@ -858,7 +858,7 @@ packages/rules/src/packs/
 └── index.ts                               # Aggregates all packs
 ```
 
-### 11.2 Rule Pack Contract
+### 11.2 Rule pack contract
 
 Each pack exports:
 
@@ -877,16 +877,16 @@ interface RulePack {
 }
 ```
 
-### 11.3 Pack Isolation
+### 11.3 Pack isolation
 
 - Each pack is independently loadable.
 - A pack may declare dependencies on other packs (e.g., `injection` extends `best-practices`).
-- Pack loading is handled by `@veris/rules-engine` — packs are discovered via registry.
+- Pack loading is handled by `@veris/rules-engine`, packs are discovered via registry.
 - Third-party packs (future) are loaded via the plugin system.
 
 ---
 
-## 12. Extractor Organization
+## 12. Extractor organization
 
 ### 12.1 Structure
 
@@ -930,7 +930,7 @@ packages/extractors/src/builtins/
     └── extractor.ts
 ```
 
-### 12.2 Extractor Contract
+### 12.2 Extractor contract
 
 ```typescript
 interface Extractor {
@@ -941,19 +941,19 @@ interface Extractor {
 }
 ```
 
-### 12.3 Extractor Principles
+### 12.3 Extractor principles
 
 - Each extractor is a single class implementing the `Extractor` interface.
 - Extractors are discovered via `ExtractorRegistry`, not hardcoded.
 - Built-in extractors ship with `@veris/extractors`.
 - Third-party extractors (future) register through the plugin system.
-- Extractors must be stateless — all state lives in `ExtractorContext`.
+- Extractors must be stateless: all state lives in `ExtractorContext`.
 
 ---
 
-## 13. Plugin Organization
+## 13. Plugin organization
 
-### 13.1 Plugin System Architecture (Future)
+### 13.1 Plugin system architecture (future)
 
 ```
 @veris/plugins/
@@ -978,7 +978,7 @@ interface Extractor {
 └── index.ts
 ```
 
-### 13.2 Plugin Types
+### 13.2 Plugin types
 
 | Plugin Type       | Extends                     | Hooks                                                    |
 | ----------------- | --------------------------- | -------------------------------------------------------- |
@@ -988,10 +988,10 @@ interface Extractor {
 | `RendererPlugin`  | Provides new renderers      | `registerRenderers()`                                    |
 | `HookPlugin`      | Observes pipeline lifecycle | `preExtract`, `postExtract`, `preAnalyze`, `postAnalyze` |
 
-### 13.3 Plugin Isolation
+### 13.3 Plugin isolation
 
-- Plugins run in a **runtime sandbox** (isolated VM context or similar).
-- Plugins communicate with the host via a **narrow message-passing API**.
+- Plugins run in a runtime sandbox (isolated VM context or similar).
+- Plugins communicate with the host via a narrow message-passing API.
 - Plugins have no access to the filesystem or network unless explicitly granted.
 - Plugin crashes must never crash the host process.
 
@@ -1001,25 +1001,25 @@ The SDK is published as a separate npm package (`@veris/plugin-sdk`) so third-pa
 
 ---
 
-## 14. Versioning Strategy
+## 14. Versioning strategy
 
-### 14.1 Monorepo Versioning
+### 14.1 Monorepo versioning
 
 | Strategy        | Choice                                              | Rationale                                                        |
 | --------------- | --------------------------------------------------- | ---------------------------------------------------------------- |
-| Mode            | **Independent** (each package versioned separately) | Core types evolve slower than CLI; CLI evolves slower than rules |
-| Tool            | **Changesets**                                      | Industry standard for pnpm workspaces, generates changelogs      |
-| Release cadence | **Continuous** — release on demand per package      | No artificial synchronization                                    |
+| Mode            | Independent (each package versioned separately) | Core types evolve slower than CLI; CLI evolves slower than rules |
+| Tool            | Changesets                                      | Industry standard for pnpm workspaces, generates changelogs      |
+| Release cadence | Continuous, release on demand per package      | No artificial synchronization                                    |
 
-### 14.2 Version Alignment
+### 14.2 Version alignment
 
 - `@veris/core` starts at `1.0.0` and moves slowly.
 - `@veris/shared` starts at `1.0.0`.
 - All domain packages start at `0.1.0` until V1 stabilization.
-- `@veris/rules` moves fastest — new rules added as minor versions.
+- `@veris/rules` moves fastest: new rules added as minor versions.
 - Breaking changes to `@veris/core` types trigger a coordinated major bump across all packages.
 
-### 14.3 Version Compatibility
+### 14.3 Version compatibility
 
 ```
 A dependency boundary lockfile ensures:
@@ -1028,86 +1028,86 @@ A dependency boundary lockfile ensures:
 - @veris/exporters@4.x requires @veris/report@^3.x, @veris/core@^1.x
 ```
 
-### 14.4 Pre-Release Tags
+### 14.4 Pre-Release tags
 
-- `0.x.x` — Pre-V1, APIs may break
-- `1.0.0-alpha.x` — Alpha releases
-- `1.0.0-beta.x` — Beta releases
-- `1.0.0-rc.x` — Release candidates
-- `1.0.0` — Stable
+- `0.x.x`: Pre-V1, APIs may break
+- `1.0.0-alpha.x`: Alpha releases
+- `1.0.0-beta.x`: Beta releases
+- `1.0.0-rc.x`: Release candidates
+- `1.0.0`: Stable
 
 ---
 
-## 15. Naming Conventions
+## 15. Naming conventions
 
-### 15.1 Package Names
+### 15.1 Package names
 
-- **Scope:** `@veris/`
-- **Name:** Single lowercase word, no hyphens except for compound descriptors:  
+- Scope: `@veris/`
+- Name: Single lowercase word, no hyphens except for compound descriptors:  
   `@veris/core`, `@veris/shared`, `@veris/rules-engine`, `@veris/rule-filters`
-- **Plugin SDK:** `@veris/plugin-sdk`
-- **Test support:** Not published, used internally only.
+- Plugin SDK: `@veris/plugin-sdk`
+- Test support: Not published, used internally only.
 
-### 15.2 Directory Names
+### 15.2 Directory names
 
 - Match package name without scope: `packages/core/`, `packages/rules-engine/`, `packages/rules/`.
 
-### 15.3 Source File Names
+### 15.3 Source file names
 
-- **Classes/PascalCase:** `ReportBuilder.ts`, `ArchiveExtractor.ts`
-- **Functions/camelCase:** `createLogger.ts`, `parseConfig.ts`
-- **Types/Interfaces:** `Extractor.ts`, `Finding.ts`, `AnalysisResult.ts`
-- **React components:** `ProgressBar.tsx`, `FindingList.tsx`
-- **Module barrel:** `index.ts` (default), `internal.ts` (cross-package internal API)
+- Classes/PascalCase: `ReportBuilder.ts`, `ArchiveExtractor.ts`
+- Functions/camelCase: `createLogger.ts`, `parseConfig.ts`
+- Types/Interfaces: `Extractor.ts`, `Finding.ts`, `AnalysisResult.ts`
+- React components: `ProgressBar.tsx`, `FindingList.tsx`
+- Module barrel: `index.ts` (default), `internal.ts` (cross-package internal API)
 
-### 15.4 Test File Names
+### 15.4 Test file names
 
 - `{module-name}.test.ts` for unit tests
 - `{module-name}.integration.test.ts` for integration tests
 - `{module-name}.bench.ts` for benchmarks
 
-### 15.5 Export Naming
+### 15.5 Export naming
 
-- **Default exports:** Avoid. Prefer named exports.
-- **Interface names:** Follow the `IAction` → `Action` convention (no `I` prefix).
+- Default exports: Avoid. Prefer named exports.
+- Interface names: Follow the `IAction` → `Action` convention (no `I` prefix).
 
 ---
 
-## 16. Future Expansion Considerations
+## 16. Future expansion Considerations
 
-### 16.1 Extractor Expansion (V2+)
+### 16.1 Extractor expansion (V2+)
 
 - New binary format parsers (Mach-O, DEX, WebAssembly) → add to `builtins/` directory.
 - Cloud artifact extractors (Docker images, Lambda layers) → new package or builtin.
 - Remote repository extractor (GitHub API, GitLab API) → new package.
 
-### 16.2 Rule Pack Expansion (Ongoing)
+### 16.2 Rule pack expansion (ongoing)
 
 - New rule packs are directories under `packages/rules/src/packs/`.
 - External rule packs (from community) can be added as separate packages under `packages/external-rules/` or installed as plugins.
 - Language-specific rule packs (Python, Java, Go) → `packages/rules/src/packs/lang-python/`, etc.
 
-### 16.3 Renderer Expansion
+### 16.3 Renderer expansion
 
 - Web renderer (React/Svelte-based dashboard) → can be its own repo or a package that depends on `@veris/renderers` interfaces.
 - CI annotation renderers (GitHub Checks, GitLab MR comments) → new renderers under `@veris/renderers`.
 - Custom renderers via plugin system.
 
-### 16.4 AI Integration Expansion
+### 16.4 AI integration expansion
 
-- AI-assisted remediation suggestions (consumer only — AI never performs analysis).
+- AI-assisted remediation suggestions (consumer only, AI never performs analysis).
 - AI-powered report summarization.
 - AI-assisted rule writing (generates rule scaffolding from natural language).
-- All AI features live in `@veris/ai` and are consumed by CLI/API — never by the analyzer.
+- All AI features live in `@veris/ai` and are consumed by CLI/API, never by the analyzer.
 
-### 16.5 Language Support
+### 16.5 Language support
 
-- VERIS is **analysis-platform-agnostic** — it analyzes artifacts, not language syntax directly.
+- VERIS is analysis-platform-agnostic: it analyzes artifacts, not language syntax directly.
 - Language-specific extractors (e.g., AST-based JavaScript extractor) are builtins.
 - Language-specific rules are rule pack subsets.
 - A future `@veris/language-support` package could host language grammars and AST parsers.
 
-### 16.6 SaaS / Cloud Offering
+### 16.6 SaaS / cloud offering
 
 - `@veris/api` is the integration point for any SaaS layer.
 - A web backend would consume `@veris/api` and add persistence, user management, and a web UI.
@@ -1115,49 +1115,49 @@ A dependency boundary lockfile ensures:
 
 ---
 
-## 17. Common Architecture Mistakes to Avoid
+## 17. Common architecture Mistakes to avoid
 
-### 17.1 Fat Shared Package
+### 17.1 Fat shared package
 
 **Mistake:** Every utility function ends up in `@veris/shared`, creating a god package that everything depends on.  
-**Prevention:** Enforce the **Three-Consumer Rule**. Co-locate utilities with single consumers.
+**Prevention:** Enforce the Three-Consumer Rule. Co-locate utilities with single consumers.
 
-### 17.2 Leaky Extractors
+### 17.2 Leaky extractors
 
-**Mistake:** Extractors do double duty — extracting AND performing preliminary analysis.  
-**Prevention:** Extractors **extract only**. They produce `ExtractionResult` — structured data about the artifact. They do not classify, score, or flag findings.
+**Mistake:** Extractors do double duty, extracting AND performing preliminary analysis.  
+**Prevention:** Extractors extract only. They produce `ExtractionResult`, structured data about the artifact. They do not classify, score, or flag findings.
 
-### 17.3 Analysis Logic in Rules
+### 17.3 Analysis logic in rules
 
 **Mistake:** Rules contain complex analysis logic, making them hard to test and reason about.  
-**Prevention:** Rules are **declarative matchers**. Complex analysis (control flow, data flow) belongs in `@veris/rules-engine` evaluators. Rules should be JSON-like in complexity.
+**Prevention:** Rules are declarative matchers. Complex analysis (control flow, data flow) belongs in `@veris/rules-engine` evaluators. Rules should be JSON-like in complexity.
 
-### 17.4 AI in the Analysis Pipeline
+### 17.4 AI in the analysis pipeline
 
-**Mistake:** Using AI for analysis — nondeterministic, unversioned, unverifiable results. **This violates VERIS's core principle of explainable deterministic analysis.**  
-**Prevention:** AI is strictly a **consumer** of analysis results — never part of the analysis pipeline. AI sits in `@veris/ai` and is imported only by `@veris/cli` and `@veris/api`.
+**Mistake:** Using AI for analysis, nondeterministic, unversioned, unverifiable results. This violates VERIS's core principle of explainable deterministic analysis.  
+**Prevention:** AI is strictly a consumer of analysis results, never part of the analysis pipeline. AI sits in `@veris/ai` and is imported only by `@veris/cli` and `@veris/api`.
 
-### 17.5 Circular Package Dependencies
+### 17.5 Circular package dependencies
 
 **Mistake:** Package A imports from Package B, and Package B imports from Package A (or through a chain).  
 **Prevention:** Enforce with `dpdm` or `madge` in CI. Design interfaces in lower layers to break cycles.
 
-### 17.6 No Public API Surface
+### 17.6 No public API surface
 
 **Mistake:** Packages export everything from `src/`, making it impossible to refactor internals.  
 **Prevention:** Every package has exactly one or two entry points (`index.ts` and `internal.ts`). Everything else is private.
 
-### 17.7 Shared Types Coupling
+### 17.7 Shared types coupling
 
 **Mistake:** Reusing domain types across unrelated packages, creating implicit coupling.  
 **Prevention:** `@veris/core` types are the only shared types. If a package needs a type variant, it defines its own local type and maps at the boundary.
 
-### 17.8 Premature Plugin System
+### 17.8 Premature plugin system
 
 **Mistake:** Designing an elaborate plugin system before core functionality stabilizes.  
 **Prevention:** Build the plugin host as a thin shell in V1. Fill in the SDK and full sandboxing in V2 after the core contracts are proven.
 
-### 17.9 Over-Engineering the Build
+### 17.9 Over-Engineering the build
 
 **Mistake:** Complex build toolchains, custom bundler configs, multiple output formats before they're needed.  
 **Prevention:** Start with a simple `tsup` config, dual CJS/ESM output, and pnpm workspace build order. Add complexity only when there's a proven need.
@@ -1169,29 +1169,29 @@ A dependency boundary lockfile ensures:
 
 ---
 
-## 18. Final Recommendations
+## 18. Final recommendations
 
-### 18.1 Implementation Order
+### 18.1 Implementation order
 
 | Phase          | Packages                                           | Rationale                         |
 | -------------- | -------------------------------------------------- | --------------------------------- |
-| **Phase 0**    | `core`, `shared`, `logger`, `config`               | Foundation — needed by everything |
-| **Phase 1**    | `knowledge`, `rules-engine`, `extractors`, `rules` | Domain — the analysis core        |
-| **Phase 2**    | `analyzer`, `report`                               | Orchestration and output          |
-| **Phase 3**    | `cli`, `api`, `runners`, `exporters`, `renderers`  | Application layer                 |
-| **Phase 4**    | `ai`, `telemetry`, `plugins`                       | Enhancements and extensibility    |
-| **Continuous** | `tools/perf`, `tools/security`, `docs`, `fixtures` | Infrastructure                    |
+| Phase 0    | `core`, `shared`, `logger`, `config`               | Foundation, needed by everything |
+| Phase 1    | `knowledge`, `rules-engine`, `extractors`, `rules` | Domain, the analysis core        |
+| Phase 2    | `analyzer`, `report`                               | Orchestration and output          |
+| Phase 3    | `cli`, `api`, `runners`, `exporters`, `renderers`  | Application layer                 |
+| Phase 4    | `ai`, `telemetry`, `plugins`                       | Enhancements and extensibility    |
+| Continuous | `tools/perf`, `tools/security`, `docs`, `fixtures` | Infrastructure                    |
 
-### 18.2 Critical Success Factors
+### 18.2 Critical success factors
 
-1. **Keep `@veris/core` extremely lean.** Every addition is a versioning commitment to every other package.
-2. **Interface-first design.** Every cross-package dependency should be on an interface, not an implementation.
-3. **No analysis in extractors.** Extractors produce data. Rules analyze data.
-4. **AI is never analysis.** Violating this one principle undermines VERIS's entire value proposition.
-5. **Test the boundaries.** Focus integration tests on the contracts between packages — that's where coupling rot first appears.
-6. **ADR every decision.** The architecture is frozen in concept, but every concrete design decision should be recorded.
+1. Keep `@veris/core` extremely lean. Every addition is a versioning commitment to every other package.
+2. Interface-first design. Every cross-package dependency should be on an interface, not an implementation.
+3. No analysis in extractors. Extractors produce data. Rules analyze data.
+4. AI is never analysis. Violating this one principle undermines VERIS's entire value proposition.
+5. Test the boundaries. Focus integration tests on the contracts between packages, that's where coupling rot first appears.
+6. ADR every decision. The architecture is frozen in concept, but every concrete design decision should be recorded.
 
-### 18.3 Architectural Invariants
+### 18.3 Architectural invariants
 
 ```
 1. @veris/core imports NOTHING from the monorepo.

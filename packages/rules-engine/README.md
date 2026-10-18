@@ -4,10 +4,10 @@ Rule matching, evaluation, and scheduling engine.
 
 ## Components
 
-- **engine/** — RuleEngine, RuleScheduler, EligibilityChecker
-- **matchers/** — Pattern, AST, heuristic, composite
-- **evaluator/** — Safe sandboxed expression evaluator
-- **scheduler/** — Dependency-aware rule scheduling
+- engine/: RuleEngine, RuleScheduler, EligibilityChecker
+- matchers/: Pattern, AST, heuristic, composite
+- evaluator/: Safe sandboxed expression evaluator
+- scheduler/: Dependency-aware rule scheduling
 
 ## Principles
 

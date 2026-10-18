@@ -1,4 +1,4 @@
-# VERIS Terminal UX, Interactive UI, Report System & Rendering Architecture — SPEC-006
+# VERIS terminal UX, Interactive UI, report system & rendering architecture: SPEC-006
 
 **Status:** Frozen  
 **Version:** 1.0  
@@ -7,7 +7,7 @@
 
 ---
 
-## Table of Contents
+## Table of contents
 
 1. [Design Philosophy](#1-design-philosophy)
 2. [Rendering Architecture](#2-rendering-architecture)
@@ -34,11 +34,11 @@
 
 ---
 
-## 1. Design Philosophy
+## 1. Design philosophy
 
 ### 1.1 Principles
 
-**Application, not logs.** VERIS should feel like an interactive application running in the terminal, not a script printing text. Users navigate, explore, drill down, and investigate — they don't scroll through output.
+**Application, not logs.** VERIS should feel like an interactive application running in the terminal, not a script printing text. Users navigate, explore, drill down, and investigate. They don't scroll through output.
 
 **Progressive disclosure.** Show the minimum viable information first. Reveal detail on demand. A single scan result should show a score, severity count, and top findings. The user expands to see evidence, chains, and diagnostics.
 
@@ -46,11 +46,11 @@
 
 **Investigation, not reporting.** The primary experience is interactive investigation. Report generation is a secondary action. Users explore findings interactively before exporting.
 
-**Beautiful but professional.** Animations are subtle and purposeful — never decorative. Color is semantic, never arbitrary. Layout is consistent, never surprising. The UI feels premium without feeling playful.
+**Beautiful but professional.** Animations are subtle and purposeful, never decorative. Color is semantic, never arbitrary. Layout is consistent, never surprising. The UI feels premium without feeling playful.
 
-**Offline-first.** The entire TUI works without network. Every screen, every interaction, every export — all available offline.
+**Offline-first.** The entire TUI works without network. Every screen, every interaction, every export. All available offline.
 
-### 1.2 Rendering Stack
+### 1.2 Rendering stack
 
 ```
 ┌──────────────────────────────────────┐
@@ -81,7 +81,7 @@
 └──────────────────────────────────────┘
 ```
 
-### 1.3 Data Flow
+### 1.3 Data flow
 
 ```
 ┌──────────────┐     ┌─────────────────┐     ┌──────────────┐
@@ -99,9 +99,9 @@
 
 ---
 
-## 2. Rendering Architecture
+## 2. Rendering architecture
 
-### 2.1 Package Structure
+### 2.1 Package structure
 
 ```
 packages/renderers/
@@ -145,7 +145,7 @@ packages/renderers/
 └── package.json
 ```
 
-### 2.2 Renderer Contract
+### 2.2 Renderer contract
 
 ```typescript
 interface Renderer {
@@ -180,9 +180,9 @@ interface RenderOptions {
 
 ---
 
-## 3. User Journey & Screen Map
+## 3. User journey & screen map
 
-### 3.1 Complete User Journey
+### 3.1 Complete user journey
 
 ```
   ┌──────────────────────────────────────────────────────────┐
@@ -263,7 +263,7 @@ interface RenderOptions {
   └──────────────────────────────────────────────────────────┘
 ```
 
-### 3.2 Screen Registry
+### 3.2 Screen registry
 
 ```typescript
 type ScreenName =
@@ -287,42 +287,42 @@ type ScreenName =
   | 'command-palette';
 ```
 
-### 3.3 Navigation Model
+### 3.3 Navigation model
 
-- Screens are organized as a **tree**, not a flat list.
-- Users can always navigate to the **parent** screen (via `Escape`).
-- Users can always jump to any screen via **command palette** (`Ctrl+P`).
-- The **breadcrumb** at the top shows the current path: `Dashboard > Findings > Finding Detail`
-- **Persistent footer** shows available actions for the current screen.
+- Screens are organized as a tree, not a flat list.
+- Users can always navigate to the parent screen (via `Escape`).
+- Users can always jump to any screen via command palette (`Ctrl+P`).
+- The breadcrumb at the top shows the current path: `Dashboard > Findings > Finding Detail`
+- Persistent footer shows available actions for the current screen.
 
 ---
 
-## 4. Component Library
+## 4. Component library
 
-### 4.1 Component Catalog
+### 4.1 Component catalog
 
 | Component          | Purpose                 | States                               | Keyboard             |
 | ------------------ | ----------------------- | ------------------------------------ | -------------------- |
-| **Box**            | Bordered container      | normal, focused, error               | Tab to focus         |
-| **Panel**          | Collapsible section     | collapsed, expanded, focused         | Space to toggle      |
-| **Card**           | Information card        | normal, hovered, selected            | Tab, Enter           |
-| **Table**          | Data grid               | normal, sorted, filtered, selected   | j/k, arrows, /search |
-| **Tree**           | Hierarchical data       | collapsed, expanded, selected        | j/k, h/l, z-enter    |
-| **Badge**          | Status label            | severity variants, count variants    | —                    |
-| **StatusBar**      | Bottom status line      | information, warning, error          | —                    |
-| **ProgressBar**    | Progress indicator      | determinate, indeterminate, complete | —                    |
-| **Spinner**        | Activity indicator      | spin states (frame animation)        | —                    |
-| **Toast**          | Temporary notification  | info, success, warning, error        | —                    |
-| **Tabs**           | Tab navigation          | active, inactive, focused            | Tab/arrows           |
-| **CommandPalette** | Fuzzy command search    | open, closed, filtered               | Ctrl+P               |
-| **Breadcrumb**     | Navigation path         | segments, current, clickable         | —                    |
-| **Dialog**         | Modal confirmation      | open, closed, submitting             | Enter/Escape         |
-| **SplitView**      | Resizable panes         | vertical, horizontal, balanced       | Ctrl+W               |
-| **Inspector**      | Detail inspection panel | open, closed, pinned                 | Tab navigation       |
-| **DiffView**       | Side-by-side diff       | additions, deletions, unchanged      | j/k scroll           |
-| **Timeline**       | Event timeline          | events, grouped, expanded            | j/k, Enter           |
+| Box            | Bordered container      | normal, focused, error               | Tab to focus         |
+| Panel          | Collapsible section     | collapsed, expanded, focused         | Space to toggle      |
+| Card           | Information card        | normal, hovered, selected            | Tab, Enter           |
+| Table          | Data grid               | normal, sorted, filtered, selected   | j/k, arrows, /search |
+| Tree           | Hierarchical data       | collapsed, expanded, selected        | j/k, h/l, z-enter    |
+| Badge          | Status label            | severity variants, count variants    | —                    |
+| StatusBar      | Bottom status line      | information, warning, error          | —                    |
+| ProgressBar    | Progress indicator      | determinate, indeterminate, complete | —                    |
+| Spinner        | Activity indicator      | spin states (frame animation)        | —                    |
+| Toast          | Temporary notification  | info, success, warning, error        | —                    |
+| Tabs           | Tab navigation          | active, inactive, focused            | Tab/arrows           |
+| CommandPalette | Fuzzy command search    | open, closed, filtered               | Ctrl+P               |
+| Breadcrumb     | Navigation path         | segments, current, clickable         | —                    |
+| Dialog         | Modal confirmation      | open, closed, submitting             | Enter/Escape         |
+| SplitView      | Resizable panes         | vertical, horizontal, balanced       | Ctrl+W               |
+| Inspector      | Detail inspection panel | open, closed, pinned                 | Tab navigation       |
+| DiffView       | Side-by-side diff       | additions, deletions, unchanged      | j/k scroll           |
+| Timeline       | Event timeline          | events, grouped, expanded            | j/k, Enter           |
 
-### 4.2 Component Specifications
+### 4.2 Component specifications
 
 **Box:**
 
@@ -393,20 +393,20 @@ interface BadgeProps {
 }
 ```
 
-### 4.3 Component Design Principles
+### 4.3 Component design principles
 
-- **Maximum width:** Components should not exceed 120 characters unless displaying code.
-- **Minimum width:** Components should not be narrower than 40 characters.
-- **Padding:** 1 character internal padding, 1 character margin between components.
-- **Focus indication:** Focused component gets a highlighted border or background.
-- **Empty states:** Every component must handle empty data with a clear message ("No findings", "No behaviors detected").
-- **Loading states:** Every component must show a loading indicator while data is being computed.
+- Maximum width: Components should not exceed 120 characters unless displaying code.
+- Minimum width: Components should not be narrower than 40 characters.
+- Padding: 1 character internal padding, 1 character margin between components.
+- Focus indication: Focused component gets a highlighted border or background.
+- Empty states: Every component must handle empty data with a clear message ("No findings", "No behaviors detected").
+- Loading states: Every component must show a loading indicator while data is being computed.
 
 ---
 
-## 5. Layout System
+## 5. Layout system
 
-### 5.1 Screen Layout Model
+### 5.1 Screen layout model
 
 Every screen follows a **header → content → footer** model:
 
@@ -425,7 +425,7 @@ Every screen follows a **header → content → footer** model:
 └──────────────────────────────────────────────────────┘
 ```
 
-### 5.2 Split Layouts
+### 5.2 Split layouts
 
 ```
 Single pane (default):
@@ -460,18 +460,18 @@ Three-pane (artifact tree + findings + detail):
 └──────────┴─────────────────────────┴─────────────────┘
 ```
 
-### 5.3 Responsive Behavior
+### 5.3 Responsive behavior
 
 - On narrow terminals (< 80 cols): single pane, detail replaces list.
-- On medium terminals (80–120 cols): two-pane vertical split.
+- On medium terminals (80-120 cols): two-pane vertical split.
 - On wide terminals (> 120 cols): three-pane layout.
 - On very narrow terminals (< 50 cols): minimal mode, text-only fallback.
 
 ---
 
-## 6. Live Scan Experience
+## 6. Live scan experience
 
-### 6.1 Animated Splash
+### 6.1 Animated splash
 
 ```
 ┌──────────────────────────────────────────────────────┐
@@ -496,7 +496,7 @@ Three-pane (artifact tree + findings + detail):
 
 **Animation:** The wordmark fades in over 500ms. The progress bar animates from 0% to 100% over the actual initialization time (target: < 2s). The tagline types in character by character.
 
-### 6.2 Live Scan Dashboard
+### 6.2 Live scan dashboard
 
 ```
 ┌──────────────────────────────────────────────────────┐
@@ -532,13 +532,13 @@ Three-pane (artifact tree + findings + detail):
 
 ### 6.3 Animation Guidelines
 
-- **Frame rate:** Target 30fps for live scan, 15fps for static screens.
-- **Animation types:** Fade (opacity), slide (position), progress (width), pulse (background).
-- **Performance:** Animations use requestAnimationFrame equivalent. No layout recalculations during animation frames.
-- **Low-power mode:** Reduce to 10fps if system battery is low.
-- **No animation mode:** `--no-animation` flag disables all animations.
+- Frame rate: Target 30fps for live scan, 15fps for static screens.
+- Animation types: Fade (opacity), slide (position), progress (width), pulse (background).
+- Performance: Animations use requestAnimationFrame equivalent. No layout recalculations during animation frames.
+- Low-power mode: Reduce to 10fps if system battery is low.
+- No animation mode: `--no-animation` flag disables all animations.
 
-### 6.4 Scan Completion
+### 6.4 Scan completion
 
 ```
 ┌──────────────────────────────────────────────────────┐
@@ -563,9 +563,9 @@ Animates in: score number counts up from 0, checkmark appears with a pulse, then
 
 ---
 
-## 7. Interactive Dashboard
+## 7. Interactive dashboard
 
-### 7.1 Default Landing View
+### 7.1 Default landing view
 
 ```
 ┌──────────────────────────────────────────────────────┐
@@ -608,7 +608,7 @@ Animates in: score number counts up from 0, checkmark appears with a pulse, then
 └──────────────────────────────────────────────────────┘
 ```
 
-### 7.2 Dashboard Sections
+### 7.2 Dashboard sections
 
 | Section            | Priority             | Shows                                               |
 | ------------------ | -------------------- | --------------------------------------------------- |
@@ -622,9 +622,9 @@ Animates in: score number counts up from 0, checkmark appears with a pulse, then
 
 ---
 
-## 8. Investigation Workspace
+## 8. Investigation workspace
 
-### 8.1 Findings View
+### 8.1 Findings view
 
 ```
 ┌──────────────────────────────────────────────────────┐
@@ -655,7 +655,7 @@ Animates in: score number counts up from 0, checkmark appears with a pulse, then
 └──────────────────────────────────────────────────────┘
 ```
 
-### 8.2 Finding Detail View
+### 8.2 Finding detail view
 
 ```
 ┌──────────────────────────────────────────────────────┐
@@ -698,7 +698,7 @@ Animates in: score number counts up from 0, checkmark appears with a pulse, then
 └──────────────────────────────────────────────────────┘
 ```
 
-### 8.3 Behavior Chain View
+### 8.3 Behavior chain view
 
 ```
 ┌──────────────────────────────────────────────────────┐
@@ -738,7 +738,7 @@ Animates in: score number counts up from 0, checkmark appears with a pulse, then
 └──────────────────────────────────────────────────────┘
 ```
 
-### 8.4 Artifact Tree View
+### 8.4 Artifact tree view
 
 ```
 ┌──────────┬───────────────────────────────────────────┐
@@ -772,7 +772,7 @@ Animates in: score number counts up from 0, checkmark appears with a pulse, then
 └──────────┴───────────────────────────────────────────┘
 ```
 
-### 8.5 Risk Dimensions View
+### 8.5 Risk dimensions view
 
 ```
 ┌──────────────────────────────────────────────────────┐
@@ -800,7 +800,7 @@ Animates in: score number counts up from 0, checkmark appears with a pulse, then
 └──────────────────────────────────────────────────────┘
 ```
 
-### 8.6 Timeline View
+### 8.6 Timeline view
 
 ```
 ┌──────────────────────────────────────────────────────┐
@@ -833,9 +833,9 @@ Animates in: score number counts up from 0, checkmark appears with a pulse, then
 
 ---
 
-## 9. Keyboard Navigation
+## 9. Keyboard navigation
 
-### 9.1 Global Shortcuts
+### 9.1 Global shortcuts
 
 | Key                 | Action                          | Context |
 | ------------------- | ------------------------------- | ------- |
@@ -848,7 +848,7 @@ Animates in: score number counts up from 0, checkmark appears with a pulse, then
 | `Ctrl+R`            | Refresh current view            | Global  |
 | `Ctrl+S`            | Export current view             | Global  |
 
-### 9.2 Navigation Shortcuts
+### 9.2 Navigation shortcuts
 
 | Key | Action           |
 | --- | ---------------- |
@@ -862,7 +862,7 @@ Animates in: score number counts up from 0, checkmark appears with a pulse, then
 | `g` | Go to top        |
 | `G` | Go to bottom     |
 
-### 9.3 List Navigation
+### 9.3 List navigation
 
 | Key          | Action                           |
 | ------------ | -------------------------------- |
@@ -878,7 +878,7 @@ Animates in: score number counts up from 0, checkmark appears with a pulse, then
 | `Ctrl+F`     | Page down                        |
 | `Ctrl+B`     | Page up                          |
 
-### 9.4 Detail View
+### 9.4 Detail view
 
 | Key          | Action                             |
 | ------------ | ---------------------------------- |
@@ -891,7 +891,7 @@ Animates in: score number counts up from 0, checkmark appears with a pulse, then
 | `y`          | Yank (copy) finding ID             |
 | `o`          | Open in editor (if configured)     |
 
-### 9.5 Command Palette
+### 9.5 Command palette
 
 | Key       | Action                   |
 | --------- | ------------------------ |
@@ -901,17 +901,17 @@ Animates in: score number counts up from 0, checkmark appears with a pulse, then
 | `Escape`  | Close                    |
 | `Up/Down` | Navigate results         |
 
-### 9.6 Focus Management
+### 9.6 Focus management
 
 - Tab order follows visual layout (left to right, top to bottom).
 - Focused element has a visible border or background highlight.
-- Focus is **trapped** within dialogs and modals.
+- Focus is trapped within dialogs and modals.
 - Restoring focus: when returning to a list, the previously selected item is re-focused.
 - Keyboard navigation works even if mouse is used (no mode switching).
 
 ---
 
-## 10. Command Palette
+## 10. Command palette
 
 ### 10.1 Design
 
@@ -934,7 +934,7 @@ Animates in: score number counts up from 0, checkmark appears with a pulse, then
 └──────────────────────────────────────────────────────┘
 ```
 
-### 10.2 Command Structure
+### 10.2 Command structure
 
 ```typescript
 interface Command {
@@ -948,7 +948,7 @@ interface Command {
 }
 ```
 
-### 10.3 Fuzzy Search
+### 10.3 Fuzzy search
 
 - Commands are filtered by fuzzy match on label, category, and keys.
 - Matching characters are highlighted.
@@ -957,9 +957,9 @@ interface Command {
 
 ---
 
-## 11. Theme System
+## 11. Theme system
 
-### 11.1 Color Tokens
+### 11.1 Color tokens
 
 ```typescript
 interface ThemeTokens {
@@ -997,7 +997,7 @@ interface ThemeTokens {
 }
 ```
 
-### 11.2 Dark Theme (Primary)
+### 11.2 Dark theme (primary)
 
 ```
 background:      #1a1b26   (dark blue-black)
@@ -1016,7 +1016,7 @@ severityLow:      #7dcfff  (blue)
 severityInfo:     #565f89  (gray)
 ```
 
-### 11.3 Light Theme
+### 11.3 Light theme
 
 ```
 background:      #f5f5f5   (light gray)
@@ -1035,14 +1035,14 @@ severityLow:      #3366cc  (blue)
 severityInfo:     #888888  (gray)
 ```
 
-### 11.4 ANSI Compatibility
+### 11.4 ANSI compatibility
 
 - All colors have ANSI 256-color equivalents.
 - If terminal doesn't support true color, fall back to 256-color palette.
 - If terminal doesn't support 256-color, fall back to 16 ANSI colors.
 - Detection via `COLORTERM` and `TERM` environment variables.
 
-### 11.5 Icons & Unicode
+### 11.5 Icons & unicode
 
 ```typescript
 interface IconSet {
@@ -1083,14 +1083,14 @@ interface IconSet {
 }
 ```
 
-### 11.6 Brand Identity
+### 11.6 Brand identity
 
-- **Wordmark:** `VERIS` in uppercase monospace, optionally with a box border for the splash screen.
-- **Tagline:** "Deterministic analysis. Explainable results."
-- **Color:** Primary brand accent is blue (`#7aa2f7` dark, `#3366cc` light).
-- **No logo.** Terminal UI uses text-based wordmark only.
+- Wordmark: `VERIS` in uppercase monospace, optionally with a box border for the splash screen.
+- Tagline: "Deterministic analysis. Explainable results."
+- Color: Primary brand accent is blue (`#7aa2f7` dark, `#3366cc` light).
+- No logo. Terminal UI uses text-based wordmark only.
 
-### 11.7 Custom Themes (Future)
+### 11.7 Custom themes (future)
 
 - Themes are JSON files loaded from `~/.config/veris/themes/`.
 - Custom themes extend the `ThemeTokens` interface.
@@ -1098,9 +1098,9 @@ interface IconSet {
 
 ---
 
-## 12. Report System
+## 12. Report system
 
-### 12.1 Report Generation Flow
+### 12.1 Report generation flow
 
 ```
 CanonicalReport (SPEC-002)
@@ -1128,7 +1128,7 @@ CanonicalReport (SPEC-002)
   Output file(s)
 ```
 
-### 12.2 Report Renderer Contract
+### 12.2 Report renderer contract
 
 ```typescript
 interface ReportRenderer {
@@ -1161,7 +1161,7 @@ interface ReportRenderOptions {
 }
 ```
 
-### 12.3 Output Format Summary
+### 12.3 Output format summary
 
 | Format          | Use Case                    | File Extension           | Interactive   | Size      |
 | --------------- | --------------------------- | ------------------------ | ------------- | --------- |
@@ -1177,14 +1177,14 @@ interface ReportRenderOptions {
 
 ## 13. Exporters
 
-### 13.1 JSON Exporter
+### 13.1 JSON exporter
 
 - Full serialization of CanonicalReport.
 - Pretty-printed by default (2-space indent).
 - Minified option for CI (`--json-min`).
 - Schema version included at top level.
 
-### 13.2 SARIF Exporter
+### 13.2 SARIF exporter
 
 - Follows the [SARIF v2.1.0](https://docs.oasis-open.org/sarif/sarif/v2.1.0/csprd01/sarif-v2.1.0-csprd01.html) specification.
 - Maps VERIS severity to SARIF level (critical/high → "error", medium/low → "warning", info → "note").
@@ -1192,7 +1192,7 @@ interface ReportRenderOptions {
 - Maps taxonomy IDs to SARIF taxonomies.
 - Includes code snippets in SARIF regions.
 
-### 13.3 HTML Exporter
+### 13.3 HTML exporter
 
 - Self-contained single HTML file (no external dependencies).
 - Includes inline CSS and minimal JavaScript for interactivity (expand/collapse).
@@ -1200,7 +1200,7 @@ interface ReportRenderOptions {
 - Searchable finding table.
 - Static (no server required).
 
-### 13.4 Markdown Exporter
+### 13.4 Markdown exporter
 
 - Hierarchical markdown with severity badges.
 - Summary table at top.
@@ -1209,7 +1209,7 @@ interface ReportRenderOptions {
 - Recommendations as checklist items.
 - Suitable for PR comments and documentation.
 
-### 13.5 CSV Exporter
+### 13.5 CSV exporter
 
 - Flattened finding list: one row per finding.
 - Columns: ID, severity, confidence, rule, title, artifact, location, taxonomy.
@@ -1217,7 +1217,7 @@ interface ReportRenderOptions {
 
 ---
 
-## 14. AI Context Export
+## 14. AI context export
 
 ### 14.1 Purpose
 
@@ -1225,7 +1225,7 @@ The AI Context Export produces a structured JSON document designed for LLM consu
 
 **Invariant:** The AI Context Export is read-only. AI services consume it but never modify it. The canonical objects are never altered by AI.
 
-### 14.2 Export Structure
+### 14.2 Export structure
 
 ```typescript
 interface AiContextExport {
@@ -1300,10 +1300,10 @@ interface AiBehaviorChain {
 }
 ```
 
-### 14.3 Export File
+### 14.3 Export file
 
 - Filename: `veris-ai-context-{timestamp}.json`
-- Size: typically 50–500 KB (depends on finding count).
+- Size: typically 50-500 KB (depends on finding count).
 - Includes all data needed for AI analysis without accessing original source.
 - Omits raw file contents (only code snippets are included).
 
@@ -1311,7 +1311,7 @@ interface AiBehaviorChain {
 
 ## 15. Diagnostics UI
 
-### 15.1 Pipeline Timing View
+### 15.1 Pipeline timing view
 
 ```
 ┌──────────────────────────────────────────────────────┐
@@ -1343,7 +1343,7 @@ interface AiBehaviorChain {
 └──────────────────────────────────────────────────────┘
 ```
 
-### 15.2 Cache Statistics View
+### 15.2 Cache statistics view
 
 ```
 ┌──────────────────────────────────────────────────────┐
@@ -1365,7 +1365,7 @@ interface AiBehaviorChain {
 └──────────────────────────────────────────────────────┘
 ```
 
-### 15.3 Extractor Diagnostics
+### 15.3 Extractor diagnostics
 
 ```
 ┌──────────────────────────────────────────────────────┐
@@ -1392,7 +1392,7 @@ interface AiBehaviorChain {
 └──────────────────────────────────────────────────────┘
 ```
 
-### 15.4 Skipped Rules & Failures
+### 15.4 Skipped rules & failures
 
 ```
 ┌──────────────────────────────────────────────────────┐
@@ -1419,9 +1419,9 @@ interface AiBehaviorChain {
 
 ---
 
-## 16. Performance Budget
+## 16. Performance budget
 
-### 16.1 UX Performance Targets
+### 16.1 UX performance targets
 
 | Metric                           | Target                | Measurement                   |
 | -------------------------------- | --------------------- | ----------------------------- |
@@ -1436,7 +1436,7 @@ interface AiBehaviorChain {
 | Export generation (HTML)         | ≤ 5s per 10K findings | Wall clock                    |
 | Memory (TUI)                     | ≤ 100 MB              | heapUsed                      |
 
-### 16.2 Optimization Techniques
+### 16.2 Optimization techniques
 
 | Technique                    | Applied To                        | Expected Gain                      |
 | ---------------------------- | --------------------------------- | ---------------------------------- |
@@ -1447,7 +1447,7 @@ interface AiBehaviorChain {
 | Debounced updates            | Live counters (200ms)             | Reduce render frequency            |
 | Static report pre-generation | HTML/Markdown export              | Full content generated in one pass |
 
-### 16.3 Memory Budget (TUI)
+### 16.3 Memory budget (TUI)
 
 | Component                 | Budget     |
 | ------------------------- | ---------- |
@@ -1457,30 +1457,30 @@ interface AiBehaviorChain {
 | Virtual scroll buffer     | ~5 MB      |
 | Theme data                | ~1 MB      |
 | Undo history              | ~10 MB     |
-| **Total**                 | **~51 MB** |
+| Total                 | ~51 MB |
 
 ---
 
-## 17. Terminal Compatibility
+## 17. Terminal compatibility
 
-### 17.1 Supported Terminals
+### 17.1 Supported terminals
 
 | Terminal           | True Color      | Unicode | Test Priority |
 | ------------------ | --------------- | ------- | ------------- |
-| Windows Terminal   | ✓               | ✓       | High          |
-| macOS Terminal.app | Limited         | ✓       | High          |
-| iTerm2             | ✓               | ✓       | High          |
-| Kitty              | ✓               | ✓       | Medium        |
-| WezTerm            | ✓               | ✓       | Medium        |
-| Alacritty          | ✓               | ✓       | Medium        |
-| tmux               | ✓ (with config) | ✓       | Medium        |
-| screen             | Limited         | ✓       | Low           |
-| xterm              | ✓               | ✓       | Low           |
-| VS Code terminal   | ✓               | ✓       | Medium        |
-| GitHub Codespaces  | ✓               | ✓       | Low           |
-| SSH (basic)        | ✗               | Limited | Low           |
+| Windows Terminal   | | | High          |
+| macOS Terminal.app | Limited         | | High          |
+| iTerm2             | | | High          |
+| Kitty              | | | Medium        |
+| WezTerm            | | | Medium        |
+| Alacritty          | | | Medium        |
+| tmux               | (with config) | | Medium        |
+| screen             | Limited         | | Low           |
+| xterm              | | | Low           |
+| VS Code terminal   | | | Medium        |
+| GitHub Codespaces  | | | Low           |
+| SSH (basic)        | | Limited | Low           |
 
-### 17.2 Fallback Strategy
+### 17.2 Fallback strategy
 
 ```
 Detection → TrueColor? → Yes → Full theme
@@ -1499,7 +1499,7 @@ Detection → TrueColor? → Yes → Full theme
 - Severity indicated by `[!]`, `[-]`, `[ ]` instead of color.
 - Fallback spinner uses ASCII: `|/-\`.
 
-### 17.3 Minimum Requirements
+### 17.3 Minimum requirements
 
 | Requirement     | Minimum                                       |
 | --------------- | --------------------------------------------- |
@@ -1512,7 +1512,7 @@ Detection → TrueColor? → Yes → Full theme
 
 ## 18. Accessibility
 
-### 18.1 Color Contrast
+### 18.1 Color contrast
 
 - All text/background pairs meet WCAG AA contrast ratio (≥ 4.5:1).
 - Severity indicators use both color AND symbol (never color alone).
@@ -1534,15 +1534,15 @@ Detection → TrueColor? → Yes → Full theme
 
 ---
 
-## 19. Future Compatibility
+## 19. Future compatibility
 
-### 19.1 Multi-Pane Workspace (V2+)
+### 19.1 Multi-Pane workspace (V2+)
 
 - Split view support (vertical, horizontal, grid).
 - Each pane can show a different screen (findings + detail + timeline).
 - Pane configuration persisted to `~/.config/veris/layout.json`.
 
-### 19.2 Diff Mode (V2+)
+### 19.2 Diff mode (V2+)
 
 - Side-by-side comparison of two reports.
 - Left = baseline, Right = current scan.
@@ -1554,64 +1554,64 @@ Detection → TrueColor? → Yes → Full theme
 - Subsequent scans diff against baseline.
 - Regression detection (new critical findings).
 
-### 19.4 Historical Comparison (V3+)
+### 19.4 Historical comparison (V3+)
 
 - SQLite-backed scan history.
 - Trend graphs: risk over time, findings over time.
 
-### 19.5 Remote Sessions (V3+)
+### 19.5 Remote sessions (V3+)
 
 - VERIS runs on CI server, report viewed remotely.
 - TUI connects to remote session via SSH or WebSocket.
 - All views work identically for local and remote.
 
-### 19.6 Plugin Panels (V3+)
+### 19.6 Plugin panels (V3+)
 
 - Plugins can register custom panels.
 - Plugin panels appear in the screen registry.
 - Plugin panels use the same component library.
 
-### 19.7 Enterprise Dashboard (V4+)
+### 19.7 Enterprise dashboard (V4+)
 
 - Aggregated view across multiple repositories.
 - Organization-wide risk trends.
 - Compliance dashboard.
 
-### 19.8 Web Companion (Optional)
+### 19.8 Web companion (optional)
 
 - HTML exporter can serve as a basic web companion.
 - Embeddable in CI pipeline artifacts.
-- No server required — static files only.
+- No server required: static files only.
 
 ---
 
-## 20. Engineering Tradeoffs
+## 20. Engineering tradeoffs
 
-### 20.1 React Ink vs. Raw Terminal Control
+### 20.1 React Ink vs. raw terminal control
 
 **Tradeoff:** React Ink provides component composition, hooks, and declarative rendering but has higher overhead than raw terminal control (blessed, termjs, direct ANSI).
 
 **Decision:** React Ink. The component model and developer ergonomics outweigh the performance overhead. Virtual scrolling and memoization close the performance gap for large datasets.
 
-### 20.2 Interactive TUI vs. CLI Output
+### 20.2 Interactive TUI vs. CLI output
 
 **Tradeoff:** Interactive TUI provides rich investigation but requires full-screen terminal. CLI output is simpler and pipes well but lacks exploration capability.
 
 **Decision:** Interactive TUI is the default. `--json`, `--markdown`, and `--sarif` flags produce static output for CI. `--no-tui` flag forces CLI-only mode.
 
-### 20.3 Client-Side Report vs. Server-Side Report
+### 20.3 Client-Side report vs. server-side report
 
 **Tradeoff:** Client-side rendering (TUI builds report from analysis data) is simpler and requires no server. Server-side rendering enables persistent reports and sharing.
 
 **Decision:** Client-side rendering. Reports are generated from the CanonicalReport object that already exists in memory. Server-side rendering is a future option for the Enterprise edition.
 
-### 20.4 Virtual Scrolling vs. Pagination
+### 20.4 Virtual scrolling vs. pagination
 
 **Tradeoff:** Virtual scrolling feels smoother and is keyboard-friendly. Pagination is simpler and provides clear page boundaries.
 
 **Decision:** Virtual scrolling for lists where users scan items (findings, artifacts). Pagination for export formats (HTML, Markdown) where page breaks matter.
 
-### 20.5 Rich Animations vs. Performance
+### 20.5 Rich animations vs. performance
 
 **Tradeoff:** Animations make the UI feel premium but consume CPU and may slow down the terminal, especially during an active scan.
 
@@ -1632,17 +1632,17 @@ No animations on data views (tables, lists, detail panels).
 **Mistake:** Showing all 500 findings on the dashboard without filtering or grouping.
 **Prevention:** Show top 10 findings, grouped by severity. "Show all" requires explicit user action.
 
-### 21.2 No Keyboard Navigation
+### 21.2 No keyboard navigation
 
 **Mistake:** Requiring mouse clicks to navigate, breaking the keyboard-first workflow.
 **Prevention:** Every action has a keyboard shortcut. Mouse is optional.
 
-### 21.3 Inconsistent Navigation
+### 21.3 Inconsistent navigation
 
 **Mistake:** Escape goes back on one screen and quits on another.
 **Prevention:** Global shortcuts are consistent across all screens. Escape always goes to the parent screen. q always quits.
 
-### 21.4 Hidden State
+### 21.4 Hidden state
 
 **Mistake:** The UI enters a loading state or error state without visual feedback.
 **Prevention:** Every state (loading, empty, error, success) has a visible indicator. No silent failures.
@@ -1652,60 +1652,60 @@ No animations on data views (tables, lists, detail panels).
 **Mistake:** Writing hundreds of lines of output per second during scan, making the terminal unusable.
 **Prevention:** Live scan dashboard updates in-place (no scrolling output). Maximum update rate: 5 times/second.
 
-### 21.6 No Empty States
+### 21.6 No empty states
 
 **Mistake:** Showing an empty table with no message when there are no findings.
 **Prevention:** "No findings detected" with a checkmark icon. Not an empty table.
 
-### 21.7 Color-Only Indicators
+### 21.7 Color-Only indicators
 
 **Mistake:** Using only red/green color to indicate severity, making the UI unusable for color-blind users.
 **Prevention:** Severity is indicated by color + symbol + text label. Never color alone.
 
-### 21.8 Slow Startup
+### 21.8 Slow startup
 
 **Mistake:** Loading all rules, extractors, and config before showing the splash screen, causing a 5-second delay before anything appears.
 **Prevention:** Splash screen appears immediately. Initialization runs in parallel with splash display.
 
-### 21.9 Ignoring Terminal Size
+### 21.9 Ignoring terminal size
 
 **Mistake:** Designing for 120-column terminals and breaking on 80-column terminals.
 **Prevention:** All layouts are responsive. Minimum supported width: 80 columns. Below 80: minimal mode with horizontal scrolling.
 
-### 21.10 No Progress During Long Operations
+### 21.10 No progress during long operations
 
 **Mistake:** Showing a spinner for 30 seconds with no indication of progress.
 **Prevention:** Every long operation shows: current stage, progress percentage, items processed, and ETA.
 
 ---
 
-## 22. Final Recommendations
+## 22. Final recommendations
 
-### 22.1 Implementation Order
+### 22.1 Implementation order
 
 | Phase        | Components                                                       | Rationale                           |
 | ------------ | ---------------------------------------------------------------- | ----------------------------------- |
-| **Phase 1**  | Component library (Box, Panel, Table, Badge, StatusBar, Spinner) | Foundation — needed by every screen |
-| **Phase 2**  | Theme system, color tokens, ANSI fallback                        | Visual identity                     |
-| **Phase 3**  | Layout system, navigation model, keyboard shortcuts              | Navigation infrastructure           |
-| **Phase 4**  | Live scan dashboard (progress, counters, timing)                 | Most critical real-time view        |
-| **Phase 5**  | Results dashboard (score card, severity breakdown, top findings) | Default landing view                |
-| **Phase 6**  | Investigation views (findings list, detail, evidence, artifacts) | Core exploration                    |
-| **Phase 7**  | Behavior chain view, risk dimensions view, timeline              | Advanced investigation              |
-| **Phase 8**  | Command palette, help overlay, search/filter                     | Power user features                 |
-| **Phase 9**  | Exporters (JSON, SARIF, Markdown, HTML, CSV, AI Context)         | Reporting                           |
-| **Phase 10** | Diagnostics UI, cache statistics, performance views              | Developer experience                |
+| Phase 1  | Component library (Box, Panel, Table, Badge, StatusBar, Spinner) | Foundation, needed by every screen |
+| Phase 2  | Theme system, color tokens, ANSI fallback                        | Visual identity                     |
+| Phase 3  | Layout system, navigation model, keyboard shortcuts              | Navigation infrastructure           |
+| Phase 4  | Live scan dashboard (progress, counters, timing)                 | Most critical real-time view        |
+| Phase 5  | Results dashboard (score card, severity breakdown, top findings) | Default landing view                |
+| Phase 6  | Investigation views (findings list, detail, evidence, artifacts) | Core exploration                    |
+| Phase 7  | Behavior chain view, risk dimensions view, timeline              | Advanced investigation              |
+| Phase 8  | Command palette, help overlay, search/filter                     | Power user features                 |
+| Phase 9  | Exporters (JSON, SARIF, Markdown, HTML, CSV, AI Context)         | Reporting                           |
+| Phase 10 | Diagnostics UI, cache statistics, performance views              | Developer experience                |
 
-### 22.2 Critical Success Factors
+### 22.2 Critical success factors
 
-1. **Keyboard-first from day one.** Don't add mouse support first and keyboard later. Design keyboard shortcuts before building any screen.
-2. **Progressive disclosure.** The dashboard shows 5 things. The investigation view shows 50. The diagnostics view shows 500. Layer information, don't dump it.
-3. **Empty states are not afterthoughts.** Every view must handle zero findings, zero chains, zero artifacts with a clear, positive message.
-4. **Performance budget is non-negotiable.** 30fps during scan, 16ms render time, 100MB memory. Test performance with 100K findings.
-5. **Dark theme is primary.** Terminal users overwhelmingly prefer dark themes. Light theme is a secondary option.
-6. **Export early, export often.** The JSON and AI Context exporters should work from day one, even before the TUI is complete. This enables CI integration before interactive use.
+1. Keyboard-first from day one. Don't add mouse support first and keyboard later. Design keyboard shortcuts before building any screen.
+2. Progressive disclosure. The dashboard shows 5 things. The investigation view shows 50. The diagnostics view shows 500. Layer information, don't dump it.
+3. Empty states are not afterthoughts. Every view must handle zero findings, zero chains, zero artifacts with a clear, positive message.
+4. Performance budget is non-negotiable. 30fps during scan, 16ms render time, 100MB memory. Test performance with 100K findings.
+5. Dark theme is primary. Terminal users overwhelmingly prefer dark themes. Light theme is a secondary option.
+6. Export early, export often. The JSON and AI Context exporters should work from day one, even before the TUI is complete. This enables CI integration before interactive use.
 
-### 22.3 Architectural Invariants
+### 22.3 Architectural invariants
 
 ```
 1. Renderers consume the Canonical Report only. No renderer performs analysis.

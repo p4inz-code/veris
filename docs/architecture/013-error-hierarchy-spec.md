@@ -1,12 +1,12 @@
-# Error Hierarchy Architecture (SPEC-013)
+# Error hierarchy architecture (SPEC-013)
 
-**Status:** Analysis — current state documented. Convergence planned for v1.0.
+**Status:** Analysis, current state documented. Convergence planned for v1.0.
 
-## Current State
+## Current state
 
 VERIS has a **distributed error model** where each package defines its own error types. There is no single unified hierarchy at this stage of the project.
 
-### Hierarchy Overview
+### Hierarchy overview
 
 ```
 Error (built-in)
@@ -34,7 +34,7 @@ Error (built-in)
     └── Used for validation and type checking
 ```
 
-### Result<T, E> Pattern
+### Result<T, E> pattern
 
 Defined in `@veris/shared/src/result/result.ts`:
 
@@ -48,34 +48,34 @@ type Result<T, E = Error> = Ok<T> | Err<E>;
 - `@veris/extractors`: `collectMetadata()` returns `{ ok, metadata/error }` (structural, not `Result` type)
 - Not yet widely adopted across the codebase
 
-### Key Observations
+### Key observations
 
-1. **No single base class** — `VerisError` exists in `@veris/core` but is not used by `ProviderError`, `CancelledError`, `ExtractionError`, or `CliError`
-2. **Inconsistent properties** — each error type has different fields:
+1. No single base class: `VerisError` exists in `@veris/core` but is not used by `ProviderError`, `CancelledError`, `ExtractionError`, or `CliError`
+2. Inconsistent properties: each error type has different fields:
    - `VerisError`: `code`, `category`, `userMessage`, `cause`, `metadata`
    - `ProviderError`: `code`, `providerId`, `recoverable`, `statusCode`, `retryAfterMs`, `cause`
    - `CancelledError`: `message` only
    - `ExtractionError`: `code`, `extractorId`
    - `CliError`: `exitCode`, `userMessage`
-3. **Result<T,E> underused** — many internal functions throw rather than returning `Result`
-4. **No `cause` chaining** — only `VerisError` properly supports `cause`
-5. **No serialization** — only `VerisError` implements `toJSON()`
+3. Result<T,E> underused: many internal functions throw rather than returning `Result`
+4. No `cause` chaining: only `VerisError` properly supports `cause`
+5. No serialization: only `VerisError` implements `toJSON()`
 
 ## Future Convergence Plan (v1.0)
 
-### Phase 1: Adopt `VerisError` as Base
+### Phase 1: adopt `VerisError` as base
 
 All named error types should extend `VerisError`:
 
 | Error             | Base                   | Timeline    |
 | ----------------- | ---------------------- | ----------- |
-| `VerisError`      | `Error` (already done) | ✅ Existing |
+| `VerisError`      | `Error` (already done) | Existing |
 | `ProviderError`   | `VerisError`           | v1.0        |
 | `CancelledError`  | `VerisError`           | v1.0        |
 | `ExtractionError` | `VerisError`           | v1.0        |
 | `CliError`        | `VerisError`           | v1.0        |
 
-### Phase 2: Standardize Error Codes
+### Phase 2: standardize error codes
 
 Establish a package-prefixed code system:
 
@@ -89,7 +89,7 @@ IO_001 — Filesystem error
 CONFIG_001 — Configuration error
 ```
 
-### Phase 3: Widen `Result<T,E>` Adoption
+### Phase 3: widen `Result<T,E>` adoption
 
 Convert internal functions from throw-based to `Result<T,E>`:
 
@@ -98,11 +98,11 @@ Convert internal functions from throw-based to `Result<T,E>`:
 - File I/O operations
 - Response parsing
 
-### Phase 4: Error Serialization
+### Phase 4: error serialization
 
 Implement `toJSON()` on all error types (already done for `VerisError`).
 
-### Migration Strategy
+### Migration strategy
 
 1. Add `VerisError` as a dependency where needed
 2. Change class hierarchy: `extends VerisError` instead of `extends Error`

@@ -1,30 +1,30 @@
-# VERIS Maintenance Guide & Production Hold Manual
+# VERIS maintenance guide & production hold manual
 
-## Current Status — v1.2.0 PRODUCTION HOLD
+## Current Status: v1.2.0 PRODUCTION HOLD
 
 **VERIS v1.2.0 is officially released and placed in long-term PRODUCTION HOLD / MAINTENANCE ONLY.**
 
-- **Release Version**: `v1.2.0`
-- **Verified Release Commit**: `b9a50f4f07c1a0347c5e00e3906b14edcf8244cb`
-- **Published npm Artifact**: `veris-cli@1.2.0` (with SLSA provenance attestations)
-- **Supported Node Runtimes**: Node.js 18, 20, 22 (LTS)
-- **Package Manager**: `pnpm@9.15.9`
-- **Supported Platforms**: Windows (x64/ARM64), macOS (Apple Silicon/Intel), Linux (x64)
+- Release Version: `v1.2.0`
+- Verified Release Commit: `b9a50f4f07c1a0347c5e00e3906b14edcf8244cb`
+- Published npm Artifact: `veris-cli@1.2.0` (with SLSA provenance attestations)
+- Supported Node Runtimes: Node.js 18, 20, 22 (LTS)
+- Package Manager: `pnpm@9.15.9`
+- Supported Platforms: Windows (x64/ARM64), macOS (Apple Silicon/Intel), Linux (x64)
 
-Tags `v1.0.0`, `v1.1.0`, and `v1.2.0` are **permanently immutable**: no tag movement, no force-push, and no republished versions. Active feature development is **FROZEN**.
+Tags `v1.0.0`, `v1.1.0`, and `v1.2.0` are **permanently immutable**: no tag movement, no force-push, and no republished versions. Active feature development is FROZEN.
 
 ---
 
-## Maintenance-Only Policy
+## Maintenance-Only policy
 
 Under Production Hold, changes to the repository are strictly constrained:
 
-1. **Security Fixes**: Remediating high or critical vulnerabilities identified in supported versions (1.2.x, 1.1.x, 1.0.x).
-2. **Break-Fix & Correctness**: Correcting false positives, false negatives, or crashes in static analysis engines with regression tests.
-3. **CI & Tooling Maintenance**: Keeping GitHub Actions workflows, runner images, and dependencies compatible with current Node.js LTS releases.
-4. **No Feature Creep**: No new product features, architectural overhauls, or unsolicited refactors without an explicit decision to reopen active development.
+1. Security Fixes: Remediating high or critical vulnerabilities identified in supported versions (1.2.x, 1.1.x, 1.0.x).
+2. Break-Fix & Correctness: Correcting false positives, false negatives, or crashes in static analysis engines with regression tests.
+3. CI & Tooling Maintenance: Keeping GitHub Actions workflows, runner images, and dependencies compatible with current Node.js LTS releases.
+4. No Feature Creep: No new product features, architectural overhauls, or unsolicited refactors without an explicit decision to reopen active development.
 
-### When NOT to Reopen Development
+### When NOT to reopen development
 
 - Do NOT reopen development for speculative features, theoretical analyzers, or subjective UI tweaks.
 - Do NOT add external runtime dependencies to `@veris/core` (must remain 0 dependencies).
@@ -33,7 +33,7 @@ Under Production Hold, changes to the repository are strictly constrained:
 
 ---
 
-## Security Bug Handling
+## Security bug handling
 
 Report security vulnerabilities directly by email to:
 **atharva.patil.cg@gmail.com**
@@ -50,9 +50,9 @@ We will acknowledge receipt within 48 hours and provide a patch timeline.
 
 ---
 
-## How to Rebuild, Test, and Verify
+## How to rebuild, test, and verify
 
-### 1. Clean Rebuild from Clone
+### 1. Clean rebuild from Clone
 
 ```bash
 # Clone and enter workspace
@@ -66,7 +66,7 @@ pnpm install --frozen-lockfile
 pnpm build
 ```
 
-### 2. Comprehensive Quality Verification Suite
+### 2. Comprehensive quality verification suite
 
 ```bash
 # Run TypeScript typecheck across all 31 packages
@@ -85,7 +85,7 @@ pnpm circular
 pnpm bench:quick
 ```
 
-### 3. Verify Published Release Artifacts
+### 3. Verify published release artifacts
 
 ```bash
 # Inspect registry metadata for published CLI
@@ -96,7 +96,7 @@ cd packages/cli
 npm pack --dry-run
 ```
 
-### 4. Windows Acceptance Verification
+### 4. Windows acceptance verification
 
 Run in PowerShell on Windows 11/10:
 
@@ -119,16 +119,16 @@ node packages/cli/dist/cli.js scan ./fixtures/samples --format json --output ./r
 
 ---
 
-## Known Limitations
+## Known limitations
 
-- **Logo Intro Animation**: The logo intro performs its intended reveal (~1.05s) and settles into the final static header state; the header remains persistent throughout interactive execution and on primary screen restoration.
-- **AI Features (`explain` / `summarize`)**: Consumer-only; require user-supplied API keys or local Ollama instances. AI never participates in core detection or scoring.
-- **Published Artifacts**: Only `veris-cli` is published to npm; monorepo domain packages (`@veris/*`) are internal workspace packages bundled into the CLI executable.
-- **Offline-First Plugin Host**: Plugin packages must be reviewed and placed locally; remote internet registry downloading of untrusted code is intentionally omitted.
+- Logo Intro Animation: The logo intro performs its intended reveal (~1.05s) and settles into the final static header state; the header remains persistent throughout interactive execution and on primary screen restoration.
+- AI Features (`explain` / `summarize`): Consumer-only; require user-supplied API keys or local Ollama instances. AI never participates in core detection or scoring.
+- Published Artifacts: Only `veris-cli` is published to npm; monorepo domain packages (`@veris/*`) are internal workspace packages bundled into the CLI executable.
+- Offline-First Plugin Host: Plugin packages must be reviewed and placed locally; remote internet registry downloading of untrusted code is intentionally omitted.
 
 ---
 
-## Release Architecture
+## Release architecture
 
 All VERIS packages use independent versioning managed by [Changesets](https://github.com/changesets/changesets).
 Future maintenance patch releases follow:

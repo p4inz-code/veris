@@ -4,9 +4,9 @@ Programmatic API for integrating VERIS into applications.
 
 ## Public API
 
-- **Veris** — Primary client
-- **scan** — Run analysis
-- **analyze** — Programmatic analysis
+- Veris: Primary client
+- scan: Run analysis
+- analyze: Programmatic analysis
 
 ## Usage
 

@@ -1,6 +1,6 @@
-# VERIS Implementation Checklist
+# VERIS implementation checklist
 
-## Phase 1: Repository Bootstrap ✓
+## Phase 1: repository bootstrap
 
 - [x] Architecture specifications frozen
 - [x] Repository structure created
@@ -13,40 +13,40 @@
 
 ## Packages
 
-### Layer 0 — Foundation
+### Layer 0: foundation
 
 - [x] Core types, errors, constants
 - [x] Collections, hashing, serialization, FS, net, path, platform, Result monad, semver
 
-### Layer 1 — Framework
+### Layer 1: framework
 
 - [x] Structured logging
 - [x] Configuration loading
 - [x] Metrics and tracing
 - [x] AI provider adapters
 
-### Layer 2 — Domain
+### Layer 2: domain
 
 - [x] Extraction framework
 - [x] Rule matching and evaluation
 - [x] Shipped rule packs
 - [x] Taxonomy and mappings
 
-### Layer 3 — Analysis
+### Layer 3: analysis
 
 - [x] Pipeline orchestrator
 
-### Layer 4 — Report & Output
+### Layer 4: report & output
 
 - [x] Report construction
 - [x] Output formats
 
-### Layer 5 — Application
+### Layer 5: application
 
 - [x] CLI commands
 - [x] Programmatic API
 
-### Layer 6+ — Extensions
+### Layer 6+: extensions
 
 - [x] Execution runners
 - [ ] Plugin system (V2+)
@@ -62,7 +62,7 @@
 - [x] M6: CLI commands functional
 - [x] M7: V1.0 Release Candidate (in progress)
 
-## Release Readiness
+## Release readiness
 
 - [x] npm metadata verified (all packages)
 - [x] engines field set (node >= 18)
